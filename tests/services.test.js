@@ -282,3 +282,21 @@ test("basic recent results do not consume advanced-statistics API requests", asy
   assert.equal(rows[0].teamStats.shots, null);
   assert.deepEqual(calls, ["/fixtures"]);
 });
+
+test("session/cache invalidation starts fresh requests and never restores stale private responses", async () => {
+  const resolve = [];
+  const service = createFootballService({
+    teams: () => new Promise((done) => resolve.push(done)),
+  });
+  const old = service.get("teams");
+  await Promise.resolve();
+  service.clearCache();
+  const fresh = service.get("teams");
+  await Promise.resolve();
+  assert.equal(resolve.length, 2);
+  resolve[1](["public"]);
+  assert.deepEqual(await fresh, ["public"]);
+  resolve[0](["private-old-session"]);
+  await old;
+  assert.deepEqual(await service.get("teams"), ["public"]);
+});

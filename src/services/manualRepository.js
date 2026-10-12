@@ -1,0 +1,162 @@
+import { supabase, requireDatabase } from "./supabaseClient.js";
+
+export async function readAll(
+  table,
+  columns = "*",
+  decorate = (query) => query,
+) {
+  const client = requireDatabase();
+  const data = [];
+  for (let offset = 0; offset < 100000; offset += 1000) {
+    const result = await decorate(client.from(table).select(columns)).range(
+      offset,
+      offset + 999,
+    );
+    if (result.error)
+      throw new Error(
+        "Lecture des données impossible. Vérifiez la connexion et la configuration de la base.",
+      );
+    data.push(...result.data);
+    if (result.data.length < 1000) return data;
+  }
+  throw new Error(
+    "Cette liste dépasse la limite de chargement. Réduisez la période avant de poursuivre.",
+  );
+}
+let pending = null,
+  cached = null,
+  dataGeneration = 0;
+export function invalidateManualData() {
+  dataGeneration++;
+  cached = null;
+  pending = null;
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event("calcito:data-changed"));
+}
+export async function getDataset() {
+  if (cached && Date.now() - cached.at < 30000) return cached.value;
+  if (pending) return pending;
+  const generation = dataGeneration;
+  const task = (async () => {
+    const [
+      competitions,
+      seasons,
+      teams,
+      members,
+      matches,
+      stats,
+      forms,
+      predictions,
+    ] = await Promise.all([
+      readAll("competitions", "*", (q) => q.order("name")),
+      readAll("seasons", "*", (q) =>
+        q.order("start_year", { ascending: false }),
+      ),
+      readAll("teams", "*", (q) => q.order("name")),
+      readAll("season_teams"),
+      readAll("matches", "*", (q) => q.order("kickoff", { ascending: false })),
+      readAll("match_team_stats"),
+      readAll("form_snapshots", "*", (q) =>
+        q.order("calculated_at", { ascending: false }),
+      ),
+      readAll("prediction_history"),
+    ]);
+    if (generation !== dataGeneration)
+      throw new Error(
+        "La session ou les données ont changé. Rechargez la page.",
+      );
+    const value = {
+      competitions,
+      seasons,
+      teams,
+      members,
+      matches,
+      stats,
+      forms,
+      predictions,
+    };
+    cached = { at: Date.now(), value };
+    return value;
+  })().finally(() => {
+    if (pending === task) pending = null;
+  });
+  pending = task;
+  return task;
+}
+export async function requireOwner() {
+  const client = requireDatabase();
+  const { data, error } = await client.rpc("is_calcito_admin");
+  if (error || data !== true)
+    throw new Error("Accès réservé au compte administrateur.");
+  return client;
+}
+export async function saveMatch(payload) {
+  const client = await requireOwner();
+  const { data, error } = await client.rpc("save_match", { payload });
+  if (error) throw translateError(error);
+  invalidateManualData();
+  return data;
+}
+export function translateError(error) {
+  if (
+    error.code === "P0001" &&
+    error.message === "La date ne correspond pas à la saison sélectionnée."
+  )
+    return new Error(error.message);
+  if (error.code === "23505")
+    return new Error(
+      "Ce match ou cet identifiant existe déjà. Vérifiez la date et les équipes.",
+    );
+  if (error.code === "23503")
+    return new Error(
+      "Équipes participantes ou références incompatibles. Vérifiez la saison.",
+    );
+  if (error.code === "40001")
+    return new Error(
+      "Les données ont été modifiées ailleurs. Rechargez avant d’enregistrer.",
+    );
+  if (["42501", "PGRST301"].includes(error.code))
+    return new Error(
+      "Opération non autorisée. Reconnectez-vous avec le compte administrateur.",
+    );
+  if (["23514", "22P02", "22003", "23502"].includes(error.code))
+    return new Error(
+      "Une donnée ne respecte pas les contraintes : champs requis, valeurs numériques, équipes ou publication.",
+    );
+  return new Error(
+    "L’enregistrement a échoué. Vos données restent dans le formulaire. Réessayez après vérification.",
+  );
+}
+export async function mutate(table, action, payload, id) {
+  const allowed = new Set([
+    "teams",
+    "competitions",
+    "seasons",
+    "season_teams",
+    "matches",
+  ]);
+  if (!allowed.has(table))
+    throw new Error("Cette table ne peut pas être modifiée ici.");
+  const client = await requireOwner();
+  let query = client.from(table);
+  if (action === "insert") query = query.insert(payload);
+  else if (action === "upsert") query = query.upsert(payload);
+  else if (action === "update") query = query.update(payload).eq("id", id);
+  else if (action === "delete") query = query.delete().eq("id", id);
+  else throw new Error("Action invalide.");
+  const { error } = await query;
+  if (error) throw translateError(error);
+  invalidateManualData();
+}
+export async function setParticipants(seasonId, participants) {
+  const client = await requireOwner();
+  const { error } = await client.rpc("replace_season_teams", {
+    target_season: seasonId,
+    participants,
+  });
+  if (error) throw translateError(error);
+  invalidateManualData();
+}
+export function hasDatabase() {
+  return Boolean(supabase);
+}

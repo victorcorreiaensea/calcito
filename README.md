@@ -1,10 +1,10 @@
-# CALCITO V2 — Football Intelligence
+# CALCITO V3 — Football Intelligence
 
-Plateforme React/Vite, CSS classique et Lucide React. La V1 est conservée et complétée par des pages Matchs, Classements, Équipes (avec fiches), Comparateur, Pronostics et Méthodologie.
+Plateforme de football sur fond noir, cartes bleu foncé, accents bleu électrique et textes blancs. React/Vite, CSS classique, Lucide React, Supabase. Mascotte originale Calcito : robot sportif en panneaux de ballon, cœur bleu, brassard et crampons.
 
-## Démarrer
+## Développement et vérifications
 
-Node.js 22.12+ recommandé (Node 20.19+ compatible avec Vite).
+Node.js 22.12+ recommandé.
 
 ```sh
 npm ci
@@ -16,94 +16,49 @@ npm run preview
 
 Si le cache npm utilisateur n’est pas accessible : `npm ci --cache /tmp/calcito-npm-cache`.
 
-## État réel de la V2
+## Activer la saisie manuelle privée
 
-- Sans backend configuré : **mode démonstration**. Toutes les équipes, dates, résultats et indices d’illustration sont fictifs et centralisés dans `src/demoData.js`.
-- Aucun classement officiel, aucune statistique de match, aucun bonus ni aucune note d’équipe ne sont fabriqués.
-- `calcitoEngine` prépare les cinq derniers matchs terminés, les résultats du point de vue de l’équipe et la traçabilité. Les données manquantes, les coefficients non spécifiés ou l’absence de formule bloquent le score définitif.
-- La constante européenne 1,20 n’est appliquée à aucune compétition par défaut : les identifiants concernés doivent être confirmés par le propriétaire.
-- Les pronostics affichent **Modèle en développement**. Il n’existe pas encore de modèle probabiliste calibré. Aucune probabilité ni cote n’est présentée.
-- `predictionHistory` prévoit un stockage local injectable, les probabilités originales, le résultat final et une évaluation Brier (somme non normalisée sur les trois issues). Aucun faux historique n’est préchargé.
-- La mascotte utilise un pictogramme de remplacement, sans requête vers des images absentes. Ajouter les visuels officiels dans `public/images/mascot/` et renseigner `mascotImages`.
+Suivre [le guide Supabase](docs/SUPABASE_SETUP.md). Il décrit la création du projet gratuit, la migration SQL, l’unique compte propriétaire, les clés publiques et les contrôles de sécurité à réaliser sur le vrai projet.
 
-## Connecter API-Football sans exposer la clé
+Variables publiques : `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY`. Aucun mot de passe, token serveur ou service_role dans le frontend. Sans configuration, les pages publiques restent accessibles avec un état « résultats en préparation » et l’administration est inactive.
 
-GitHub Pages héberge uniquement le frontend statique. Le backend Node fourni dans `server/` doit être hébergé séparément sur une plateforme supportant Node.js et HTTPS.
+La V3 utilise les données manuelles publiées dans Supabase. Le backend API-Football historique est conservé dans `server/`, mais il n’est pas utilisé par le nouveau parcours public. Aucune migration des anciens exemples ou aucun résultat fictif n’est importé.
 
-1. Déployer `server/index.js` avec Node.js 22. Le backend n’a pas de dépendance npm dédiée.
-2. Dans les paramètres **secrets du serveur**, définir `API_FOOTBALL_KEY` avec la clé du compte API-Football. Ne jamais la mettre dans une variable `VITE_*`, un commit ou les fichiers publics. Seule l’API directe API-Sports (`v3.football.api-sports.io`) est prise en charge ici ; les comptes RapidAPI nécessitent un adaptateur serveur distinct.
-3. Définir `FRONTEND_ORIGIN=https://victorcorreiaensea.github.io` et, si l’hébergeur ne le fournit pas, `PORT=8787`.
-4. Lancer `npm run api` (ou `node server/index.js`). `/health` indique si la clé est présente, sans la révéler. Sans clé, les routes football renvoient 503.
-5. Définir la variable publique `VITE_FOOTBALL_PROXY_URL` avec l’adresse HTTPS du backend, sans clé ni paramètres. Pour GitHub Actions : **Settings → Secrets and variables → Actions → Variables → New repository variable**. Le workflow transmet cette variable au build.
-6. Recompiler / relancer le workflow. Le frontend passe en mode réel et affiche les sources et dates. Un échec du backend produit « Données indisponibles » ; il ne bascule jamais silencieusement vers des données fictives.
+## Fonctionnalités
 
-Le backend limite les requêtes entrantes par adresse réseau, utilise une liste fermée de routes, un cache d’une minute et déduplique les requêtes concurrentes. CORS autorise seulement `FRONTEND_ORIGIN`. Pour un hébergement public, configurer également les limites de trafic et de quota sur l’hébergeur : CORS n’est pas une authentification et le quota API-Football dépend du compte.
+- Accueil avec la mascotte sportive, données disponibles et méthodologie.
+- Matchs et résultats publiés, filtres par compétition/saison, pagination.
+- Classements reconstruits, règles configurables, rangs partagés, corrections de points justifiées, indication de couverture partielle.
+- Classement européen Calcito séparé des classements officiels et des saisons ; indices indisponibles sans modèle réel.
+- Équipes, recherche globale, fiches, statistiques sources et historique.
+- Comparateur entre championnats avec données absentes explicites.
+- Pronostics : modèle en développement ; aucune probabilité ou cote inventée.
+- Administration `/calcito/#/admin` : authentification Supabase, autorisations PostgreSQL/RLS, saisie rapide, brouillons, publication, modification, suppression confirmée, gestion du catalogue et des participants.
+- Import CSV avec aperçu et contrôle de doublons ; exports ; journal d’audit non modifiable depuis le navigateur.
 
-Le fournisseur doit autoriser les compétitions, saisons, logos et statistiques utilisés. La disponibilité ne peut être vérifiée sans clé utilisable. Les statistiques avancées et les notes d’équipe peuvent être absentes même avec une clé valide ; leur absence reste explicite. Les statistiques détaillées ne sont demandées que par la route statistics, conservée pour une intégration ultérieure. Les bonus propriétaires restent à fournir.
-
-### Comportement de l’adaptateur API-Football
-
-- Compétitions prioritaires sélectionnées depuis les métadonnées réelles des saisons courantes.
-- Recherche de clubs à partir de trois caractères, tous championnats ; sans filtre ni recherche, Ligue 1 par défaut.
-- Calendrier des prochaines rencontres ou derniers résultats ; sélectionner une compétition pour affiner. Sans filtre, affichage représentatif des huit premières compétitions couvertes, jusqu’à cinq rencontres chacune.
-- Classement officiel pour une compétition et sa saison courante. Les compétitions à plusieurs groupes affichent tous les groupes séparément.
-- Les cinq derniers matchs terminés d’une équipe et leurs statistiques disponibles. Les moyennes descriptives ne sont calculées que lorsque toutes les valeurs de l’échantillon sont présentes.
-- Le comparateur présente les victoires, nuls et défaites sur les résultats disponibles. Les indices simulés et scénarios de remplacement sont explicitement signalés ; les statistiques détaillées restent masquées.
-
-## Contrat interchangeable du proxy
-
-`src/services/footballService.js` sépare l’adaptateur, le cache et l’interface. Le frontend attend une enveloppe JSON :
-
-```json
-{
-  "data": [],
-  "source": { "name": "Nom du fournisseur", "url": "https://adresse-publique" },
-  "fetchedAt": "2030-01-01T00:00:00Z"
-}
-```
-
-La date est celle de récupération auprès du backend, dont le cache fournisseur expire après une minute. `data` est un objet pour une fiche ou des statistiques, un tableau pour une liste.
-
-Routes :
-
-- `GET /competitions` → `{ id, name, country }[]`
-- `GET /teams?search=&competition=` → `{ id, name, short, logo, country, competitionId, competitionName }[]`
-- `GET /teams/:id` → même objet équipe
-- `GET /matches?competition=&view=upcoming|results` → `{ id, home, away, competition: { id, name }, kickoff, status, goalsHome, goalsAway }[]`
-- `GET /standings?competition=` → `{ position, team, played, won, drawn, lost, goalsFor, goalsAgainst, points }[]`
-- `GET /teams/:id/matches?status=finished&limit=5` → matchs enrichis de `teamStats: { shots, bigChances, rating, bonuses }` et `sourceReference`
-- `GET /teams/:id/statistics` → `{ periodStart, periodEnd, sampleSize, shotsPerMatch, bigChancesPerMatch, teamRating }`
-
-Les identifiants sont des chaînes. Les valeurs inconnues sont `null`, jamais des zéros de remplacement. Les statuts de match sont `scheduled`, `finished`, `live`, `postponed` ou `cancelled`. Les logits ou scores retournés par un fournisseur ne deviennent pas automatiquement un indice Calcito.
+Le formulaire enregistre un seul match et les statistiques de ses deux équipes dans une transaction. Les blancs restent inconnus ; zéro reste une valeur explicite. Il conserve les paramètres de la journée entre deux saisies. Le délai de 20 secondes est un objectif à valider avec l’utilisateur, sans inclure la recherche des statistiques.
 
 ## Architecture
 
-- `src/pages/` : pages et fiche équipe.
-- `src/components/` : affichage des données, états, analyses, mascotte.
-- `src/services/` : adaptateurs football, cache, historique.
-- `src/hooks/useFootball.js` : chargement, erreurs, rechargement, protection contre les réponses obsolètes.
-- `src/engines/` : préparation de la forme et interfaces du futur modèle probabiliste.
-- `server/` : backend et adaptation API-Football, jamais inclus dans le bundle Vite.
-- `tests/` : tests des garde-fous, du cache, des probabilités, de l’historique et du backend.
+- `supabase/migrations/` : schéma versionné, contraintes, RLS, sauvegardes atomiques, audit et invalidation.
+- `src/admin/` : authentification, tableau de bord, saisie, catalogue, import/export.
+- `src/services/manualRepository.js` : chargement paginé, accès propriétaire et écritures.
+- `src/services/manualAdapter.js` : données publiques normalisées ; masque les brouillons même lorsque le propriétaire consulte une page publique.
+- `src/domain/` : validation, calcul des classements et CSV.
+- `src/config/calcitoModel.js` : interface des modèles, sans formule inventée.
+- `src/engines/` : préparation de la forme et validation des futures probabilités.
+- `src/pages/` et `src/components/` : parcours publics et composants réutilisables.
+- `tests/` : moteurs, domaines, données et tests PostgreSQL/RLS avec PGlite.
+- `public/images/mascot/` : image effectivement générée et intégrée. Les variantes utilisent actuellement la même pose ; d’autres poses officielles pourront la remplacer.
 
-Les polices sont locales via Fontsource. La navigation utilise `HashRouter` : les URL sont de la forme `/calcito/#/comparateur`, ce qui préserve le rafraîchissement sur GitHub Pages sans règle serveur ni 404 de route.
+La mascotte est une illustration de marque. Elle ne prétend pas exécuter un modèle d’analyse déjà disponible. Les polices sont locales via Fontsource, l’administration est chargée à la demande et les bibliothèques sont séparées dans le build.
 
 ## Publication GitHub Pages
 
-Le workflow `.github/workflows/deploy.yml` installe les dépendances, lance les tests, compile et publie `dist/`. Vite conserve `base: '/calcito/'`.
+Vite conserve `base: '/calcito/'`. `HashRouter` permet les routes et leur rafraîchissement sans règle serveur.
 
-1. Dans **Settings → Pages → Build and deployment**, sélectionner **GitHub Actions**.
-2. Envoyer sur `main` ou lancer **Actions → Deploy CALCITO to GitHub Pages → Run workflow**.
-3. Attendre la réussite du job `deploy`.
+Le workflow `.github/workflows/deploy.yml` installe, teste puis publie `dist/`. Dans **Settings → Pages**, sélectionner **GitHub Actions**. Les deux variables publiques Supabase sont transmises au build si elles ont été configurées ; sinon le frontend est publié avec l’administration inactive.
 
-Adresse attendue : https://victorcorreiaensea.github.io/calcito/
+Adresse : https://victorcorreiaensea.github.io/calcito/
 
-## Mise à jour : classements complets et simulations
-
-La page Classements ouvre la Ligue 1 par défaut et affiche tous les clubs retournés, sans limiter le tableau à cinq équipes. Les groupes sont présentés séparément. Les raccourcis permettent de choisir les autres compétitions, et un sélecteur permet de demander une saison précise.
-
-Si l’API refuse la saison courante et indique explicitement les années accessibles à l’offre gratuite, le backend réessaie uniquement la plus récente de ces saisons présente dans les métadonnées du championnat. Le tableau affiche cette année comme historique ; il n’est pas présenté comme le classement actuel. Une saison explicitement choisie reste respectée et une restriction est expliquée au lieu d’être contournée silencieusement.
-
-À la demande du propriétaire, des **indices de forme simulés** illustrent désormais aussi les équipes réelles. Ils sont assignés depuis des scénarios fixes centralisés, indépendants de toute performance sportive ou formule Calcito. Le tri « Forme simulée » est un classement d’illustration, distinct du classement officiel. Dans le comparateur, les résultats API restent prioritaires ; si aucun n’est disponible, les résultats du scénario sont explicitement marqués simulés. Les simulations ne sont jamais utilisées dans le moteur propriétaire ni dans un modèle de pronostics.
-
-Les tirs, grosses occasions, notes et bonus sont retirés de la présentation principale. Les fiches et le comparateur ne chargent plus de statistiques avancées, afin d’économiser le quota API. Le module propriétaire reste conservé pour l’intégration ultérieure de la vraie formule.
+Le déploiement du frontend ne crée pas le projet Supabase et ne prouve pas que les autorisations distantes fonctionnent. Les tests locaux PostgreSQL et les tests navigateur doivent être distingués de la validation d’un projet distant réellement configuré.

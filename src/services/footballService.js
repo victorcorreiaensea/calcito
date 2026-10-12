@@ -1,3 +1,4 @@
+import { manualAdapter } from "./manualAdapter.js";
 import { teams, matches, demoCompetitions } from "../demoData.js";
 
 export class FootballError extends Error {
@@ -330,10 +331,13 @@ export function createFootballService(
 ) {
   const cache = new Map();
   const pending = new Map();
+  let generation = 0;
   return {
     mode: adapter.mode,
     clearCache() {
+      generation++;
       cache.clear();
+      pending.clear();
     },
     async get(method, params) {
       if (typeof adapter[method] !== "function")
@@ -345,39 +349,21 @@ export function createFootballService(
       const cached = cache.get(key);
       if (cached && now() - cached.time < ttl) return cached.value;
       if (pending.has(key)) return pending.get(key);
+      const requestGeneration = generation;
       const task = Promise.resolve()
         .then(() => adapter[method](params))
         .then((value) => {
-          cache.set(key, { time: now(), value });
+          if (requestGeneration === generation)
+            cache.set(key, { time: now(), value });
           if (cache.size > 500) cache.delete(cache.keys().next().value);
           return value;
         })
-        .finally(() => pending.delete(key));
+        .finally(() => {
+          if (pending.get(key) === task) pending.delete(key);
+        });
       pending.set(key, task);
       return task;
     },
   };
 }
-const configuredUrl = import.meta.env?.VITE_FOOTBALL_PROXY_URL;
-let adapter = demoAdapter;
-if (configuredUrl) {
-  try {
-    adapter = createProxyAdapter(configuredUrl);
-  } catch (error) {
-    adapter = {
-      mode: "real",
-      ...Object.fromEntries(
-        [
-          "competitions",
-          "teams",
-          "team",
-          "matches",
-          "standings",
-          "recentMatches",
-          "statistics",
-        ].map((key) => [key, () => Promise.reject(error)]),
-      ),
-    };
-  }
-}
-export const footballService = createFootballService(adapter);
+export const footballService = createFootballService(manualAdapter);

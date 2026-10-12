@@ -28,7 +28,7 @@ export function TeamBadge({ team, small = false }) {
   return (
     <span
       className={`team-badge ${small ? "small" : ""}`}
-      style={{ "--team-color": team.color || "#B4FF39" }}
+      style={{ "--team-color": team.color || "#2F8CFF" }}
       aria-hidden="true"
     >
       <Shield size={small ? 23 : 34} strokeWidth={1.3} />
@@ -67,7 +67,7 @@ export function FormValue({ score, demo = false }) {
   return (
     <div className="form-value">
       <strong>{Number.isFinite(score) ? `${score} %` : "—"}</strong>
-      <span>{demo ? "Indice simulé" : "Calcul indisponible"}</span>
+      <span>{demo ? "Indice simulé" : "Indice indisponible"}</span>
       {Number.isFinite(score) && <FormBar score={score} />}
     </div>
   );
@@ -97,7 +97,13 @@ export function DataState({ loading, error, empty, retry, children }) {
       <div className="state-panel" role={error ? "alert" : "status"}>
         <CalcitoMascot
           variant={error ? "error" : "empty"}
-          title={error ? "Données indisponibles" : "Aucun résultat"}
+          title={
+            error?.code === "NOT_CONFIGURED"
+              ? "Les résultats arrivent bientôt"
+              : error
+                ? "Données indisponibles"
+                : "Aucun résultat"
+          }
           message={
             error?.message ||
             "Essayez une autre recherche ou une autre compétition."

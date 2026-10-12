@@ -1,204 +1,205 @@
 import { useSearchParams } from "react-router-dom";
-import { simulatedProfile } from "../services/simulation";
 import { useFootball } from "../hooks/useFootball";
-import { calculatePrediction } from "../engines/predictionEngine";
-import { createPredictionHistory } from "../services/predictionHistory";
+import { useTeamAnalysis } from "../components/TeamAnalysis";
 import {
   PageHeading,
   DataState,
   TeamLink,
   FormValue,
+  Results,
   Notice,
 } from "../components/FootballUI";
-import { SourceCaption } from "../components/DataContext";
+import { SeasonSelect, SourceCaption } from "../components/DataContext";
+import { TeamPicker, ComparativeStatistics } from "./Compare";
 import CalcitoMascot from "../components/CalcitoMascot";
 
-function PredictionHistory() {
-  let records = [],
-    error = null;
-  try {
-    records = createPredictionHistory(window.localStorage).list();
-  } catch {
-    error =
-      "Historique local inaccessible ou illisible. Aucun enregistrement n’a été supprimé.";
-  }
-  return (
-    <section className="analysis-panel history-panel">
-      <div className="panel-heading">
-        <h2>Historique des pronostics</h2>
-        <span className="status-pill">Stockage local prévu</span>
-      </div>
-      <p className="muted-text">
-        Match, date du calcul, version du modèle, probabilités, résultat final
-        et évaluation. Les futurs enregistrements locaux resteront propres à ce
-        navigateur.
-      </p>
-      {error ? (
-        <p role="alert">{error}</p>
-      ) : records.length ? (
-        <div className="table-scroll">
-          <table className="official-table">
-            <caption>Pronostics enregistrés sur ce navigateur</caption>
-            <thead>
-              <tr>
-                <th>Match</th>
-                <th>Date</th>
-                <th>1 / N / 2</th>
-                <th>Résultat</th>
-                <th>Évaluation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((record) => (
-                <tr key={record.id}>
-                  <td>
-                    {record.match.homeName} — {record.match.awayName}
-                  </td>
-                  <td>
-                    {new Date(record.predictedAt).toLocaleString("fr-FR")}
-                  </td>
-                  <td>
-                    {["home", "draw", "away"]
-                      .map(
-                        (key) =>
-                          `${(record.probabilities[key] * 100).toFixed(1)} %`,
-                      )
-                      .join(" / ")}
-                  </td>
-                  <td>
-                    {{ home: "1", draw: "N", away: "2" }[record.finalResult] ||
-                      "En attente"}
-                  </td>
-                  <td>
-                    {record.evaluation?.value?.toFixed(3) ?? "Non évalué"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="history-empty">
-          Aucun pronostic enregistré. L’historique commencera après
-          l’intégration d’un modèle calibré.
-        </div>
-      )}
-    </section>
-  );
-}
 export default function Predictions() {
-  const state = useFootball("matches");
   const [params, setParams] = useSearchParams();
-  const selectedId = params.get("match");
-  const match = selectedId
-    ? state.result?.data.find((item) => item.id === selectedId)
-    : state.result?.data[0];
-  const prediction = calculatePrediction({ match });
-  const demo = state.result?.mode === "demo";
+  const homeId = params.get("home") || "",
+    awayId = params.get("away") || "",
+    year = params.get("season") || "";
+  const home = useFootball("team", {teamId:homeId,season:year}, { enabled: Boolean(homeId) }),
+    away = useFootball("team", {teamId:awayId,season:year}, { enabled: Boolean(awayId) });
+  const a = useTeamAnalysis(home.result?.data.id, year),
+    b = useTeamAnalysis(away.result?.data.id, year);
+  const dataset = useFootball("dataset");
+  const history = dataset.result?.data.predictions || [];
+  function set(key, value) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  }
   return (
     <section className="container page-content">
       <PageHeading
         label="COMPRENDRE AVANT D’ANTICIPER"
         title="Pronostics"
-        description="Un futur modèle probabiliste distinct de l’indice de forme. Les estimations ne seront affichées qu’après calibration et validation."
+        description="Choisissez deux équipes pour lire leur dynamique. Les probabilités et cotes attendent un modèle distinct, calibré et validé."
       />
       <CalcitoMascot
         variant="analysis"
-        title="Modèle en développement"
-        message="Un indice de forme n’est pas une probabilité de victoire. Aucun pronostic ni aucune cote n’est inventé ici."
+        title="Modèle de pronostics en développement"
+        message="Un indice de forme n’est pas une probabilité de victoire. Je ne présente aucun pronostic ni aucune cote inventée."
       />
-      <DataState {...state} empty={state.result?.data.length === 0}>
-        {!match ? (
-          <Notice>
-            Ce match est introuvable. Choisissez une autre rencontre.
-          </Notice>
-        ) : null}
-        <div className="filter-bar">
-          <div className="filter-field prediction-select">
-            <label htmlFor="prediction-match">
-              Rencontre à analyser{demo ? " · fictive" : ""}
-            </label>
-            <select
-              id="prediction-match"
-              value={match?.id || ""}
-              onChange={(event) =>
-                setParams({ match: event.target.value }, { replace: true })
-              }
-            >
-              {!match && <option value="">Choisir une rencontre</option>}
-              {state.result?.data.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.home.name} — {item.away.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {match && (
-          <section className="analysis-panel prediction-panel">
-            <div className="prediction-teams">
-              <div>
-                <TeamLink team={match.home} />
-                <FormValue
-                  score={
-                    match.home.score ?? simulatedProfile(match.home.id).score
-                  }
-                  demo
-                />
-              </div>
-              <span>VS</span>
-              <div>
-                <TeamLink team={match.away} />
-                <FormValue
-                  score={
-                    match.away.score ?? simulatedProfile(match.away.id).score
-                  }
-                  demo
-                />
-              </div>
-            </div>
-            <div className="probability-grid">
-              {[
-                ["1", "Victoire domicile"],
-                ["N", "Match nul"],
-                ["2", "Victoire extérieur"],
-              ].map(([key, label]) => (
-                <div key={key}>
-                  <span>
-                    {key} · {label}
-                  </span>
-                  <strong>—</strong>
-                  <small>Probabilité indisponible</small>
-                  <hr />
-                  <span>Cote théorique</span>
-                  <b>—</b>
+      <div className="filter-bar">
+        <SeasonSelect value={year} onChange={(value) => set("season", value)} />
+      </div>
+      <div className="picker-grid predictions-pickers">
+        <TeamPicker
+          label="Équipe à domicile"
+          value={homeId}
+          excluded={awayId}
+          season={year}
+          onChange={(value) => set("home", value)}
+        />
+        <span className="comparison-vs">VS</span>
+        <TeamPicker
+          label="Équipe à l’extérieur"
+          value={awayId}
+          excluded={homeId}
+          season={year}
+          onChange={(value) => set("away", value)}
+        />
+      </div>
+      {homeId && awayId && homeId === awayId ? (
+        <Notice>Choisissez deux équipes différentes.</Notice>
+      ) : homeId && awayId ? (
+        <DataState
+          loading={home.loading || away.loading}
+          error={home.error || away.error}
+        >
+          {home.result && away.result && (
+            <>
+              <section className="analysis-panel prediction-panel">
+                <div className="prediction-teams">
+                  {[
+                    [home.result.data, a],
+                    [away.result.data, b],
+                  ].map(([team, analysis]) => (
+                    <div key={team.id}>
+                      <TeamLink team={team} />
+                      <FormValue
+                        score={
+                          year && Number(year) !== team.season
+                            ? null
+                            : team.score
+                        }
+                      />
+                      <Results results={analysis.results} demo={false} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <Notice>
-              {prediction.status === "model-pending"
-                ? "Modèle en développement : aucune probabilité 1/N/2 ni cote disponible. Les futures probabilités devront totaliser 100 % ; les cotes théoriques seront leurs inverses décimaux."
-                : ""}
-            </Notice>
-            <dl className="prediction-metadata">
-              <div>
-                <dt>Date du calcul</dt>
-                <dd>Non calculé</dd>
-              </div>
-              <div>
-                <dt>Qualité des données</dt>
-                <dd>{demo ? "Démonstration fictive" : "Non évaluée"}</dd>
-              </div>
-              <div>
-                <dt>Facteurs utilisés</dt>
-                <dd>Aucun calcul exécuté</dd>
-              </div>
-            </dl>
-          </section>
+                <div className="probability-grid">
+                  {[
+                    ["1", "Victoire domicile"],
+                    ["N", "Match nul"],
+                    ["2", "Victoire extérieur"],
+                  ].map(([key, label]) => (
+                    <div key={key}>
+                      <span>
+                        {key} · {label}
+                      </span>
+                      <strong>—</strong>
+                      <small>Probabilité indisponible</small>
+                      <hr />
+                      <span>Cote théorique</span>
+                      <b>—</b>
+                    </div>
+                  ))}
+                </div>
+                <Notice>
+                  Modèle de pronostics en développement. Aucune conversion
+                  directe des indices en probabilités. Les futures probabilités
+                  totaliseront 100 % ; la cote théorique sera leur inverse
+                  décimal.
+                </Notice>
+                <dl className="prediction-metadata">
+                  <div>
+                    <dt>Date du calcul</dt>
+                    <dd>Non calculé</dd>
+                  </div>
+                  <div>
+                    <dt>Qualité des données</dt>
+                    <dd>
+                      {a.results.length} / 5 matchs domicile ·{" "}
+                      {b.results.length} / 5 extérieur
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Facteurs utilisés</dt>
+                    <dd>Aucun calcul probabiliste exécuté</dd>
+                  </div>
+                </dl>
+              </section>
+              <ComparativeStatistics
+                left={a}
+                right={b}
+                leftTeam={home.result.data}
+                rightTeam={away.result.data}
+              />
+            </>
+          )}
+        </DataState>
+      ) : (
+        <Notice>
+          Sélectionnez les deux équipes pour afficher leurs données publiées.
+        </Notice>
+      )}
+      <section className="analysis-panel">
+        <h2>Historique des pronostics</h2>
+        <p className="muted-text">
+          Les futures prévisions seront enregistrées en base avant le coup
+          d’envoi, puis comparées au résultat final. Aucun faux historique n’est
+          créé.
+        </p>
+        {history.length ? (
+          <div className="table-scroll">
+            <table className="official-table">
+              <thead>
+                <tr>
+                  <th>Match</th>
+                  <th>Date de calcul</th>
+                  <th>1 / N / 2</th>
+                  <th>Résultat</th>
+                  <th>Évaluation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((row) => (
+                  <tr key={row.id}>
+                    <td>
+                      {dataset.result.data.matches.find(
+                        (m) => m.id === row.match_id,
+                      )?.round || "Match publié"}
+                    </td>
+                    <td>
+                      {new Date(row.predicted_at).toLocaleString("fr-FR")}
+                    </td>
+                    <td>
+                      {[
+                        row.home_probability,
+                        row.draw_probability,
+                        row.away_probability,
+                      ]
+                        .map((value) => `${(Number(value) * 100).toFixed(1)} %`)
+                        .join(" / ")}
+                    </td>
+                    <td>{row.final_result || "En attente"}</td>
+                    <td>{row.evaluation?.value ?? "Non évalué"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="history-empty">
+            Aucun pronostic publié. L’historique commencera après l’intégration
+            du modèle.
+          </p>
         )}
-        <SourceCaption result={state.result} />
-      </DataState>
-      <PredictionHistory />
+        <SourceCaption result={dataset.result} />
+      </section>
     </section>
   );
 }

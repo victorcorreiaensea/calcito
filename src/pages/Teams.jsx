@@ -1,30 +1,42 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowUpRight, Search } from "lucide-react";
-import { simulatedProfile } from "../services/simulation";
 import { useFootball } from "../hooks/useFootball";
 import {
   PageHeading,
   DataState,
   TeamBadge,
   FormValue,
-  Results,
-  DemoLabel,
+  Notice,
 } from "../components/FootballUI";
-import { CompetitionSelect, SourceCaption } from "../components/DataContext";
-import { useTeamAnalysis, CalculationTrace } from "../components/TeamAnalysis";
-import { Notice } from "../components/FootballUI";
+import {
+  CompetitionSelect,
+  SeasonSelect,
+  SourceCaption,
+} from "../components/DataContext";
+import {
+  useTeamAnalysis,
+  CalculationTrace,
+  TeamStatistics,
+} from "../components/TeamAnalysis";
 
 export default function Teams() {
-  const [search, setSearch] = useState("");
-  const [competition, setCompetition] = useState("");
-  const state = useFootball("teams", { search, competition });
+  const [params, setParams] = useSearchParams();
+  const search = params.get("search") || "";
+  function setSearch(value) {
+    setParams(value ? { search: value } : {}, { replace: true });
+  }
+  const [competition, setCompetition] = useState(""),
+    [year, setYear] = useState(""),
+    [page, setPage] = useState(0);
+  const state = useFootball("teams", { search, competition, season: year });
+  const rows = state.result?.data || [];
   return (
     <section className="container page-content">
       <PageHeading
         label="LES ÉQUIPES, AU-DELÀ DU SCORE"
         title="Équipes"
-        description="Explorez les clubs, leurs résultats disponibles et des indices de forme simulés pour illustrer leur dynamique."
+        description="Retrouvez les fiches publiées, leurs résultats et les statistiques réellement renseignées. Les données absentes restent indisponibles."
       />
       <div className="filter-bar">
         <div className="filter-field search-field">
@@ -34,52 +46,73 @@ export default function Teams() {
             <input
               type="search"
               id="team-search"
+              placeholder="Nom de l’équipe…"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Nom de l’équipe (3 caractères minimum en mode réel)…"
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(0);
+              }}
             />
           </div>
         </div>
-        <CompetitionSelect value={competition} onChange={setCompetition} />
+        <CompetitionSelect
+          value={competition}
+          onChange={(value) => {
+            setCompetition(value);
+            setYear("");
+            setPage(0);
+          }}
+        />
+        <SeasonSelect
+          competition={competition}
+          value={year}
+          onChange={(value) => {
+            setYear(value);
+            setPage(0);
+          }}
+        />
       </div>
-      <p className="muted-text">
-        Sans filtre ni recherche, le fournisseur API-Football affiche la Ligue
-        1. Une recherche permet de trouver des équipes d’autres championnats.
-      </p>
-      <DataState {...state} empty={state.result?.data.length === 0}>
+      <DataState {...state} empty={!rows.length}>
         <p className="result-count" role="status">
-          {state.result?.data.length} équipe(s)
+          {rows.length} équipe(s) publiée(s)
         </p>
         <div className="team-grid">
-          {state.result?.data.map((team) => (
+          {rows.slice(page * 18, (page + 1) * 18).map((team) => (
             <article className="team-card" key={team.id}>
               <div className="team-card-top">
                 <TeamBadge team={team} />
-                {state.result.mode === "demo" && <DemoLabel compact />}
+                <span className="status-pill">{team.country}</span>
               </div>
               <h2>{team.name}</h2>
               <p>
-                {team.competitionName ||
-                  team.country ||
-                  "Compétition non renseignée"}
-                {team.season ? ` · Saison ${team.season}` : ""}
+                {team.competitionName || "Fiche publiée"}
+                {team.season ? ` · ${team.season}–${team.season + 1}` : ""}
               </p>
-              <FormValue
-                score={team.score ?? simulatedProfile(team.id).score}
-                demo
-              />
-              <Results
-                results={team.results}
-                demo={state.result.mode === "demo"}
-              />
-              <Link
-                className="text-link"
-                to={`/equipes/${encodeURIComponent(team.id)}`}
-              >
-                Explorer l’équipe <ArrowUpRight size={18} />
+              <span className="eyebrow">FORME CALCITO</span>
+              <FormValue score={team.score} />
+              <Link className="text-link" to={`/equipes/${team.id}`}>
+                Explorer l’équipe
+                <ArrowUpRight size={18} />
               </Link>
             </article>
           ))}
+        </div>
+        <div className="pagination">
+          <button
+            disabled={!page}
+            onClick={() => setPage((value) => value - 1)}
+          >
+            Précédent
+          </button>
+          <span>
+            Page {page + 1} / {Math.max(1, Math.ceil(rows.length / 18))}
+          </span>
+          <button
+            disabled={(page + 1) * 18 >= rows.length}
+            onClick={() => setPage((value) => value + 1)}
+          >
+            Suivant
+          </button>
         </div>
         <SourceCaption result={state.result} />
       </DataState>
@@ -88,10 +121,26 @@ export default function Teams() {
 }
 export function TeamDetail() {
   const { teamId } = useParams();
-  const state = useFootball("team", teamId);
-  const analysis = useTeamAnalysis(state.result?.data.id);
+  const [year, setYear] = useState("");
+  const state = useFootball("team", {teamId,season:year});
+  const analysis = useTeamAnalysis(state.result?.data.id, year);
+  const history = useFootball("matches", { season: year });
+  const standings = useFootball(
+    "standings",
+    { competition: state.result?.data.competitionId, season: year },
+    { enabled: Boolean(state.result?.data.competitionId) },
+  );
   const team = state.result?.data;
-  const demo = state.result?.mode === "demo";
+  const position = standings.result?.data.rows.find(
+    (row) => row.id === teamId,
+  )?.position;
+  const relevantHistory =
+    history.result?.data.filter(
+      (m) =>
+        m.status === "finished" &&
+        (m.home.id === teamId || m.away.id === teamId),
+    ) || [];
+  const [page, setPage] = useState(0);
   return (
     <section className="container page-content">
       <Link className="back-link" to="/equipes">
@@ -103,42 +152,149 @@ export function TeamDetail() {
             <div className="team-detail-header">
               <TeamBadge team={team} />
               <PageHeading
-                label={
-                  demo
-                    ? "FICHE D’ÉQUIPE FICTIVE"
-                    : team.competitionName || "FICHE ÉQUIPE"
-                }
+                label={`${team.country} · ${team.competitionName || "ÉQUIPE"}`}
                 title={team.name}
-                description={
-                  demo
-                    ? "Profil de démonstration. Les résultats et l’indice de forme sont fictifs."
-                    : "Résultats disponibles dans l’API et indice de forme simulé, clairement séparés."
-                }
+                description="Résultats publiés, statistiques renseignées et indice de forme lorsqu’il est disponible."
               />
               <FormValue
-                score={demo ? team.score : simulatedProfile(team.id).score}
-                demo
+                score={year && Number(year) !== team.season ? null : team.score}
               />
             </div>
-            {demo && <Results results={team.results} />}
-            <SourceCaption result={state.result} />
-            <Notice>
-              L’indice est simulé pour illustrer l’interface. Il ne provient pas
-              de l’algorithme propriétaire et n’est pas une probabilité de
-              victoire.
-            </Notice>
-            <div className="results-detail">
-              <CalculationTrace analysis={analysis} demo={demo} />
+            <div className="filter-bar">
+              <SeasonSelect
+                value={year}
+                onChange={(value) => {
+                  setYear(value);
+                  setPage(0);
+                }}
+              />
+              <span className="status-pill">
+                Position : {position || "—"}
+                {standings.result?.data.partial ? " · classement partiel" : ""}
+              </span>
+              <Link
+                className="button button-primary"
+                to={`/comparateur?team=${team.id}${year ? `&season=${year}` : ""}`}
+              >
+                Comparer cette équipe
+                <ArrowUpRight size={16} />
+              </Link>
             </div>
-            <Link
-              className="button button-primary"
-              to={`/comparateur?team=${encodeURIComponent(team.id)}`}
-            >
-              Comparer cette équipe <ArrowUpRight size={18} />
-            </Link>
+            <div className="detail-grid">
+              <CalculationTrace analysis={analysis} />
+              <TeamStatistics state={analysis.statistics} />
+            </div>
+            <section className="analysis-panel">
+              <h2>Évolution de la forme</h2>
+              <FormHistory
+                history={
+                  year && Number(year) !== team.season
+                    ? []
+                    : team.formHistory || []
+                }
+              />
+            </section>
+            <section className="analysis-panel">
+              <h2>Historique des résultats publiés</h2>
+              {history.error ? (
+                <p role="alert">Les résultats ne sont pas disponibles.</p>
+              ) : !relevantHistory.length ? (
+                <p className="muted-text">
+                  Aucun résultat publié dans cette saison.
+                </p>
+              ) : (
+                <>
+                  <div className="team-history">
+                    {relevantHistory
+                      .slice(page * 10, (page + 1) * 10)
+                      .map((match) => (
+                        <div key={match.id}>
+                          <span>
+                            {new Date(match.kickoff).toLocaleDateString(
+                              "fr-FR",
+                            )}{" "}
+                            · {match.competition.name}
+                          </span>
+                          <strong>
+                            {match.home.name} {match.goalsHome ?? "—"} –{" "}
+                            {match.goalsAway ?? "—"} {match.away.name}
+                          </strong>
+                        </div>
+                      ))}
+                  </div>
+                  <div className="pagination">
+                    <button
+                      disabled={!page}
+                      onClick={() => setPage((p) => p - 1)}
+                    >
+                      Précédent
+                    </button>
+                    <span>Page {page + 1}</span>
+                    <button
+                      disabled={(page + 1) * 10 >= relevantHistory.length}
+                      onClick={() => setPage((p) => p + 1)}
+                    >
+                      Suivant
+                    </button>
+                  </div>
+                </>
+              )}
+            </section>
+            <SourceCaption result={state.result} />
           </>
         )}
       </DataState>
     </section>
+  );
+}
+
+function FormHistory({ history }) {
+  if (history.length < 2)
+    return (
+      <p className="muted-text">
+        Aucun historique suffisant d’indice calculé n’est disponible. Le
+        graphique apparaît uniquement après des calculs réels et versionnés.
+      </p>
+    );
+  const rows = [...history].sort(
+    (a, b) => Date.parse(a.calculatedAt) - Date.parse(b.calculatedAt),
+  );
+  const points = rows
+    .map(
+      (row, i) =>
+        `${15 + (i / (rows.length - 1)) * 470},${150 - row.score * 1.3}`,
+    )
+    .join(" ");
+  return (
+    <div>
+      <svg
+        className="form-history-chart"
+        viewBox="0 0 500 175"
+        role="img"
+        aria-label={`Historique réel de forme de ${rows[0].score} à ${rows.at(-1).score} %`}
+      >
+        <line x1="15" x2="485" y1="150" y2="150" stroke="#25344D" />
+        <polyline
+          points={points}
+          fill="none"
+          stroke="#2F8CFF"
+          strokeWidth="3"
+        />
+        {rows.map((row, i) => (
+          <circle
+            key={i}
+            cx={15 + (i / (rows.length - 1)) * 470}
+            cy={150 - row.score * 1.3}
+            r="4"
+            fill="#73B5FF"
+          />
+        ))}
+      </svg>
+      <p className="muted-text">
+        {new Date(rows[0].calculatedAt).toLocaleDateString("fr-FR")} —{" "}
+        {new Date(rows.at(-1).calculatedAt).toLocaleDateString("fr-FR")} ·
+        Calculs versionnés
+      </p>
+    </div>
   );
 }

@@ -10,6 +10,14 @@ export function useFootball(method, params, { enabled = true } = {}) {
     error: null,
     requestKey: null,
   });
+  useEffect(() => {
+    function refresh() {
+      footballService.clearCache();
+      setRevision((value) => value + 1);
+    }
+    window.addEventListener("calcito:data-changed", refresh);
+    return () => window.removeEventListener("calcito:data-changed", refresh);
+  }, []);
   const requestKey = `${method}:${key}:${revision}`;
   useEffect(() => {
     if (!enabled) return;

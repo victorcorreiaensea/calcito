@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   HashRouter,
   NavLink,
@@ -6,13 +6,16 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
-import { Activity, Menu, X } from "lucide-react";
+import { Activity, Menu, X, Search } from "lucide-react";
 import { DataBanner } from "./components/DataContext";
 import { PageHeading } from "./components/FootballUI";
 import Home from "./pages/Home";
 import Matches from "./pages/Matches";
-import Standings from "./pages/Standings";
+import Standings, { EuropeanRanking } from "./pages/Standings";
+const Admin = lazy(() => import("./admin/Admin"));
+import { AuthProvider } from "./admin/AuthProvider";
 import Teams, { TeamDetail } from "./pages/Teams";
 import Compare from "./pages/Compare";
 import Predictions from "./pages/Predictions";
@@ -39,6 +42,9 @@ function Logo() {
 }
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
   const toggle = useRef(null);
   const location = useLocation();
   useEffect(() => {
@@ -76,7 +82,39 @@ function Navbar() {
             </NavLink>
           ))}
         </nav>
-        <span className="version-badge">V2</span>
+        <button
+          className="global-search-toggle"
+          aria-label="Recherche globale d’équipes"
+          aria-expanded={searchOpen}
+          onClick={() => setSearchOpen((value) => !value)}
+        >
+          <Search size={19} />
+        </button>
+        <span className="version-badge">V3</span>
+        {searchOpen && (
+          <form
+            className="global-search-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              navigate(`/equipes?search=${encodeURIComponent(search)}`);
+              setSearchOpen(false);
+              setOpen(false);
+            }}
+          >
+            <label className="sr-only" htmlFor="global-team-search">
+              Nom de l’équipe
+            </label>
+            <input
+              id="global-team-search"
+              autoFocus
+              type="search"
+              placeholder="Rechercher une équipe…"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <button>Rechercher</button>
+          </form>
+        )}
         <button
           ref={toggle}
           className="menu-toggle"
@@ -96,6 +134,10 @@ function RouteEffects() {
   useEffect(() => {
     const label =
       navigation.find(([, path]) => path === location.pathname)?.[0] ||
+      {
+        "/admin": "Administration",
+        "/classement-europeen": "Classement européen Calcito",
+      }[location.pathname] ||
       "Équipe";
     document.title = `${label} — CALCITO · Football Intelligence`;
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -123,7 +165,8 @@ function Footer() {
       </nav>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} CALCITO</span>
-        <span>V2 · Formule et modèle en développement</span>
+        <span>V3 · Données vérifiées, forme en préparation</span>
+        <Link to="/admin">Administration privée</Link>
         <button
           onClick={() =>
             window.scrollTo({
@@ -157,34 +200,51 @@ function NotFound() {
 }
 export default function App() {
   return (
-    <HashRouter>
-      <a
-        className="skip-link"
-        href="#main-content"
-        onClick={(event) => {
-          event.preventDefault();
-          document.getElementById("main-content")?.focus();
-        }}
-      >
-        Aller au contenu
-      </a>
-      <Navbar />
-      <DataBanner />
-      <main id="main-content" tabIndex={-1}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/matchs" element={<Matches />} />
-          <Route path="/classements" element={<Standings />} />
-          <Route path="/equipes" element={<Teams />} />
-          <Route path="/equipes/:teamId" element={<TeamDetail />} />
-          <Route path="/comparateur" element={<Compare />} />
-          <Route path="/pronostics" element={<Predictions />} />
-          <Route path="/methodologie" element={<Methodology />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      <Footer />
-      <RouteEffects />
-    </HashRouter>
+    <AuthProvider>
+      <HashRouter>
+        <a
+          className="skip-link"
+          href="#main-content"
+          onClick={(event) => {
+            event.preventDefault();
+            document.getElementById("main-content")?.focus();
+          }}
+        >
+          Aller au contenu
+        </a>
+        <Navbar />
+        <DataBanner />
+        <main id="main-content" tabIndex={-1}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/matchs" element={<Matches />} />
+            <Route path="/classements" element={<Standings />} />
+            <Route path="/classement-europeen" element={<EuropeanRanking />} />
+            <Route
+              path="/admin"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="container state-panel" role="status">
+                      Chargement de l’espace privé…
+                    </div>
+                  }
+                >
+                  <Admin />
+                </Suspense>
+              }
+            />
+            <Route path="/equipes" element={<Teams />} />
+            <Route path="/equipes/:teamId" element={<TeamDetail />} />
+            <Route path="/comparateur" element={<Compare />} />
+            <Route path="/pronostics" element={<Predictions />} />
+            <Route path="/methodologie" element={<Methodology />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <Footer />
+        <RouteEffects />
+      </HashRouter>
+    </AuthProvider>
   );
 }

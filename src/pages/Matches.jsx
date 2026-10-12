@@ -1,116 +1,137 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
-import { simulatedProfile } from "../services/simulation";
 import { useFootball } from "../hooks/useFootball";
 import {
   PageHeading,
   DataState,
   TeamLink,
   FormValue,
-  DemoLabel,
 } from "../components/FootballUI";
-import { CompetitionSelect, SourceCaption } from "../components/DataContext";
+import {
+  CompetitionSelect,
+  SeasonSelect,
+  SourceCaption,
+} from "../components/DataContext";
 
-const statuses = {
-  scheduled: "À venir",
+const labels = {
   finished: "Terminé",
+  scheduled: "À venir",
   live: "En cours",
   postponed: "Reporté",
   cancelled: "Annulé",
 };
-export function FixtureCard({ match, demo }) {
+export function FixtureCard({ match }) {
   return (
     <article className="fixture-card">
       <div className="fixture-meta">
         <span>
-          {typeof match.competition === "string"
-            ? match.competition
-            : match.competition?.name || "Compétition indisponible"}
+          {match.competition.name} · {match.round}
         </span>
-        {demo ? (
-          <DemoLabel compact />
-        ) : (
-          <span className="status-pill">{statuses[match.status]}</span>
-        )}
+        <span className="status-pill">{labels[match.status]}</span>
       </div>
       <div className="fixture-versus">
         <TeamLink team={match.home} />
-        <span className="fixture-score">
-          {match.status === "finished" &&
-          match.goalsHome != null &&
-          match.goalsAway != null
+        <strong className="fixture-score">
+          {match.goalsHome != null && match.goalsAway != null
             ? `${match.goalsHome} – ${match.goalsAway}`
             : "VS"}
-        </span>
+        </strong>
         <TeamLink team={match.away} />
       </div>
       <div className="fixture-forms">
         <div>
           <span>Forme domicile</span>
-          <FormValue
-            score={match.home.score ?? simulatedProfile(match.home.id).score}
-            demo
-          />
+          <FormValue score={match.home.score} />
         </div>
         <div>
           <span>Forme extérieur</span>
-          <FormValue
-            score={match.away.score ?? simulatedProfile(match.away.id).score}
-            demo
-          />
+          <FormValue score={match.away.score} />
         </div>
       </div>
       <div className="fixture-footer">
         <span>
-          {demo
-            ? `Date fictive · ${match.date}`
-            : new Date(match.kickoff).toLocaleString("fr-FR", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
+          {new Date(match.kickoff).toLocaleString("fr-FR", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}
         </span>
-        <Link to={`/pronostics?match=${encodeURIComponent(match.id)}`}>
-          Analyse <ArrowUpRight size={14} />
+        <Link
+          to={`/pronostics?home=${match.home.id}&away=${match.away.id}&match=${match.id}&season=${match.season}`}
+        >
+          Analyse
+          <ArrowUpRight size={14} />
         </Link>
       </div>
     </article>
   );
 }
 export default function Matches() {
-  const [competition, setCompetition] = useState("");
-  const [view, setView] = useState("upcoming");
-  const state = useFootball("matches", { competition, view });
+  const [competition, setCompetition] = useState(""),
+    [year, setYear] = useState(""),
+    [view, setView] = useState(""),
+    [page, setPage] = useState(0);
+  const state = useFootball("matches", { competition, season: year, view });
+  const matches = state.result?.data || [];
   return (
     <section className="container page-content">
       <PageHeading
         label="LE JEU, MATCH APRÈS MATCH"
         title="Matchs"
-        description="Calendrier et derniers résultats. Les horaires réels sont affichés selon votre fuseau horaire ; les indices de forme ne sont pas des probabilités."
+        description="Calendrier et résultats vérifiés, saisis une seule fois pour les deux équipes. Seules les rencontres publiées par l’administrateur sont visibles."
       />
       <div className="filter-bar">
-        <CompetitionSelect value={competition} onChange={setCompetition} />
+        <CompetitionSelect
+          value={competition}
+          onChange={(value) => {
+            setCompetition(value);
+            setYear("");
+            setPage(0);
+          }}
+        />
+        <SeasonSelect
+          competition={competition}
+          value={year}
+          onChange={(value) => {
+            setYear(value);
+            setPage(0);
+          }}
+        />
         <div className="filter-field">
           <label htmlFor="fixture-view">Calendrier</label>
           <select
             id="fixture-view"
             value={view}
-            onChange={(event) => setView(event.target.value)}
+            onChange={(event) => {
+              setView(event.target.value);
+              setPage(0);
+            }}
           >
-            <option value="upcoming">À venir</option>
-            <option value="results">Derniers résultats</option>
+            <option value="">Tous les matchs publiés</option>
+            <option value="results">Résultats</option>
+            <option value="upcoming">À venir / en cours</option>
           </select>
         </div>
       </div>
-      <DataState {...state} empty={state.result?.data.length === 0}>
+      <DataState {...state} empty={!matches.length}>
         <div className="fixture-grid">
-          {state.result?.data.map((match) => (
-            <FixtureCard
-              match={match}
-              key={match.id}
-              demo={state.result.mode === "demo"}
-            />
+          {matches.slice(page * 12, (page + 1) * 12).map((match) => (
+            <FixtureCard match={match} key={match.id} />
           ))}
+        </div>
+        <div className="pagination">
+          <button disabled={!page} onClick={() => setPage((p) => p - 1)}>
+            Précédent
+          </button>
+          <span>
+            Page {page + 1} / {Math.max(1, Math.ceil(matches.length / 12))}
+          </span>
+          <button
+            disabled={(page + 1) * 12 >= matches.length}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Suivant
+          </button>
         </div>
         <SourceCaption result={state.result} />
       </DataState>

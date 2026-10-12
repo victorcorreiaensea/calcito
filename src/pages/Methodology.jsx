@@ -1,6 +1,6 @@
 import { ScanLine, SlidersHorizontal, ChartNoAxesCombined } from "lucide-react";
-import { methodology, priorityCompetitions } from "../demoData";
 import { PageHeading, Notice } from "../components/FootballUI";
+import { priorityCompetitions } from "../demoData";
 
 export default function Methodology() {
   return (
@@ -8,83 +8,105 @@ export default function Methodology() {
       <PageHeading
         label="UNE LECTURE TRANSPARENTE DU JEU"
         title="Méthodologie"
-        description="Distinguer ce que les données montrent, ce que l’algorithme calculera et ce qui reste à développer."
+        description="Les résultats vérifiés, les classements reconstruits et les futurs modèles ont chacun leur rôle. Les données manquantes restent visibles."
       />
       <div className="method-grid">
-        {methodology.map((step, i) => {
-          const Icon = [ScanLine, SlidersHorizontal, ChartNoAxesCombined][i];
-          return (
-            <article className="method-card" key={step.number}>
-              <div className="method-top">
-                <Icon size={27} />
-                <span>{step.number}</span>
-              </div>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-            </article>
-          );
-        })}
+        {[
+          [
+            ScanLine,
+            "01",
+            "Saisir et vérifier",
+            "L’administrateur enregistre chaque match une seule fois : score, statistiques des deux équipes, source et date de vérification. Les brouillons restent privés.",
+          ],
+          [
+            SlidersHorizontal,
+            "02",
+            "Préparer la forme",
+            "Les cinq derniers matchs officiels, toutes compétitions confondues dans la même saison, constituent les données d’entrée du futur indice.",
+          ],
+          [
+            ChartNoAxesCombined,
+            "03",
+            "Lire et comparer",
+            "Les visiteurs consultent les données publiées, les classements partiels et les comparaisons sans avoir besoin de se connecter.",
+          ],
+        ].map(([Icon, n, title, text]) => (
+          <article className="method-card" key={n}>
+            <div className="method-top">
+              <Icon size={27} />
+              <span>{n}</span>
+            </div>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
       </div>
       <div className="detail-grid methodology-panels">
         <section className="analysis-panel">
           <h2>L’indice de forme Calcito</h2>
-          <p className="muted-text">
-            Les cinq derniers matchs terminés constituent les données d’entrée.
-            Le module conserve leur date, leur résultat et leur référence
-            source.
-          </p>
           <ul className="feature-list">
-            <li>Résultat du match et tirs</li>
-            <li>Grosses occasions et notes d’équipe</li>
-            <li>Bonus fournis et coefficients de compétition</li>
+            <li>Cinq derniers matchs officiels publiés</li>
+            <li>Résultats, tirs, grosses occasions et notes d’équipe</li>
+            <li>Bonus et coefficients fournis par le propriétaire</li>
             <li>
-              Coefficient européen de 1,20 uniquement pour les compétitions
-              explicitement confirmées
+              Coefficient de 1,20 pour les compétitions européennes expressément
+              confirmées
             </li>
           </ul>
           <Notice>
-            La formule exacte, les autres coefficients et les compétitions
-            auxquelles appliquer 1,20 restent à fournir. Des données manquantes
-            bloquent le calcul ; elles ne sont jamais remplacées par zéro.
+            La formule exacte reste à fournir. Aucun score n’est inventé et
+            aucune donnée manquante ne devient zéro. « Indice indisponible » est
+            affiché tant que le calcul n’est pas possible.
           </Notice>
         </section>
         <section className="analysis-panel">
-          <h2>Des probabilités à part entière</h2>
+          <h2>Un classement honnête sur sa couverture</h2>
           <p className="muted-text">
-            Un futur modèle calibré estimera les trois issues d’un match.
-            L’indice de forme ne sera jamais converti directement en
-            probabilité.
+            Les points sont reconstruits à partir des matchs terminés publiés et
+            des règles configurées pour la saison. Les sanctions de points
+            doivent être justifiées.
           </p>
-          <ul className="feature-list">
-            <li>Probabilités décimales totalisant 1 (100 %)</li>
-            <li>Cote théorique = 1 / probabilité décimale</li>
-            <li>Date, version du modèle et qualité des données</li>
-            <li>Historique et évaluation après résultat final</li>
-          </ul>
           <Notice>
-            Modèle en développement. Aucun pari, paiement, bookmaker ou lien
-            d’affiliation.
+            « Classement partiel » reste visible tant que les matchs
+            nécessaires, les règles et les vérifications ne sont pas complets.
+            Les départages sont configurables ; une égalité non résolue garde un
+            rang partagé.
           </Notice>
+          <p className="muted-text">
+            Le classement européen Calcito compare les indices, pas les points
+            de championnat. Il n’est pas un classement UEFA.
+          </p>
         </section>
       </div>
       <section className="analysis-panel">
-        <h2>Couverture envisagée</h2>
+        <h2>Pronostics : un modèle à part entière</h2>
         <p className="muted-text">
-          La disponibilité effective dépendra du fournisseur autorisé et des
-          droits d’accès. Cette liste ne constitue pas une couverture
-          actuellement connectée.
+          Le futur modèle probabiliste devra être calibré. Ses trois
+          probabilités totaliseront 100 %, les cotes théoriques seront leurs
+          inverses et les calculs conserveront leur date, version et qualité des
+          données.
         </p>
+        <Notice>
+          Modèle de pronostics en développement. Aucun pari, paiement, bookmaker
+          ou lien d’affiliation.
+        </Notice>
+      </section>
+      <section className="analysis-panel">
+        <h2>Compétitions prévues</h2>
         <div className="competition-chips">
-          {priorityCompetitions.map((name) => (
+          {[
+            ...priorityCompetitions.slice(0, 7),
+            "UEFA Europa League",
+            "UEFA Conference League",
+          ].map((name) => (
             <span key={name}>{name}</span>
           ))}
         </div>
+        <p className="muted-text">
+          Chaque saison possède ses propres participants. Les données d’une
+          saison ne remplacent pas celles des précédentes.
+        </p>
       </section>
-      <Notice>
-        Mode démonstration : équipes, résultats, dates et indices fictifs sont
-        explicitement identifiés. Aucun classement officiel ni statistique
-        manquante n’est inventé.
-      </Notice>
     </section>
   );
 }

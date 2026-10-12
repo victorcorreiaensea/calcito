@@ -1,46 +1,61 @@
 import { useFootball } from "../hooks/useFootball";
 import { calculateCalcitoForm } from "../engines/calcitoEngine";
+import { calcitoModel } from "../config/calcitoModel";
 import { SourceCaption } from "./DataContext";
 import { Results, Notice } from "./FootballUI";
 
-export function useTeamAnalysis(id) {
-  const recent = useFootball("recentMatches", id, { enabled: Boolean(id) });
-  const statistics = useFootball("statistics", id, { enabled: false });
-  const engine = calculateCalcitoForm({
-    teamId: id,
-    matches: recent.result?.data || [],
+export function useTeamAnalysis(id, season = "") {
+  const params = { teamId: id, season };
+  const recent = useFootball("recentMatches", params, { enabled: Boolean(id) });
+  const statistics = useFootball("statistics", params, {
+    enabled: Boolean(id),
   });
+  const engine = calculateCalcitoForm(
+    {
+      teamId: id,
+      matches: recent.result?.data || [],
+      competitionCoefficients: {
+        ...calcitoModel.competitionCoefficients,
+        ...Object.fromEntries(
+          (recent.result?.data || [])
+            .filter(
+              (match) =>
+                Number.isFinite(Number(match.competition.coefficient)) &&
+                match.competition.coefficient != null,
+            )
+            .map((match) => [
+              match.competition.id,
+              Number(match.competition.coefficient),
+            ]),
+        ),
+      },
+    },
+    { formula: calcitoModel.formula, formulaVersion: calcitoModel.version },
+  );
   const results = [...engine.trace]
     .reverse()
     .map((match) => match.result || "?");
   return { recent, statistics, engine, results };
 }
-export function CalculationTrace({ analysis, demo }) {
+export function CalculationTrace({ analysis }) {
   const { recent, engine } = analysis;
   return (
     <section className="analysis-panel">
-      <h2>Derniers résultats disponibles</h2>
+      <h2>Cinq derniers matchs officiels</h2>
       <Notice>
-        Les résultats ci-dessous proviennent des matchs fournis par l’API. Les
-        éventuels indices simulés sont présentés séparément et n’utilisent pas
-        les tirs ou les notes d’équipe.
+        {engine.trace.length} / 5 matchs publiés dans la saison sélectionnée.
+        Indice indisponible tant que la formule ou les données nécessaires
+        manquent.
       </Notice>
       {recent.loading ? (
         <p role="status">Chargement des matchs…</p>
       ) : recent.error ? (
-        <div role="alert">
-          <p>{recent.error.message}</p>
-          <button className="button button-secondary" onClick={recent.retry}>
-            Réessayer
-          </button>
-        </div>
+        <p role="alert">{recent.error.message}</p>
       ) : !engine.trace.length ? (
-        <p className="muted-text">
-          Aucun résultat réel disponible pour cette équipe.
-        </p>
+        <p className="muted-text">Aucun résultat publié pour cette équipe.</p>
       ) : (
         <>
-          <Results results={analysis.results} demo={demo} />
+          <Results results={analysis.results} demo={false} />
           <div className="trace-list">
             {engine.trace.map((match) => (
               <div className="trace-match" key={match.matchId}>
@@ -54,9 +69,50 @@ export function CalculationTrace({ analysis, demo }) {
                 <p className="result-score">
                   {match.goalsFor ?? "—"} – {match.goalsAgainst ?? "—"}
                 </p>
+                <small>
+                  Source : {match.sourceReference || "Non renseignée"}
+                </small>
               </div>
             ))}
           </div>
+          <details className="missing-details">
+            <summary>Données utilisées et éléments manquants</summary>
+            <ul>
+              {engine.missing.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+            {!calcitoModel.formula && (
+              <p>Formule propriétaire : non intégrée.</p>
+            )}
+            {engine.trace.map((match) => (
+              <div key={match.matchId}>
+                <strong>{match.opponent}</strong>
+                <dl className="trace-source-stats">
+                  {Object.entries({
+                    shots: "Tirs",
+                    bigChances: "Grosses occasions",
+                    rating: "Note d’équipe",
+                    bonuses: "Bonus fournis",
+                  }).map(([key, label]) => (
+                    <div key={key}>
+                      <dt>{label}</dt>
+                      <dd>
+                        {Array.isArray(match.statistics[key])
+                          ? match.statistics[key].join(", ") ||
+                            "Aucun bonus fourni"
+                          : (match.statistics[key] ?? "Non renseigné")}
+                      </dd>
+                    </div>
+                  ))}
+                  <div>
+                    <dt>Coefficient de compétition</dt>
+                    <dd>{match.coefficient ?? "Non défini"}</dd>
+                  </div>
+                </dl>
+              </div>
+            ))}
+          </details>
           <SourceCaption result={recent.result} />
         </>
       )}
@@ -64,26 +120,23 @@ export function CalculationTrace({ analysis, demo }) {
   );
 }
 export const metricLabels = {
-  shotsPerMatch: "Tirs par match",
-  bigChancesPerMatch: "Grosses occasions par match",
+  shotsPerMatch: "Tirs / match",
+  shotsOnTargetPerMatch: "Tirs cadrés / match",
+  woodworkPerMatch: "Poteaux / match",
+  bigChancesPerMatch: "Grosses occasions / match",
   teamRating: "Note d’équipe",
 };
 export function TeamStatistics({ state }) {
   return (
     <section className="analysis-panel">
-      <h2>Statistiques disponibles</h2>
+      <h2>Statistiques renseignées</h2>
       {state.loading ? (
-        <p role="status">Chargement des statistiques…</p>
+        <p role="status">Chargement…</p>
       ) : state.error ? (
-        <div role="alert">
-          <p>{state.error.message}</p>
-          <button className="button button-secondary" onClick={state.retry}>
-            Réessayer
-          </button>
-        </div>
+        <p role="alert">Statistiques indisponibles pour le moment.</p>
       ) : !state.result?.data ? (
         <p className="muted-text">
-          Données indisponibles. Aucune valeur n’est estimée.
+          Aucune statistique publiée. Une donnée manquante ne devient pas zéro.
         </p>
       ) : (
         <>
@@ -99,10 +152,22 @@ export function TeamStatistics({ state }) {
             {state.result.data.metrics.map((metric) => (
               <div key={metric.key}>
                 <dt>{metricLabels[metric.key]}</dt>
-                <dd>{metric.value ?? "—"}</dd>
+                <dd>
+                  {metric.value === null
+                    ? "—"
+                    : Number(metric.value.toFixed(2))}
+                </dd>
+                <small>
+                  {metric.available} / {state.result.data.sampleSize} valeurs
+                  renseignées
+                </small>
               </div>
             ))}
           </dl>
+          <Notice>
+            Une moyenne n’est affichée que lorsque toutes les valeurs de
+            l’échantillon sont disponibles.
+          </Notice>
         </>
       )}
       <SourceCaption result={state.result} />
