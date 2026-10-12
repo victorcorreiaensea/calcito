@@ -25,8 +25,12 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Validate engines and services
+        run: npm test
       - name: Build
         run: npm run build
+        env:
+          VITE_FOOTBALL_PROXY_URL: ${{ vars.VITE_FOOTBALL_PROXY_URL }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
