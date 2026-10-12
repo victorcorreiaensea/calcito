@@ -1,3 +1,4 @@
+async function checkBackend() {
 // Deployment readiness check: inspect public metadata only, never credentials.
 const base = process.env.VITE_FOOTBALL_PROXY_URL?.replace(/\/$/, '');
 const origin = 'https://victorcorreiaensea.github.io';
@@ -20,3 +21,10 @@ if (!base) {
   if (!Array.isArray(competitions.data) || !competitions.source?.name || !competitions.data.length) throw new Error('Aucune compétition accessible depuis API-Football. Vérifier les droits du compte et son quota.');
   console.log(`API-Football répond : ${competitions.data.length} compétitions disponibles. Aucun secret affiché.`);
 }
+
+}
+checkBackend().catch(error => {
+  const message = String(error.message).replaceAll("%", "%25").replaceAll("\r", "%0D").replaceAll("\n", "%0A");
+  console.error(`::error title=Backend Calcito::${message}`);
+  process.exitCode = 1;
+});
