@@ -30,8 +30,24 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://vxodonurvxzfbwvfvzxr.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_2mbxPqgUHffn8F4D65B43g_viZS8Zaf' }}
+      - name: Check public Supabase access
+        env:
+          SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://vxodonurvxzfbwvfvzxr.supabase.co' }}
+          SUPABASE_PUBLIC_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_2mbxPqgUHffn8F4D65B43g_viZS8Zaf' }}
+        run: |
+          node --input-type=module <<'JS'
+          const headers = { apikey: process.env.SUPABASE_PUBLIC_KEY };
+          for (const table of ['competitions', 'teams', 'seasons', 'matches', 'admin_users']) {
+            const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, { headers });
+            if (!response.ok) throw new Error(`${table}: HTTP ${response.status}`);
+            const rows = await response.json();
+            if (!Array.isArray(rows)) throw new Error(`${table}: unexpected response`);
+            if (table === 'admin_users' && rows.length) throw new Error('Private administrator records are publicly readable');
+            console.log(`${table}: public access checked`);
+          }
+          JS
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
