@@ -27,10 +27,14 @@ jobs:
         run: npm ci
       - name: Validate engines and services
         run: npm test
+      - name: Check Render backend
+        run: node scripts/check-backend.js
+        env:
+          VITE_FOOTBALL_PROXY_URL: ${{ vars.VITE_FOOTBALL_PROXY_URL || 'https://calcito.onrender.com' }}
       - name: Build
         run: npm run build
         env:
-          VITE_FOOTBALL_PROXY_URL: ${{ vars.VITE_FOOTBALL_PROXY_URL }}
+          VITE_FOOTBALL_PROXY_URL: ${{ vars.VITE_FOOTBALL_PROXY_URL || 'https://calcito.onrender.com' }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
