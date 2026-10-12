@@ -47,11 +47,19 @@ export function normalizeTeam(team) {
     competitionName: team.competitionName ?? null,
     source: "real",
     score: null,
+    season: Number.isInteger(team.season) ? team.season : null,
   };
 }
 function normalizeCompetition(item) {
   requireIdentity(item);
-  return { id: item.id, name: item.name, country: item.country ?? null };
+  return {
+    id: item.id,
+    name: item.name,
+    country: item.country ?? null,
+    seasons: Array.isArray(item.seasons)
+      ? item.seasons.filter(Number.isInteger)
+      : [],
+  };
 }
 function normalizeMatch(item) {
   if (
@@ -112,6 +120,8 @@ function normalizeStanding(row) {
   ];
   return {
     position: row.position,
+    group: typeof row.group === "string" ? row.group : null,
+    season: Number.isInteger(row.season) ? row.season : null,
     team: normalizeTeam(row.team),
     ...Object.fromEntries(
       values.map((key) => [key, isNumber(row[key]) ? row[key] : null]),
@@ -164,7 +174,7 @@ export function createProxyAdapter(baseUrl, { fetchImpl = fetch } = {}) {
     let response;
     try {
       response = await fetchImpl(target, {
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(60000),
         credentials: "omit",
         headers: { Accept: "application/json" },
       });
@@ -174,13 +184,30 @@ export function createProxyAdapter(baseUrl, { fetchImpl = fetch } = {}) {
         "NETWORK",
       );
     }
-    if (!response.ok)
+    if (!response.ok) {
+      let details = null;
+      try {
+        details = await response.json();
+      } catch {
+        /* Preserve the HTTP diagnosis. */
+      }
+      if (
+        details?.code === "SEASON_ACCESS" &&
+        Array.isArray(details.availableSeasons) &&
+        details.availableSeasons.every(Number.isInteger)
+      ) {
+        throw new FootballError(
+          `Votre offre API-Football permet les saisons ${details.availableSeasons.join(", ")}. Choisissez l’une de ces saisons.`,
+          "SEASON_ACCESS",
+        );
+      }
       throw new FootballError(
         response.status === 429
           ? "Limite du fournisseur atteinte. Réessayez plus tard."
           : "Le service football ne peut pas fournir ces données.",
         String(response.status),
       );
+    }
     let payload;
     try {
       payload = await response.json();
@@ -214,8 +241,12 @@ export function createProxyAdapter(baseUrl, { fetchImpl = fetch } = {}) {
     team: (id) =>
       request(`teams/${encodeURIComponent(id)}`, {}, normalizeTeam, false),
     matches: (params) => request("matches", params, normalizeMatch),
-    standings: (competition) =>
-      request("standings", { competition }, normalizeStanding),
+    standings: (params) =>
+      request(
+        "standings",
+        typeof params === "string" ? { competition: params } : params,
+        normalizeStanding,
+      ),
     recentMatches: (id) =>
       request(
         `teams/${encodeURIComponent(id)}/matches`,

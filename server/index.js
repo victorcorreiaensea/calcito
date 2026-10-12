@@ -33,7 +33,13 @@ export function createFootballServer({
     }
     const url = new URL(req.url, "http://localhost");
     if (url.pathname === "/health") {
-      res.end(JSON.stringify({ status: "ok", configured: Boolean(apiKey) }));
+      res.end(
+        JSON.stringify({
+          status: "ok",
+          configured: Boolean(apiKey),
+          version: "2.1.0",
+        }),
+      );
       return;
     }
     const client = req.socket.remoteAddress;
@@ -61,7 +67,14 @@ export function createFootballServer({
       if (
         Object.keys(params).some(
           (key) =>
-            !["search", "competition", "status", "limit", "view"].includes(key),
+            ![
+              "search",
+              "competition",
+              "status",
+              "limit",
+              "view",
+              "season",
+            ].includes(key),
         )
       ) {
         res.writeHead(400);
@@ -83,7 +96,10 @@ export function createFootballServer({
       else if (url.pathname === "/matches")
         data = await provider.matches(params);
       else if (url.pathname === "/standings")
-        data = await provider.standings(params.competition || "");
+        data = await provider.standings({
+          competition: params.competition || "",
+          season: params.season,
+        });
       else if (match)
         data = await provider[
           match[2] === "matches"

@@ -121,7 +121,7 @@ test("API-Football preserves missing advanced statistics instead of guessing", a
       }),
     }),
   });
-  const data = await provider.recentMatches("1");
+  const data = await provider.recentMatches("1", { includeStatistics: true });
   assert.equal(data[0].teamStats.shots, 8);
   assert.equal(data[0].teamStats.bigChances, null);
   assert.equal(data[0].teamStats.rating, null);
@@ -135,6 +135,7 @@ test("backend exposes readiness without a key, refuses unknown origins and does 
     assert.deepEqual(await (await fetch(`${base}/health`)).json(), {
       status: "ok",
       configured: false,
+      version: "2.1.0",
     });
     assert.equal((await fetch(`${base}/competitions`)).status, 503);
     assert.equal(
@@ -152,4 +153,132 @@ test("backend exposes readiness without a key, refuses unknown origins and does 
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }
+});
+
+test("free-plan standings use only a provider-confirmed accessible season and retain every group", async () => {
+  const requested = [];
+  const provider = createApiFootballProvider({
+    apiKey: "test-only",
+    fetchImpl: async (url) => {
+      requested.push(url.href);
+      let response;
+      if (url.pathname === "/leagues")
+        response = [
+          {
+            league: { id: 61, name: "Test League" },
+            seasons: [
+              { year: 2026, current: true },
+              { year: 2024, current: false },
+            ],
+          },
+        ];
+      else if (url.searchParams.get("season") === "2026")
+        return {
+          ok: true,
+          json: async () => ({
+            errors: {
+              plan: "Free plans do not have access to this season, try from 2022 to 2024.",
+            },
+            response: [],
+          }),
+        };
+      else
+        response = [
+          {
+            league: {
+              standings: [
+                [
+                  {
+                    rank: 1,
+                    team: { id: 1, name: "A" },
+                    group: "Groupe A",
+                    all: {
+                      played: 5,
+                      win: 3,
+                      draw: 1,
+                      lose: 1,
+                      goals: { for: 9, against: 4 },
+                    },
+                    points: 10,
+                  },
+                ],
+                [
+                  {
+                    rank: 1,
+                    team: { id: 2, name: "B" },
+                    group: "Groupe B",
+                    all: { played: 5 },
+                    points: 8,
+                  },
+                ],
+              ],
+            },
+          },
+        ];
+      return { ok: true, json: async () => ({ errors: [], response }) };
+    },
+  });
+  const rows = await provider.standings({ competition: "61" });
+  assert.equal(rows.length, 2);
+  assert.deepEqual(
+    rows.map((row) => row.group),
+    ["Groupe A", "Groupe B"],
+  );
+  assert.ok(rows.every((row) => row.season === 2024));
+  assert.equal(rows[0].points, 10);
+  assert.equal(rows[1].won, null);
+  assert.equal(requested.filter((url) => url.includes("/standings")).length, 2);
+  await assert.rejects(
+    provider.standings({ competition: "61", season: "2026" }),
+    (error) => error.code === "SEASON_ACCESS",
+  );
+});
+test("quota and authentication failures never trigger historical-season guesses", async () => {
+  let standingCalls = 0;
+  const provider = createApiFootballProvider({
+    apiKey: "test-only",
+    fetchImpl: async (url) => {
+      if (url.pathname === "/leagues")
+        return {
+          ok: true,
+          json: async () => ({
+            errors: [],
+            response: [
+              { league: { id: 61 }, seasons: [{ year: 2026, current: true }] },
+            ],
+          }),
+        };
+      standingCalls++;
+      return { ok: false, status: 429 };
+    },
+  });
+  await assert.rejects(provider.standings("61"), /Quota/);
+  assert.equal(standingCalls, 1);
+});
+test("basic recent results do not consume advanced-statistics API requests", async () => {
+  const calls = [];
+  const provider = createApiFootballProvider({
+    apiKey: "test-only",
+    fetchImpl: async (url) => {
+      calls.push(url.pathname);
+      return {
+        ok: true,
+        json: async () => ({
+          errors: [],
+          response: [
+            {
+              fixture: { id: 1, date: fetchedAt, status: { short: "FT" } },
+              teams: { home: { id: 1, name: "A" }, away: { id: 2, name: "B" } },
+              league: { id: 61, name: "League" },
+              goals: { home: 2, away: 0 },
+            },
+          ],
+        }),
+      };
+    },
+  });
+  const rows = await provider.recentMatches("1");
+  assert.equal(rows[0].goalsHome, 2);
+  assert.equal(rows[0].teamStats.shots, null);
+  assert.deepEqual(calls, ["/fixtures"]);
 });

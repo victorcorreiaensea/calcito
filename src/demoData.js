@@ -107,3 +107,15 @@ export const priorityCompetitions = [
   "Ligue des Champions",
   "Compétitions internationales",
 ];
+
+// Scenarios are display-only illustrations, never inputs to calcitoEngine or predictions.
+export const simulationScenarios = [
+  { score: 82, results: ["V", "N", "V", "V", "N"] },
+  { score: 68, results: ["N", "D", "V", "N", "V"] },
+  { score: 91, results: ["V", "V", "N", "V", "V"] },
+  { score: 55, results: ["D", "N", "V", "D", "N"] },
+  { score: 74, results: ["V", "D", "N", "V", "V"] },
+  { score: 63, results: ["N", "V", "D", "N", "V"] },
+  { score: 87, results: ["V", "N", "V", "V", "V"] },
+  { score: 47, results: ["D", "N", "D", "V", "D"] },
+];

@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowLeftRight } from "lucide-react";
+import { simulatedProfile } from "../services/simulation";
 import { useFootball } from "../hooks/useFootball";
-import {
-  useTeamAnalysis,
-  metricLabels,
-  CalculationTrace,
-} from "../components/TeamAnalysis";
+import { useTeamAnalysis, CalculationTrace } from "../components/TeamAnalysis";
 import {
   PageHeading,
   DataState,
@@ -63,111 +60,86 @@ function TeamPicker({ label, value, onChange, excluded }) {
     </div>
   );
 }
+function displayResults(team, analysis, demo) {
+  if (demo)
+    return {
+      values: team.results || simulatedProfile(team.id).results,
+      simulated: true,
+    };
+  if (analysis.results.length)
+    return { values: analysis.results, simulated: false };
+  return { values: simulatedProfile(team.id).results, simulated: true };
+}
 function TeamSummary({ team, analysis, demo }) {
+  const results = displayResults(team, analysis, demo);
   return (
     <article className="comparison-team">
       <TeamBadge team={team} />
       <h2>{team.name}</h2>
-      <p>{team.competitionName || "Compétition non renseignée"}</p>
-      <span className="eyebrow">FORME CALCITO</span>
-      <FormValue
-        score={demo ? team.score : analysis.engine.score}
-        demo={demo}
-      />
-      <p className="muted-text">Cinq derniers résultats · ancien → récent</p>
-      {analysis.recent.loading && !demo ? (
-        <p role="status">Chargement…</p>
-      ) : analysis.recent.error ? (
-        <p role="alert">{analysis.recent.error.message}</p>
-      ) : (
-        <Results results={demo ? team.results : analysis.results} demo={demo} />
-      )}
+      <p>{team.competitionName || "Équipe sélectionnée"}</p>
+      <span className="eyebrow">FORME SIMULÉE</span>
+      <FormValue score={team.score ?? simulatedProfile(team.id).score} demo />
+      <p className="muted-text">
+        {analysis.recent.loading && !demo
+          ? "Chargement des résultats réels…"
+          : results.simulated
+            ? "5 résultats SIMULÉS · ancien → récent"
+            : `${results.values.length} résultats API · ancien → récent`}
+      </p>
+      <Results results={results.values} demo={results.simulated} />
     </article>
   );
 }
-function StatisticalComparison({ left, right }) {
-  const a = left.statistics.result?.data,
-    b = right.statistics.result?.data;
-  const compatible =
-    a &&
-    b &&
-    Date.parse(a.periodStart) === Date.parse(b.periodStart) &&
-    Date.parse(a.periodEnd) === Date.parse(b.periodEnd) &&
-    a.sampleSize === b.sampleSize;
+function StatisticalComparison({ left, right, leftTeam, rightTeam, demo }) {
+  const a = displayResults(leftTeam, left, demo),
+    b = displayResults(rightTeam, right, demo);
   return (
     <section className="analysis-panel">
-      <h2>Statistiques comparatives</h2>
-      {left.statistics.loading || right.statistics.loading ? (
-        <p role="status">Chargement des statistiques…</p>
-      ) : (
-        <>
-          {[left.statistics, right.statistics].some((state) => state.error) && (
-            <div role="alert">
-              <p>Les statistiques d’au moins une équipe sont indisponibles.</p>
-              <button
-                className="button button-secondary"
-                onClick={() => {
-                  left.statistics.retry();
-                  right.statistics.retry();
-                }}
-              >
-                Réessayer les statistiques
-              </button>
+      <h2>La dynamique en un coup d’œil</h2>
+      <Notice>
+        Les indices de forme sont simulés. Les résultats disponibles dans l’API
+        sont conservés ; à défaut, un scénario de résultats est affiché avec la
+        mention « simulé ». Aucun tir, bonus ou note n’est estimé.
+      </Notice>
+      <div className="comparison-result-sources">
+        <span>
+          {leftTeam.name} :{" "}
+          {a.simulated ? "résultats SIMULÉS" : "résultats API"}
+        </span>
+        <span>
+          {rightTeam.name} :{" "}
+          {b.simulated ? "résultats SIMULÉS" : "résultats API"}
+        </span>
+      </div>
+      {[
+        ["V", "Victoires"],
+        ["N", "Nuls"],
+        ["D", "Défaites"],
+      ].map(([key, label]) => {
+        const countA = a.values.filter((result) => result === key).length,
+          countB = b.values.filter((result) => result === key).length;
+        return (
+          <div className="comparison-metric" key={key}>
+            <div>
+              <strong>
+                {countA} / {a.values.length}
+              </strong>
+              <span>{label}</span>
+              <strong>
+                {countB} / {b.values.length}
+              </strong>
             </div>
-          )}
-          {!compatible ? (
-            <Notice>
-              Données comparables indisponibles : une même période et un même
-              nombre de matchs sont nécessaires. Aucune force ou faiblesse n’est
-              déduite de statistiques manquantes.
-            </Notice>
-          ) : (
-            <>
-              <p className="muted-text">
-                Même période · {a.sampleSize} matchs par équipe
-              </p>
-              {a.metrics.map((metric) => {
-                const other = b.metrics.find(
-                  (item) => item.key === metric.key,
-                )?.value;
-                const comparable = metric.value != null && other != null;
-                const total = comparable ? metric.value + other : 0;
-                return (
-                  <div className="comparison-metric" key={metric.key}>
-                    <div>
-                      <strong>{metric.value ?? "—"}</strong>
-                      <span>{metricLabels[metric.key]}</span>
-                      <strong>{other ?? "—"}</strong>
-                    </div>
-                    {comparable && total > 0 && (
-                      <div
-                        className="split-bar"
-                        role="img"
-                        aria-label={`${metricLabels[metric.key]} : ${metric.value} contre ${other}`}
-                      >
-                        <span
-                          style={{ width: `${(metric.value / total) * 100}%` }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              <p className="muted-text">
-                Les barres représentent la part de chaque valeur dans leur
-                total, pas une probabilité de victoire.
-              </p>
-            </>
-          )}
-          <h3>Forces et faiblesses</h3>
-          <p className="muted-text">
-            L’analyse qualitative reste en développement. Aucun diagnostic
-            automatique n’est produit sans critères validés.
-          </p>
-        </>
-      )}
-      <SourceCaption result={left.statistics.result} />
-      <SourceCaption result={right.statistics.result} />
+            <div className="dual-result-bars" aria-hidden="true">
+              <span style={{ width: `${(countA / a.values.length) * 100}%` }} />
+              <span style={{ width: `${(countB / b.values.length) * 100}%` }} />
+            </div>
+          </div>
+        );
+      })}
+      <p className="muted-text">
+        Ces barres décrivent des résultats observés ou simulés, pas les chances
+        de gagner le prochain match.
+      </p>
     </section>
   );
 }
@@ -252,6 +224,9 @@ export default function Compare() {
               <StatisticalComparison
                 left={leftAnalysis}
                 right={rightAnalysis}
+                leftTeam={left.result.data}
+                rightTeam={right.result.data}
+                demo={left.result.mode === "demo"}
               />
               <div className="detail-grid">
                 <CalculationTrace

@@ -5,7 +5,7 @@ import { Results, Notice } from "./FootballUI";
 
 export function useTeamAnalysis(id) {
   const recent = useFootball("recentMatches", id, { enabled: Boolean(id) });
-  const statistics = useFootball("statistics", id, { enabled: Boolean(id) });
+  const statistics = useFootball("statistics", id, { enabled: false });
   const engine = calculateCalcitoForm({
     teamId: id,
     matches: recent.result?.data || [],
@@ -15,28 +15,18 @@ export function useTeamAnalysis(id) {
     .map((match) => match.result || "?");
   return { recent, statistics, engine, results };
 }
-const fields = {
-  shots: "Tirs",
-  bigChances: "Grosses occasions",
-  rating: "Note d’équipe",
-  bonuses: "Bonus",
-  coefficient: "Coefficient",
-};
 export function CalculationTrace({ analysis, demo }) {
   const { recent, engine } = analysis;
   return (
     <section className="analysis-panel">
-      <div className="panel-heading">
-        <h2>Traçabilité du calcul</h2>
-        <span className="status-pill">Non calculé</span>
-      </div>
+      <h2>Derniers résultats disponibles</h2>
       <Notice>
-        {demo
-          ? "Les indices affichés sont des valeurs d’illustration, sans calcul. Aucune statistique de match n’est fabriquée."
-          : "La formule propriétaire et les coefficients applicables restent à fournir. Aucun indice définitif n’est calculé."}
+        Les résultats ci-dessous proviennent des matchs fournis par l’API. Les
+        éventuels indices simulés sont présentés séparément et n’utilisent pas
+        les tirs ou les notes d’équipe.
       </Notice>
       {recent.loading ? (
-        <p role="status">Chargement des cinq derniers matchs…</p>
+        <p role="status">Chargement des matchs…</p>
       ) : recent.error ? (
         <div role="alert">
           <p>{recent.error.message}</p>
@@ -44,55 +34,29 @@ export function CalculationTrace({ analysis, demo }) {
             Réessayer
           </button>
         </div>
+      ) : !engine.trace.length ? (
+        <p className="muted-text">
+          Aucun résultat réel disponible pour cette équipe.
+        </p>
       ) : (
         <>
-          <Results results={demo ? [] : analysis.results} demo={demo} />
-          {engine.trace.length > 0 && (
-            <div className="trace-list">
-              {engine.trace.map((match) => (
-                <div className="trace-match" key={match.matchId}>
-                  <header>
-                    <strong>vs {match.opponent}</strong>
-                    <span>
-                      {new Date(match.kickoff).toLocaleDateString("fr-FR")} ·{" "}
-                      {match.result || "Résultat manquant"}
-                    </span>
-                  </header>
-                  <dl>
-                    {Object.entries(fields).map(([key, label]) => (
-                      <div key={key}>
-                        <dt>{label}</dt>
-                        <dd>
-                          {key === "coefficient"
-                            ? (match.coefficient ?? "Non défini")
-                            : Array.isArray(match.statistics[key])
-                              ? match.statistics[key].length
-                                ? match.statistics[key].join(", ")
-                                : "Aucun bonus fourni"
-                              : (match.statistics[key] ?? "Manquant")}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <small>
-                    Référence source : {match.sourceReference || "Non fournie"}
-                  </small>
-                </div>
-              ))}
-            </div>
-          )}
-          <details className="missing-details">
-            <summary>
-              {engine.missing.length} prérequis manquant
-              {engine.missing.length > 1 ? "s" : ""}
-            </summary>
-            <ul>
-              {engine.missing.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-            <p>Formule propriétaire : non intégrée.</p>
-          </details>
+          <Results results={analysis.results} demo={demo} />
+          <div className="trace-list">
+            {engine.trace.map((match) => (
+              <div className="trace-match" key={match.matchId}>
+                <header>
+                  <strong>vs {match.opponent}</strong>
+                  <span>
+                    {new Date(match.kickoff).toLocaleDateString("fr-FR")} ·{" "}
+                    {match.result || "Résultat indisponible"}
+                  </span>
+                </header>
+                <p className="result-score">
+                  {match.goalsFor ?? "—"} – {match.goalsAgainst ?? "—"}
+                </p>
+              </div>
+            ))}
+          </div>
           <SourceCaption result={recent.result} />
         </>
       )}

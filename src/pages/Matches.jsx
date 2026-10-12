@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
+import { simulatedProfile } from "../services/simulation";
 import { useFootball } from "../hooks/useFootball";
 import {
   PageHeading,
@@ -47,11 +48,17 @@ export function FixtureCard({ match, demo }) {
       <div className="fixture-forms">
         <div>
           <span>Forme domicile</span>
-          <FormValue score={demo ? match.home.score : null} demo={demo} />
+          <FormValue
+            score={match.home.score ?? simulatedProfile(match.home.id).score}
+            demo
+          />
         </div>
         <div>
           <span>Forme extérieur</span>
-          <FormValue score={demo ? match.away.score : null} demo={demo} />
+          <FormValue
+            score={match.away.score ?? simulatedProfile(match.away.id).score}
+            demo
+          />
         </div>
       </div>
       <div className="fixture-footer">

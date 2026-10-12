@@ -14,7 +14,7 @@ export function DataBanner() {
         <p>
           {demo
             ? "Équipes et indices fictifs. Aucune donnée sportive réelle connectée."
-            : "Les sources et dates de récupération sont indiquées avec les données. Aucun score Calcito n’est calculé sans formule."}
+            : "Résultats et classements issus de l’API. Les indices simulés sont signalés et restent distincts des données officielles."}
         </p>
       </div>
     </div>

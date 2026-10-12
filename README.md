@@ -39,16 +39,16 @@ GitHub Pages héberge uniquement le frontend statique. Le backend Node fourni da
 
 Le backend limite les requêtes entrantes par adresse réseau, utilise une liste fermée de routes, un cache d’une minute et déduplique les requêtes concurrentes. CORS autorise seulement `FRONTEND_ORIGIN`. Pour un hébergement public, configurer également les limites de trafic et de quota sur l’hébergeur : CORS n’est pas une authentification et le quota API-Football dépend du compte.
 
-Le fournisseur doit autoriser les compétitions, saisons, logos et statistiques utilisés. La disponibilité ne peut être vérifiée sans clé utilisable. Les statistiques avancées et les notes d’équipe peuvent être absentes même avec une clé valide ; leur absence reste explicite. Les cinq derniers matchs peuvent déclencher plusieurs demandes de statistiques ; elles sont mises en cache. Les bonus propriétaires restent à fournir.
+Le fournisseur doit autoriser les compétitions, saisons, logos et statistiques utilisés. La disponibilité ne peut être vérifiée sans clé utilisable. Les statistiques avancées et les notes d’équipe peuvent être absentes même avec une clé valide ; leur absence reste explicite. Les statistiques détaillées ne sont demandées que par la route statistics, conservée pour une intégration ultérieure. Les bonus propriétaires restent à fournir.
 
 ### Comportement de l’adaptateur API-Football
 
 - Compétitions prioritaires sélectionnées depuis les métadonnées réelles des saisons courantes.
 - Recherche de clubs à partir de trois caractères, tous championnats ; sans filtre ni recherche, Ligue 1 par défaut.
 - Calendrier des prochaines rencontres ou derniers résultats ; sélectionner une compétition pour affiner. Sans filtre, affichage représentatif des huit premières compétitions couvertes, jusqu’à cinq rencontres chacune.
-- Classement officiel pour une compétition et sa saison courante. Les compétitions à plusieurs groupes sont explicitement signalées comme non prises en charge par le tableau global.
+- Classement officiel pour une compétition et sa saison courante. Les compétitions à plusieurs groupes affichent tous les groupes séparément.
 - Les cinq derniers matchs terminés d’une équipe et leurs statistiques disponibles. Les moyennes descriptives ne sont calculées que lorsque toutes les valeurs de l’échantillon sont présentes.
-- Le comparateur ne rapproche les statistiques que si période et nombre de matchs correspondent. Les forces et faiblesses qualitatives restent en développement.
+- Le comparateur présente les victoires, nuls et défaites sur les résultats disponibles. Les indices simulés et scénarios de remplacement sont explicitement signalés ; les statistiques détaillées restent masquées.
 
 ## Contrat interchangeable du proxy
 
@@ -97,3 +97,13 @@ Le workflow `.github/workflows/deploy.yml` installe les dépendances, lance les 
 3. Attendre la réussite du job `deploy`.
 
 Adresse attendue : https://victorcorreiaensea.github.io/calcito/
+
+## Mise à jour : classements complets et simulations
+
+La page Classements ouvre la Ligue 1 par défaut et affiche tous les clubs retournés, sans limiter le tableau à cinq équipes. Les groupes sont présentés séparément. Les raccourcis permettent de choisir les autres compétitions, et un sélecteur permet de demander une saison précise.
+
+Si l’API refuse la saison courante et indique explicitement les années accessibles à l’offre gratuite, le backend réessaie uniquement la plus récente de ces saisons présente dans les métadonnées du championnat. Le tableau affiche cette année comme historique ; il n’est pas présenté comme le classement actuel. Une saison explicitement choisie reste respectée et une restriction est expliquée au lieu d’être contournée silencieusement.
+
+À la demande du propriétaire, des **indices de forme simulés** illustrent désormais aussi les équipes réelles. Ils sont assignés depuis des scénarios fixes centralisés, indépendants de toute performance sportive ou formule Calcito. Le tri « Forme simulée » est un classement d’illustration, distinct du classement officiel. Dans le comparateur, les résultats API restent prioritaires ; si aucun n’est disponible, les résultats du scénario sont explicitement marqués simulés. Les simulations ne sont jamais utilisées dans le moteur propriétaire ni dans un modèle de pronostics.
+
+Les tirs, grosses occasions, notes et bonus sont retirés de la présentation principale. Les fiches et le comparateur ne chargent plus de statistiques avancées, afin d’économiser le quota API. Le module propriétaire reste conservé pour l’intégration ultérieure de la vraie formule.

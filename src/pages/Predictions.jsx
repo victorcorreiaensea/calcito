@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import { simulatedProfile } from "../services/simulation";
 import { useFootball } from "../hooks/useFootball";
 import { calculatePrediction } from "../engines/predictionEngine";
 import { createPredictionHistory } from "../services/predictionHistory";
@@ -138,12 +139,22 @@ export default function Predictions() {
             <div className="prediction-teams">
               <div>
                 <TeamLink team={match.home} />
-                <FormValue score={demo ? match.home.score : null} demo={demo} />
+                <FormValue
+                  score={
+                    match.home.score ?? simulatedProfile(match.home.id).score
+                  }
+                  demo
+                />
               </div>
               <span>VS</span>
               <div>
                 <TeamLink team={match.away} />
-                <FormValue score={demo ? match.away.score : null} demo={demo} />
+                <FormValue
+                  score={
+                    match.away.score ?? simulatedProfile(match.away.id).score
+                  }
+                  demo
+                />
               </div>
             </div>
             <div className="probability-grid">

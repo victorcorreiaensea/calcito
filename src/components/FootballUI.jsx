@@ -67,7 +67,7 @@ export function FormValue({ score, demo = false }) {
   return (
     <div className="form-value">
       <strong>{Number.isFinite(score) ? `${score} %` : "—"}</strong>
-      <span>{demo ? "Valeur fictive" : "Calcul indisponible"}</span>
+      <span>{demo ? "Indice simulé" : "Calcul indisponible"}</span>
       {Number.isFinite(score) && <FormBar score={score} />}
     </div>
   );

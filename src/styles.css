@@ -2604,3 +2604,165 @@ h1 > span {
     padding-top: 25px;
   }
 }
+
+/* Full league tables and explicitly illustrative form scores. */
+.league-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.league-shortcuts button {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: white;
+  border-radius: 6px;
+  padding: 15px;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.league-shortcuts button small {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  margin-top: 5px;
+}
+.league-shortcuts button[aria-pressed="true"] {
+  border-color: var(--green);
+  background: #b4ff3910;
+  color: var(--green);
+}
+.standings-tabs {
+  display: flex;
+  gap: 8px;
+  align-self: end;
+  flex-wrap: wrap;
+}
+.standings-tabs button {
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  border-radius: 5px;
+  font-size: 11px;
+}
+.standings-tabs button[aria-pressed="true"] {
+  background: var(--green);
+  color: var(--bg);
+  border-color: var(--green);
+}
+.season-context {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+.season-context p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--muted);
+  flex: 1;
+  margin: 0;
+}
+.season-context strong {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.full-standings caption {
+  font-size: 12px;
+  color: white;
+  padding-block: 20px;
+}
+.full-standings td:last-child {
+  min-width: 140px;
+}
+.standings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.standings-form small {
+  font-size: 7px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.full-standings {
+  margin-bottom: 0;
+}
+.page-content .table-scroll + .table-scroll {
+  margin-top: 20px;
+}
+.result-score {
+  font-size: 18px;
+  color: var(--green);
+  margin-bottom: 0;
+}
+.comparison-result-sources {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.dual-result-bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+.dual-result-bars > span {
+  height: 4px;
+  background: var(--green);
+  border-radius: 3px;
+}
+.dual-result-bars > span:last-child {
+  background: #9dc8e9;
+  justify-self: end;
+}
+.results-detail {
+  margin-block: 24px;
+}
+.results-detail .analysis-panel {
+  max-width: 850px;
+}
+@media (max-width: 800px) {
+  .league-shortcuts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .league-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .league-shortcuts button {
+    font-size: 11px;
+    padding: 13px;
+  }
+  .season-context {
+    align-items: start;
+    gap: 10px;
+  }
+  .season-context p {
+    flex-basis: 100%;
+  }
+  .standings-tabs {
+    width: 100%;
+  }
+  .comparison-result-sources {
+    font-size: 9px;
+    gap: 15px;
+  }
+  .full-standings th,
+  .full-standings td {
+    padding-inline: 13px;
+  }
+  .full-standings caption {
+    line-height: 1.7;
+    white-space: normal;
+  }
+}

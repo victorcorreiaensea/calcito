@@ -17,9 +17,10 @@ const internationalCompetitions = new Set([
   "UEFA Nations League",
 ]);
 export class ProviderError extends Error {
-  constructor(message, status = 502) {
+  constructor(message, status = 502, metadata = {}) {
     super(message);
     this.status = status;
+    Object.assign(this, metadata);
   }
 }
 export function createApiFootballProvider({
@@ -28,6 +29,7 @@ export function createApiFootballProvider({
   now = Date.now,
   ttl = 60000,
 }) {
+  let permittedSeasons = null;
   const cache = new Map(),
     pending = new Map();
   async function get(path, params = {}) {
@@ -63,6 +65,29 @@ export function createApiFootballProvider({
         body = await response.json();
       } catch {
         throw new ProviderError("Réponse API-Football illisible.");
+      }
+      if (body?.errors && Object.keys(body.errors).length) {
+        const planMessage = Object.values(body.errors).find(
+          (value) =>
+            typeof value === "string" &&
+            /free plans do not have access to this season/i.test(value),
+        );
+        const range = planMessage?.match(/from (20\d{2}) to (20\d{2})/i);
+        if (
+          range &&
+          Number(range[2]) - Number(range[1]) >= 0 &&
+          Number(range[2]) - Number(range[1]) <= 10
+        ) {
+          permittedSeasons = Array.from(
+            { length: Number(range[2]) - Number(range[1]) + 1 },
+            (_, i) => Number(range[1]) + i,
+          );
+          throw new ProviderError(
+            `L’offre gratuite donne accès aux saisons ${permittedSeasons.join(", ")}.`,
+            403,
+            { code: "SEASON_ACCESS", availableSeasons: permittedSeasons },
+          );
+        }
       }
       if (
         !body ||
@@ -138,7 +163,6 @@ export function createApiFootballProvider({
   async function competition(id) {
     const [league] = await get("leagues", {
       id: numericId(id),
-      current: "true",
     });
     if (!league) throw new ProviderError("Compétition introuvable.", 404);
     return league;
@@ -157,18 +181,77 @@ export function createApiFootballProvider({
         id: String(item.league.id),
         name: item.league.name,
         country: item.country?.name || null,
+        seasons: item.seasons
+          .map((season) => season.year)
+          .filter(Number.isInteger)
+          .sort((a, b) => b - a),
       }));
   }
-  async function teamList({ search, competition: competitionId } = {}) {
+  async function seasonalRequest(
+    path,
+    id,
+    league,
+    requestedSeason,
+    extra = {},
+  ) {
+    if (requestedSeason && !/^20\d{2}$/.test(String(requestedSeason)))
+      throw new ProviderError("Saison invalide.", 400);
+    let season = requestedSeason
+      ? Number(requestedSeason)
+      : leagueSeason(league);
+    if (
+      !requestedSeason &&
+      permittedSeasons &&
+      !permittedSeasons.includes(season)
+    ) {
+      season = Math.max(
+        ...league.seasons
+          .map((item) => item.year)
+          .filter((year) => permittedSeasons.includes(year)),
+      );
+    }
+    if (
+      !Number.isFinite(season) ||
+      !league.seasons.some((item) => item.year === season)
+    )
+      throw new ProviderError(
+        "Aucune saison accessible pour cette compétition.",
+        404,
+      );
+    try {
+      return {
+        season,
+        data: await get(path, { league: id, season, ...extra }),
+      };
+    } catch (error) {
+      if (requestedSeason || error.code !== "SEASON_ACCESS") throw error;
+      const accessible = league.seasons
+        .map((item) => item.year)
+        .filter((year) => error.availableSeasons.includes(year));
+      if (!accessible.length) throw error;
+      season = Math.max(...accessible);
+      return {
+        season,
+        data: await get(path, { league: id, season, ...extra }),
+      };
+    }
+  }
+  async function teamList({
+    search,
+    competition: competitionId,
+    season: requestedSeason,
+  } = {}) {
     if (search) {
       if (search.trim().length < 3) return [];
       const list = await get("teams", { search: search.trim() });
       if (!competitionId) return list.map((item) => team(item.team));
       const league = await competition(competitionId);
-      const members = await get("teams", {
-        league: competitionId,
-        season: leagueSeason(league),
-      });
+      const { data: members, season } = await seasonalRequest(
+        "teams",
+        competitionId,
+        league,
+        requestedSeason,
+      );
       const ids = new Set(members.map((item) => item.team.id));
       return list
         .filter((item) => ids.has(item.team.id))
@@ -176,17 +259,23 @@ export function createApiFootballProvider({
           ...team(item.team),
           competitionId,
           competitionName: league.league.name,
+          season,
         }));
     }
     // API-Football requires a league/season or a search. Use Ligue 1 as documented default.
     const id = competitionId || "61";
     const league = await competition(id);
-    return (
-      await get("teams", { league: id, season: leagueSeason(league) })
-    ).map((item) => ({
+    const { data, season } = await seasonalRequest(
+      "teams",
+      id,
+      league,
+      requestedSeason,
+    );
+    return data.map((item) => ({
       ...team(item.team),
       competitionId: id,
       competitionName: league.league.name,
+      season,
     }));
   }
   async function teamDetail(id) {
@@ -226,11 +315,28 @@ export function createApiFootballProvider({
       .map(fixture)
       .sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
   }
-  async function recentMatches(id) {
+  async function recentMatches(id, { includeStatistics = false } = {}) {
     numericId(id);
-    const recent = (
-      await get("fixtures", { team: id, last: 5, status: "FT-AET-PEN" })
-    )
+    let season = permittedSeasons
+      ? Math.max(...permittedSeasons)
+      : new Date(now()).getUTCFullYear();
+    let response;
+    try {
+      response = await get("fixtures", {
+        team: id,
+        season,
+        status: "FT-AET-PEN",
+      });
+    } catch (error) {
+      if (error.code !== "SEASON_ACCESS") throw error;
+      season = Math.max(...error.availableSeasons);
+      response = await get("fixtures", {
+        team: id,
+        season,
+        status: "FT-AET-PEN",
+      });
+    }
+    const recent = response
       .sort((a, b) => Date.parse(b.fixture.date) - Date.parse(a.fixture.date))
       .slice(0, 5);
     return Promise.all(
@@ -239,10 +345,11 @@ export function createApiFootballProvider({
         let rows = [],
           statisticsStatus = "available";
         try {
-          rows = await get("fixtures/statistics", {
-            fixture: raw.fixture.id,
-            team: id,
-          });
+          if (includeStatistics)
+            rows = await get("fixtures/statistics", {
+              fixture: raw.fixture.id,
+              team: id,
+            });
         } catch {
           statisticsStatus = "unavailable";
         }
@@ -256,7 +363,9 @@ export function createApiFootballProvider({
         };
         return {
           ...fixture(raw),
-          statisticsStatus,
+          statisticsStatus: includeStatistics
+            ? statisticsStatus
+            : "not-requested",
           teamStats: {
             shots: read("Total Shots"),
             bigChances: read("Big Chances"),
@@ -268,7 +377,7 @@ export function createApiFootballProvider({
     );
   }
   async function statistics(id) {
-    const recent = await recentMatches(id);
+    const recent = await recentMatches(id, { includeStatistics: true });
     if (!recent.length)
       throw new ProviderError(
         "Aucun match terminé disponible pour les statistiques.",
@@ -288,29 +397,37 @@ export function createApiFootballProvider({
       teamRating: null,
     };
   }
-  async function standings(id) {
+  async function standings(params) {
+    const { competition: id, season: requestedSeason } =
+      typeof params === "string" ? { competition: params } : params;
     const league = await competition(id);
-    const response = await get("standings", {
-      league: id,
-      season: leagueSeason(league),
-    });
+    const { data: response, season } = await seasonalRequest(
+      "standings",
+      id,
+      league,
+      requestedSeason,
+    );
     const groups = response[0]?.league?.standings || [];
-    if (groups.length > 1)
-      throw new ProviderError(
-        "Classement à plusieurs groupes : présentation dédiée nécessaire. Aucun classement global n’est fabriqué.",
-        422,
-      );
-    return (groups[0] || []).map((row) => ({
-      position: row.rank,
-      team: team(row.team),
-      played: row.all?.played ?? null,
-      won: row.all?.win ?? null,
-      drawn: row.all?.draw ?? null,
-      lost: row.all?.lose ?? null,
-      goalsFor: row.all?.goals?.for ?? null,
-      goalsAgainst: row.all?.goals?.against ?? null,
-      points: row.points ?? null,
-    }));
+    return groups.flatMap((group, index) =>
+      group.map((row) => ({
+        position: row.rank,
+        team: {
+          ...team(row.team),
+          competitionId: id,
+          competitionName: league.league.name,
+          season,
+        },
+        group: row.group || (groups.length > 1 ? `Groupe ${index + 1}` : null),
+        season,
+        played: row.all?.played ?? null,
+        won: row.all?.win ?? null,
+        drawn: row.all?.draw ?? null,
+        lost: row.all?.lose ?? null,
+        goalsFor: row.all?.goals?.for ?? null,
+        goalsAgainst: row.all?.goals?.against ?? null,
+        points: row.points ?? null,
+      })),
+    );
   }
   return {
     competitions,
