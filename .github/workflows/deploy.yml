@@ -41,6 +41,10 @@ jobs:
           const headers = { apikey: process.env.SUPABASE_PUBLIC_KEY };
           for (const table of ['competitions', 'teams', 'seasons', 'matches', 'admin_users']) {
             const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, { headers });
+            if (table === 'admin_users' && [401, 403].includes(response.status)) {
+              console.log('admin_users: public access denied as expected');
+              continue;
+            }
             if (!response.ok) throw new Error(`${table}: HTTP ${response.status}`);
             const rows = await response.json();
             if (!Array.isArray(rows)) throw new Error(`${table}: unexpected response`);
