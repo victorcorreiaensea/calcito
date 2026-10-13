@@ -14,11 +14,11 @@ jobs:
           SUPABASE_PUBLIC_KEY: sb_publishable_2mbxPqgUHffn8F4D65B43g_viZS8Zaf
         run: |
           python3 - <<'PY'
-          import os,json,urllib.request
+          import os,json,urllib.request,gzip,base64
           for table in ['teams','competitions','seasons','season_teams','matches']:
             request=urllib.request.Request(os.environ['SUPABASE_URL']+'/rest/v1/'+table+'?select=*&limit=1000',headers={'apikey':os.environ['SUPABASE_PUBLIC_KEY']})
             with urllib.request.urlopen(request,timeout=20) as response: rows=json.load(response)
-            for index in range(0,max(len(rows),1),2):
-              payload=json.dumps(rows[index:index+2],ensure_ascii=False).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
-              print('::notice title=Public catalog '+table+' '+str(index)+'::'+payload)
+            encoded=base64.b64encode(gzip.compress(json.dumps(rows,ensure_ascii=False).encode())).decode()
+            for index in range(0,len(encoded),3000):
+              print('::notice title=Public catalog '+table+' '+str(index)+'::'+encoded[index:index+3000])
           PY
