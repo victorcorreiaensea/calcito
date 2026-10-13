@@ -56,7 +56,7 @@ export function manualTeam(raw, dataset, year = latestYear(dataset)) {
     coverage,
     source: "manual",
     formHistory:
-      coverage.status === "unavailable"
+      coverage.status === "unavailable" || coverage.variant === "provisional"
         ? []
         : dataset.forms
             .filter(

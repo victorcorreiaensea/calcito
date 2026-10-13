@@ -1,0 +1,9 @@
+CALCITO — relevé partiel du 13 octobre 2026
+348 résultats disponibles ; 16 rencontres non renseignées ; 6 dates contradictoires exclues.
+Scores et dates OpenFootball (CC0), compléments adaptés depuis Wikipédia et ses contributeurs (CC BY-SA 4.0).
+Modifications : sélection de matchs, correspondance des noms, conversion CSV.
+Licence des adaptations : https://creativecommons.org/licenses/by-sa/4.0/
+Chaque ligne conserve son URL source. Toutes les statistiques inconnues restent vides.
+Importer uniquement le fichier de résultats, jamais les listes de dates à vérifier ou de matchs non renseignés.
+Les identifiants internes connus sont dans le fichier de correspondance ; les nouvelles fiches reçoivent leur identifiant après création dans la session admin.
+Bilan et mode d’emploi : https://github.com/victorcorreiaensea/calcito/blob/main/docs/SIX_CHAMPIONNATS_2026_2027.md

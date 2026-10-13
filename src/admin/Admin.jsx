@@ -76,11 +76,7 @@ function Login() {
             {auth.error ||
               "Ce compte ne possède pas les autorisations administrateur."}
           </Notice>
-          <button
-            className="button button-secondary"
-            disabled={importBusy}
-            onClick={auth.signOut}
-          >
+          <button className="button button-secondary" onClick={auth.signOut}>
             Se déconnecter
           </button>
         </>

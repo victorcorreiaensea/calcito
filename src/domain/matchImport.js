@@ -456,6 +456,14 @@ export function planMatchImport(
           "Une fiche ou la saison est privée : le match ne sera pas visible publiquement.",
         );
     }
+    if (
+      exact &&
+      (Number(exact.goals_home) !== Number(row.home_goals) ||
+        Number(exact.goals_away) !== Number(row.away_goals))
+    )
+      warnings.push(
+        "Le score diffère du match déjà enregistré. Contrôlez les deux sources ; aucune correction automatique en mode ignorer.",
+      );
     if (exact && action === "update")
       warnings.push(
         "Les champs statistiques vides conservent les valeurs déjà connues. Le statut de publication existant est conservé.",

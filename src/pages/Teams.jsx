@@ -89,7 +89,11 @@ export default function Teams() {
                 {team.season ? ` · ${team.season}–${team.season + 1}` : ""}
               </p>
               <span className="eyebrow">FORME CALCITO</span>
-              <FormValue score={team.score} />
+              <FormValue
+                variant={team.coverage?.variant}
+                dataMode={team.coverage?.dataMode}
+                score={team.score}
+              />
               <Link className="text-link" to={`/equipes/${team.id}`}>
                 Explorer l’équipe
                 <ArrowUpRight size={18} />
@@ -158,6 +162,8 @@ export function TeamDetail() {
                 description="Résultats publiés, statistiques renseignées et indice de forme lorsqu’il est disponible."
               />
               <FormValue
+                variant={team.coverage?.variant}
+                dataMode={team.coverage?.dataMode}
                 score={year && Number(year) !== team.season ? null : team.score}
               />
             </div>

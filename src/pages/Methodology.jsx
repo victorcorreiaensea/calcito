@@ -13,9 +13,10 @@ export default function Methodology() {
       <Notice>
         Les résultats rapides des championnats non suivis rejoignent les cinq
         derniers matchs. Ils renseignent uniquement le score : les statistiques
-        absentes restent inconnues. La méthode provisoire attend une validation,
-        sans pourcentage inventé. Ces résultats ne modifient jamais les
-        classements nationaux.
+        absentes restent inconnues. L’indice résultats provisoire utilise
+        uniquement les points obtenus sur cinq matchs : 100 × (3 × victoires +
+        nuls) / 15. Il ne s’agit pas d’une probabilité de victoire. Ces
+        résultats ne modifient jamais les classements nationaux.
       </Notice>
       <div className="method-grid">
         {[
@@ -50,7 +51,22 @@ export default function Methodology() {
       </div>
       <div className="detail-grid methodology-panels">
         <section className="analysis-panel">
-          <h2>L’indice de forme Calcito</h2>
+          <h2>Indice résultats provisoire</h2>
+          <p>
+            Sur les cinq derniers matchs publiés, toutes compétitions
+            enregistrées dans la saison : 3 points pour une victoire, 1 pour un
+            nul, 0 pour une défaite. Cinq victoires valent 100 ; cinq nuls
+            valent 33,3. Aucun poids de récence, bonus européen ou coefficient
+            supplémentaire n’est ajouté à cette méthode distincte.
+          </p>
+          <p>
+            Les buts sont conservés dans l’historique, sans pondération
+            arbitraire. Les données avancées sont signalées comme complètes,
+            mixtes ou simplifiées ; elles ne changent pas ce calcul provisoire.
+            Les indices propriétaires et provisoires restent dans des groupes de
+            comparaison séparés.
+          </p>
+          <h2>L’indice propriétaire Calcito</h2>
           <ul className="feature-list">
             <li>Cinq derniers matchs officiels publiés</li>
             <li>Résultats, tirs, grosses occasions et notes d’équipe</li>
@@ -98,6 +114,20 @@ export default function Methodology() {
           ou lien d’affiliation.
         </Notice>
       </section>
+      <Notice>
+        Les résultats OpenFootball sont issus d’un jeu de données CC0. Les
+        compléments adaptés depuis Wikipédia sont attribués à la page source de
+        chaque match et partagés sous{" "}
+        <a
+          href="https://creativecommons.org/licenses/by-sa/4.0/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          CC BY-SA 4.0
+        </a>
+        . Les noms sont associés aux fiches Calcito ; les relevés incomplets et
+        dates contradictoires sont signalés avant import.
+      </Notice>
       <section className="analysis-panel">
         <h2>Compétitions prévues</h2>
         <div className="competition-chips">

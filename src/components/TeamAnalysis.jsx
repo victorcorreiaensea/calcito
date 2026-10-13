@@ -44,7 +44,17 @@ export function useTeamAnalysis(id, season = "") {
       goals_against: m.home.id === id ? m.goalsAway : m.goalsHome,
     })),
   );
-  return { recent, statistics, engine, results, coverage };
+  const shownEngine =
+    engine.score == null && coverage.score != null
+      ? {
+          ...engine,
+          score: coverage.score,
+          status: "provisional",
+          indexVariant: "provisional",
+          formulaVersion: "results-points-v1",
+        }
+      : engine;
+  return { recent, statistics, engine: shownEngine, results, coverage };
 }
 export function CalculationTrace({ analysis }) {
   const { recent, engine } = analysis;
@@ -56,6 +66,16 @@ export function CalculationTrace({ analysis }) {
         {analysis.coverage.detailed} avec les données du moteur ·{" "}
         {analysis.coverage.simplified} simplifiés. {analysis.coverage.label}.
       </Notice>
+      {analysis.coverage.status === "provisional" && (
+        <Notice>
+          Indice résultats provisoire : {analysis.coverage.points} points sur 15
+          possibles, ramenés sur 100. Buts sur ces cinq matchs :{" "}
+          {analysis.coverage.goalsFor} marqués,
+          {analysis.coverage.goalsAgainst} encaissés. Cette méthode distincte
+          utilise seulement les résultats ; aucune statistique manquante ni
+          aucun bonus n’est remplacé par zéro.
+        </Notice>
+      )}
       {recent.loading ? (
         <p role="status">Chargement des matchs…</p>
       ) : recent.error ? (

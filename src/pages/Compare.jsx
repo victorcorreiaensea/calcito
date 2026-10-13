@@ -72,6 +72,7 @@ function TeamSummary({ team, analysis, season }) {
       <p>{team.competitionName || team.country}</p>
       <span className="eyebrow">FORME CALCITO</span>
       <FormValue
+        variant={team.coverage?.variant || analysis.coverage?.variant}
         score={
           season && Number(season) !== team.season
             ? null

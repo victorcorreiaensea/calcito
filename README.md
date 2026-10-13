@@ -72,3 +72,7 @@ Le workflow `.github/workflows/deploy.yml` installe, teste puis publie `dist/`. 
 Adresse : https://victorcorreiaensea.github.io/calcito/
 
 Le déploiement du frontend ne crée pas le projet Supabase et ne prouve pas que les autorisations distantes fonctionnent. Les tests locaux PostgreSQL et les tests navigateur doivent être distingués de la validation d’un projet distant réellement configuré.
+
+### Six championnats 2026–2027
+
+Préparation privée des 78 clubs manquants et import d’un relevé **partiel** de 348 résultats, avec contrôle des correspondances et doublons. L’indice résultats provisoire (points sur les cinq derniers matchs) est distinct de la formule propriétaire. Voir [le bilan et la procédure](docs/SIX_CHAMPIONNATS_2026_2027.md). Aucune nouvelle migration n’est requise.

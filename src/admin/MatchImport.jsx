@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FileUp, ExternalLink, Download, Plus } from "lucide-react";
-import { downloadCSV } from "../domain/csv";
+import SeasonSetup from "./SeasonSetup";
+import { downloadCSV, exportCSV } from "../domain/csv";
 import {
   readMatchCSV,
   matchImportHeaders,
@@ -64,6 +65,7 @@ export default function MatchImport({
     [reviewedPlan, setReviewedPlan] = useState(null),
     [progress, setProgress] = useState(null),
     [busy, setBusy] = useState(false),
+    [catalogBusy, setCatalogBusy] = useState(false),
     [page, setPage] = useState(0);
   const competition = dataset.competitions.find(
     (c) => c.slug === "liga-portugal",
@@ -235,7 +237,7 @@ export default function MatchImport({
         </div>
         <button
           className="button button-secondary"
-          disabled={busy}
+          disabled={busy || catalogBusy}
           onClick={() =>
             downloadCSV("calcito-modele-matchs.csv", [], matchImportHeaders)
           }
@@ -244,9 +246,25 @@ export default function MatchImport({
           Modèle CSV
         </button>
       </div>
+      <SeasonSetup
+        dataset={dataset}
+        reload={reload}
+        disabled={busy}
+        onBusyChange={(value) => {
+          setCatalogBusy(value);
+          onBusyChange(value);
+        }}
+        onReady={(prepared) => {
+          load(
+            exportCSV(prepared, matchImportHeaders),
+            "Relevé six championnats 2026–2027",
+          );
+          setTab("csv");
+        }}
+      />
       <nav className="entry-modes" aria-label="Modes d’import">
         <button
-          disabled={busy}
+          disabled={busy || catalogBusy}
           aria-pressed={tab === "csv"}
           className={`button ${tab === "csv" ? "button-primary" : "button-secondary"}`}
           onClick={() => setTab("csv")}
@@ -254,7 +272,7 @@ export default function MatchImport({
           Import CSV
         </button>
         <button
-          disabled={busy}
+          disabled={busy || catalogBusy}
           aria-pressed={tab === "flashscore"}
           className={`button ${tab === "flashscore" ? "button-primary" : "button-secondary"}`}
           onClick={() => setTab("flashscore")}
@@ -262,7 +280,7 @@ export default function MatchImport({
           Flashscore
         </button>
       </nav>
-      <fieldset disabled={busy}>
+      <fieldset disabled={busy || catalogBusy}>
         {tab === "csv" ? (
           <>
             <p className="muted-text">

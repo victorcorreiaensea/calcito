@@ -82,7 +82,7 @@ export function calculateCalcitoForm(input, { formula, formulaVersion } = {}) {
     return {
       ...prepared,
       ...calculateSimplifiedForm(prepared),
-      formulaVersion: null,
+      formulaVersion: "results-points-v1",
     };
   if (!prepared.complete)
     return {

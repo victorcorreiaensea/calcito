@@ -42,11 +42,19 @@ export function FixtureCard({ match }) {
       <div className="fixture-forms">
         <div>
           <span>Forme domicile</span>
-          <FormValue score={match.home.score} />
+          <FormValue
+            variant={match.home.coverage?.variant}
+            dataMode={match.home.coverage?.dataMode}
+            score={match.home.score}
+          />
         </div>
         <div>
           <span>Forme extérieur</span>
-          <FormValue score={match.away.score} />
+          <FormValue
+            variant={match.away.coverage?.variant}
+            dataMode={match.away.coverage?.dataMode}
+            score={match.away.score}
+          />
         </div>
       </div>
       <div className="fixture-footer">

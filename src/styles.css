@@ -4200,3 +4200,21 @@ input[type="checkbox"] {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.season-catalog-scroll {
+  max-height: 480px;
+  margin-block: 20px;
+}
+.season-catalog-scroll select {
+  min-width: 200px;
+  max-width: 320px;
+}
+.season-catalog-scroll td small {
+  display: block;
+  white-space: normal;
+}
+
+.form-value > small {
+  color: var(--muted);
+  font-size: 10px;
+}

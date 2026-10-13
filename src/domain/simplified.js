@@ -148,17 +148,55 @@ export function teamHistory(
     )
     .slice(0, limit);
 }
-// No provisional formula or coefficient is supplied. This separate module is the future extension point.
+// Results-only benchmark: standard football points, never the proprietary model.
 export const simplifiedModel = Object.freeze({
-  version: null,
-  formula: null,
-  compatibilityGroup: null,
+  version: "results-points-v1",
+  formula: (points) => (100 * points) / 15,
+  compatibilityGroup: "results-points-v1",
 });
-export function calculateSimplifiedForm() {
+export function calculateSimplifiedForm(input = []) {
+  const history = Array.isArray(input)
+    ? input
+    : (input.trace || []).map((m) => ({
+        goals_for: m.goalsFor,
+        goals_against: m.goalsAgainst,
+      }));
+  const recent = history.slice(0, 5);
+  if (
+    recent.length !== 5 ||
+    recent.some((m) =>
+      [m.goals_for, m.goals_against].some(
+        (n) =>
+          n == null ||
+          (typeof n !== "number" && typeof n !== "string") ||
+          String(n).trim() === "" ||
+          !Number.isInteger(Number(n)) ||
+          Number(n) < 0,
+      ),
+    )
+  )
+    return {
+      score: null,
+      status: "unavailable",
+      reason: "Cinq résultats valides nécessaires",
+    };
+  const points = recent.reduce(
+    (total, m) =>
+      total +
+      (Number(m.goals_for) > Number(m.goals_against)
+        ? 3
+        : Number(m.goals_for) === Number(m.goals_against)
+          ? 1
+          : 0),
+    0,
+  );
   return {
-    score: null,
-    status: "unavailable",
-    reason: "Méthode provisoire à définir",
+    score: simplifiedModel.formula(points),
+    status: "provisional",
+    points,
+    goalsFor: recent.reduce((n, m) => n + Number(m.goals_for), 0),
+    goalsAgainst: recent.reduce((n, m) => n + Number(m.goals_against), 0),
+    formulaVersion: simplifiedModel.version,
   };
 }
 export function formCoverage(
@@ -168,7 +206,13 @@ export function formCoverage(
 ) {
   const recent = history.slice(0, 5),
     simplified = recent.filter((m) => m.entry_type === "simplified").length;
-  const required = ["shots", "big_chances", "team_rating", "bonuses"];
+  const required = [
+    "shots",
+    "shots_on_target",
+    "big_chances",
+    "team_rating",
+    "bonuses",
+  ];
   const detailed = recent.filter(
     (m) =>
       m.entry_type === "complete" &&
@@ -182,35 +226,64 @@ export function formCoverage(
   // Stored outputs require an explicitly defined method with the exact same version.
   const valid =
     eligible &&
+    !(
+      variant === "provisional" && method.version === simplifiedModel.version
+    ) &&
     snapshot?.is_valid &&
     snapshot?.is_published &&
     (snapshot.index_variant || "complete") === variant &&
     typeof method.formula === "function" &&
     Boolean(method.version) &&
     method.version === snapshot.model_version &&
-    Number.isFinite(Number(snapshot.score));
+    snapshot.score != null &&
+    snapshot.score !== "" &&
+    Number.isFinite(Number(snapshot.score)) &&
+    Number(snapshot.score) >= 0 &&
+    Number(snapshot.score) <= 100;
+  const provisional =
+    provisionalModel.version === simplifiedModel.version &&
+    typeof provisionalModel.formula === "function"
+      ? calculateSimplifiedForm(recent)
+      : { score: null };
+  const fallback = !valid && provisional.score != null;
+  const advancedAvailable = recent.some((m) =>
+    ["shots", "shots_on_target", "big_chances", "team_rating"].some(
+      (key) => m.stats?.[key] != null,
+    ),
+  );
+  const dataMode =
+    detailed === 5 ? "complet" : advancedAvailable ? "mixte" : "simplifié";
   return {
+    dataMode,
+    points: fallback ? provisional.points : null,
+    goalsFor: fallback ? provisional.goalsFor : null,
+    goalsAgainst: fallback ? provisional.goalsAgainst : null,
     sampleSize: recent.length,
     missingMatches: 5 - recent.length,
-    simplified,
+    simplified: recent.length - detailed,
+    quickEntries: simplified,
     detailed,
-    variant,
-    status: valid ? variant : "unavailable",
-    score: valid ? Number(snapshot.score) : null,
+    variant: fallback ? "provisional" : variant,
+    status: valid ? variant : fallback ? "provisional" : "unavailable",
+    score: valid ? Number(snapshot.score) : fallback ? provisional.score : null,
     compatibilityGroup: valid
       ? snapshot.compatibility_group || `${variant}:${snapshot.model_version}`
-      : null,
-    label: valid
-      ? simplified
-        ? "Indice provisoire"
-        : "Indice complet"
-      : recent.length < 5
-        ? "Moins de cinq résultats"
-        : simplified
-          ? "Méthode provisoire à définir"
-          : detailed < 5
-            ? "Statistiques partielles"
-            : "Méthode de calcul à définir",
+      : fallback
+        ? simplifiedModel.compatibilityGroup
+        : null,
+    label: fallback
+      ? `Indice résultats provisoire · couverture ${{ complet: "complète", mixte: "mixte", simplifié: "simplifiée" }[dataMode]}`
+      : valid
+        ? simplified
+          ? "Indice provisoire"
+          : "Indice complet"
+        : recent.length < 5
+          ? "Moins de cinq résultats"
+          : simplified
+            ? "Méthode provisoire à définir"
+            : detailed < 5
+              ? "Statistiques partielles"
+              : "Méthode de calcul à définir",
     results: [...recent]
       .reverse()
       .map((m) => resultLetter(m.goals_for, m.goals_against)),

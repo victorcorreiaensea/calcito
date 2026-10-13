@@ -72,7 +72,11 @@ function Table({ rows, group, season }) {
                 <Results results={row.results} demo={false} />
               </td>
               <td>
-                <FormValue score={row.team.score} />
+                <FormValue
+                  variant={row.team.coverage?.variant}
+                  dataMode={row.team.coverage?.dataMode}
+                  score={row.team.score}
+                />
               </td>
             </tr>
           ))}

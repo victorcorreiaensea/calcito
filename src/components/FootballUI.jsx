@@ -63,17 +63,29 @@ export function Results({ results = [], demo = true }) {
     </div>
   );
 }
-export function FormValue({ score, demo = false }) {
+export function FormValue({ score, demo = false, variant, dataMode }) {
   return (
     <div className="form-value">
-      <strong>{Number.isFinite(score) ? `${score} %` : "—"}</strong>
+      <strong>
+        {Number.isFinite(score) ? `${Number(score.toFixed(1))} %` : "—"}
+      </strong>
       <span>
         {demo
           ? "Indice simulé"
           : Number.isFinite(score)
-            ? "Indice Calcito"
-            : "Indice indisponible"}
+            ? variant === "provisional"
+              ? "Indice résultats provisoire"
+              : "Indice Calcito"
+            : "Données insuffisantes"}
       </span>
+      {Number.isFinite(score) && dataMode && (
+        <small>
+          Données{" "}
+          {{ complet: "complètes", mixte: "mixtes", simplifié: "simplifiées" }[
+            dataMode
+          ] || dataMode}
+        </small>
+      )}
       {Number.isFinite(score) && <FormBar score={score} />}
     </div>
   );

@@ -126,7 +126,7 @@ test("merged chronology includes quick results, ignores drafts/archives and uses
   assert.equal(teamHistory(d, "a", 2025).length, 0);
   assert.equal(teamHistory(d, "a", 2026, { publishedOnly: false }).length, 3);
 });
-test("all mixed five-match combinations have explicit completeness and no invented provisional percentage", () => {
+test("all mixed five-match combinations use a distinct results benchmark while preserving a validated full model", () => {
   const snapshot = {
     score: 78,
     is_valid: true,
@@ -141,15 +141,15 @@ test("all mixed five-match combinations have explicit completeness and no invent
       goals_for: 1,
       goals_against: 0,
     }));
-    assert.equal(formCoverage(history, snapshot).score, null);
+    assert.equal(formCoverage(history, snapshot).score, 100);
     const c = formCoverage(history, snapshot, {
       completeModel: { version: "validated-test", formula: () => 78 },
     });
     assert.equal(c.simplified, quick);
     assert.equal(c.detailed, 5 - quick);
     assert.equal(c.variant, quick ? "provisional" : "complete");
-    assert.equal(c.score, quick ? null : 78);
-    if (quick) assert.equal(c.label, "Méthode provisoire à définir");
+    assert.equal(c.score, quick ? 100 : 78);
+    if (quick) assert.match(c.label, /Indice résultats provisoire/);
   }
   assert.equal(
     formCoverage(
@@ -341,7 +341,7 @@ test("a simplified result cannot use the full formula, even when injected data a
     },
     formulaVersion: "test-only",
   });
-  assert.equal(result.score, null);
+  assert.equal(result.score, 100);
   assert.equal(result.indexVariant, "provisional");
   assert.equal(called, false);
 });
