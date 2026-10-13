@@ -1,5 +1,8 @@
 -- CALCITO V3.1: apply AFTER 001, once. Existing matches and IDs are preserved.
 begin;
+-- Monotonic revision stamps also distinguish rapid writes in the same transaction.
+create or replace function public.touch_updated_at() returns trigger language plpgsql set search_path=pg_catalog as $$
+begin new.updated_at=greatest(clock_timestamp(),old.updated_at+interval '1 microsecond'); return new; end $$;
 alter table public.teams add column domestic_league text;
 alter table public.form_snapshots add column index_variant text not null default 'complete' check(index_variant in('complete','provisional'));
 alter table public.form_snapshots add column compatibility_group text;
@@ -30,7 +33,7 @@ create policy public_simplified on public.simplified_results for select to anon,
  is_published and converted_at is null and exists(select 1 from public.teams t where t.id=team_id and t.is_published)
 );
 create function public.normalized_club(value text) returns text language sql immutable set search_path=pg_catalog as $$
- select regexp_replace(translate(lower(trim(value)),'àáâãäåèéêëìíîïòóôõöùúûüýÿçñ','aaaaaaeeeeiiiiooooouuuuyycn'),'[^a-z0-9]','','g')
+ select regexp_replace(normalize(lower(trim(value)),NFD),'[^a-z0-9]','','g')
 $$;
 -- One transaction lock serializes writes across both entry types, including direct API writes.
 -- Security-definer checks see drafts too; callers only receive a generic duplicate error.

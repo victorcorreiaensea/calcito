@@ -141,7 +141,10 @@ test("all mixed five-match combinations have explicit completeness and no invent
       goals_for: 1,
       goals_against: 0,
     }));
-    const c = formCoverage(history, snapshot);
+    assert.equal(formCoverage(history, snapshot).score, null);
+    const c = formCoverage(history, snapshot, {
+      completeModel: { version: "validated-test", formula: () => 78 },
+    });
     assert.equal(c.simplified, quick);
     assert.equal(c.detailed, 5 - quick);
     assert.equal(c.variant, quick ? "provisional" : "complete");

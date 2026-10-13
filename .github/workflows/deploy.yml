@@ -26,7 +26,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Validate engines and services
-        run: npm test
+        run: |
+          if npm test > /tmp/calcito-tests.log 2>&1; then
+            cat /tmp/calcito-tests.log
+          else
+            cat /tmp/calcito-tests.log
+            python3 - <<'PY'
+          from pathlib import Path
+          report = Path('/tmp/calcito-tests.log').read_text()[-12000:]
+          escaped = report.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+          print(f'::error title=CALCITO test failure::{escaped}')
+          PY
+            exit 1
+          fi
       - name: Build
         run: npm run build
         env:

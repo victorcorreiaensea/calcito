@@ -1,3 +1,4 @@
+import { calcitoModel } from "../config/calcitoModel.js";
 import { nullableNumber } from "./match.js";
 export const trackedLeagueSlugs = [
   "ligue-1",
@@ -160,7 +161,11 @@ export function calculateSimplifiedForm() {
     reason: "Méthode provisoire à définir",
   };
 }
-export function formCoverage(history, snapshot = null) {
+export function formCoverage(
+  history,
+  snapshot = null,
+  { completeModel = calcitoModel, provisionalModel = simplifiedModel } = {},
+) {
   const recent = history.slice(0, 5),
     simplified = recent.filter((m) => m.entry_type === "simplified").length;
   const required = ["shots", "big_chances", "team_rating", "bonuses"];
@@ -173,13 +178,16 @@ export function formCoverage(history, snapshot = null) {
   const eligible =
     recent.length === 5 &&
     (simplified ? detailed + simplified === 5 : detailed === 5);
-  // Persisted provisional output is accepted only after its separate method is explicitly validated.
+  const method = simplified ? provisionalModel : completeModel;
+  // Stored outputs require an explicitly defined method with the exact same version.
   const valid =
     eligible &&
     snapshot?.is_valid &&
     snapshot?.is_published &&
     (snapshot.index_variant || "complete") === variant &&
-    (!simplified || typeof simplifiedModel.formula === "function") &&
+    typeof method.formula === "function" &&
+    Boolean(method.version) &&
+    method.version === snapshot.model_version &&
     Number.isFinite(Number(snapshot.score));
   return {
     sampleSize: recent.length,

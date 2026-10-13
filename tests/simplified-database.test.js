@@ -103,6 +103,25 @@ test("incremental migration preserves V3 records and enforces quick-result RLS, 
         ])
       ).rows[0].id;
     const qid = await save(quick);
+    await db.exec("begin");
+    const firstRevision = (
+      await db.query(
+        "update simplified_results set competition_name=competition_name where id=$1 returning updated_at::text as stamp",
+        [qid],
+      )
+    ).rows[0].stamp;
+    const secondRevision = (
+      await db.query(
+        "update simplified_results set competition_name=competition_name where id=$1 returning updated_at::text as stamp",
+        [qid],
+      )
+    ).rows[0].stamp;
+    assert.notEqual(
+      firstRevision,
+      secondRevision,
+      "rapid writes must have distinct revisions",
+    );
+    await db.exec("rollback");
     assert.equal(
       (await db.query("select count(*)::int as n from teams")).rows[0].n,
       3,
