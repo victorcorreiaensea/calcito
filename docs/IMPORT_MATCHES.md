@@ -67,6 +67,8 @@ Source demandée : [résultats Liga Portugal](https://www.flashscore.fr/football
 
 L’accès direct depuis l’environnement cloud est bloqué par son proxy (CONNECT 403). Une inspection limitée, avec un agent identifié et sans collecte de scores, a pu consulter `robots.txt`, la page d’accueil et [les conditions officielles](https://www.flashscore.fr/terms-of-use/) depuis GitHub Actions. `robots.txt` autorisait la page résultats pour cet agent, ce qui ne suffit pas à autoriser la réutilisation des données. Les pages contiennent du JavaScript ; aucune requête interne de statistiques n’a été utilisée ni supposée publique. Aucune protection, CAPTCHA, authentification ou limite n’est contournée.
 
+Les conditions consultées précisent « pour votre usage personnel uniquement » et interdisent l’extraction ou la mise à disposition du public d’une partie substantielle de la base sans « notre consentement explicite ». Ce n’est donc pas une source ouverte pour recopier automatiquement une saison sur CALCITO. L’interface demande de confirmer le consentement nécessaire pour les relevés dont la source est Flashscore.fr ; à défaut, utiliser des fichiers d’une autre source autorisée. Cette déclaration ne constitue pas une autorisation accordée par Flashscore et n’active aucun collecteur.
+
 Il n’existe pas de backend de collecte autorisé configuré pour ce parcours. L’interface ne présente donc pas de faux bouton de récupération. Les fichiers/relevés doivent provenir de sources dont vous êtes autorisé à utiliser les données. L’application ne prétend pas avoir récupéré l’ensemble de la saison 2026–2027.
 
 ## Validation effectuée

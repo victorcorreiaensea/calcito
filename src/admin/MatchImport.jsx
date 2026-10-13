@@ -8,6 +8,7 @@ import {
   planMatchImport,
   executeMatchImport,
   safeSourceURL,
+  isFlashscoreSource,
 } from "../domain/matchImport";
 import { saveMatch } from "../services/manualRepository";
 import { Notice } from "../components/FootballUI";
@@ -56,6 +57,7 @@ export default function MatchImport({
     [duplicates, setDuplicates] = useState("ignore"),
     [published, setPublished] = useState(false),
     [verified, setVerified] = useState(false),
+    [flashscoreConsent, setFlashscoreConsent] = useState(false),
     [timeZone, setTimeZone] = useState("Europe/Paris"),
     [message, setMessage] = useState(""),
     [report, setReport] = useState(null),
@@ -81,9 +83,19 @@ export default function MatchImport({
         duplicates,
         published,
         verified,
+        flashscoreConsent,
         timeZone,
       }),
-    [rows, dataset, mapping, duplicates, published, verified, timeZone],
+    [
+      rows,
+      dataset,
+      mapping,
+      duplicates,
+      published,
+      verified,
+      flashscoreConsent,
+      timeZone,
+    ],
   );
   const plan = report && reviewedPlan ? reviewedPlan : livePlan;
   const unknown = importMappings(rows, dataset, mapping);
@@ -302,11 +314,19 @@ export default function MatchImport({
           <>
             <h3>Importer depuis Flashscore</h3>
             <Notice>
-              La récupération automatique n’est pas activée : son accès et son
-              autorisation ne sont pas confirmés. Le parcours disponible est un
-              relevé assisté : ouvrez les résultats, consultez les matchs, puis
-              ajoutez uniquement les valeurs réellement visibles. Aucun CAPTCHA
-              ni protection n’est contourné.
+              Flashscore réserve l’usage de son site à un usage personnel et
+              demande un consentement explicite pour extraire ou publier une
+              partie substantielle de sa base. La récupération automatique reste
+              désactivée. Avec l’autorisation nécessaire, vous pouvez relever
+              les valeurs visibles et les contrôler ici ; sinon, utilisez un
+              fichier issu d’une autre source autorisée.{" "}
+              <a
+                href="https://www.flashscore.fr/terms-of-use/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Consulter les conditions
+              </a>
             </Notice>
             <a
               className="button button-secondary"
@@ -471,6 +491,21 @@ export default function MatchImport({
                 J’ai vérifié les résultats et leurs sources
               </label>
             </div>
+            {(rows.some((row) => isFlashscoreSource(row.source_url)) ||
+              plan.some((item) => isFlashscoreSource(item.payload.source))) && (
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={flashscoreConsent}
+                  onChange={(e) => {
+                    setFlashscoreConsent(e.target.checked);
+                    changed();
+                  }}
+                />
+                Je dispose du consentement nécessaire pour réutiliser les
+                données Flashscore.
+              </label>
+            )}
             <p className="muted-text">
               Une mise à jour conserve le statut publié ou privé du match
               existant. Les statistiques vides conservent ses valeurs connues.

@@ -78,6 +78,14 @@ export function readMatchCSV(text) {
     throw new Error(`Colonnes requises manquantes : ${missing.join(", ")}.`);
   return rows;
 }
+export function isFlashscoreSource(value) {
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    return host === "flashscore.fr" || host.endsWith(".flashscore.fr");
+  } catch {
+    return false;
+  }
+}
 export function safeSourceURL(value) {
   if (!value) return true;
   try {
@@ -250,6 +258,7 @@ export function planMatchImport(
     duplicates = "ignore",
     published = false,
     verified = false,
+    flashscoreConsent = false,
     timeZone = "Europe/Paris",
     now = new Date(),
   } = {},
@@ -340,6 +349,14 @@ export function planMatchImport(
           : "Un match existe dans une autre saison ou compétition : corrigez la correspondance.",
       );
     }
+    if (
+      action !== "ignore" &&
+      isFlashscoreSource(row.source_url || exact?.source) &&
+      !flashscoreConsent
+    )
+      errors.push(
+        "Flashscore exige un consentement explicite pour réutiliser une partie substantielle de ses données : confirmez votre autorisation ou utilisez une autre source autorisée.",
+      );
     const publish =
       action === "update" && exact ? exact.is_published : published;
     const source = row.source_url || exact?.source || "";

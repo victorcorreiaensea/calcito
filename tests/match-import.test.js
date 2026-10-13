@@ -335,3 +335,20 @@ test("batch imports only valid records, counts updates/ignores/rejections and di
   assert.equal(denied.unprocessed, 3);
   assert.equal(denied.uncertain, 0);
 });
+
+test("Flashscore provenance requires explicit reuse consent while licensed CSV sources remain usable", () => {
+  const sample = row({
+    source_url: "https://www.flashscore.fr/match/test-only",
+  });
+  assert.ok(
+    planMatchImport([sample], d(), options)[0].errors.some((e) =>
+      e.includes("consentement"),
+    ),
+  );
+  assert.deepEqual(
+    planMatchImport([sample], d(), { ...options, flashscoreConsent: true })[0]
+      .errors,
+    [],
+  );
+  assert.deepEqual(planMatchImport([row()], d(), options)[0].errors, []);
+});
