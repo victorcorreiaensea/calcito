@@ -1,0 +1,26 @@
+name: Inspect licensed club reference markup
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: python3 -m pip install beautifulsoup4==4.13.4
+      - name: Read one match layout
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json,re,urllib.parse
+          from bs4 import BeautifulSoup
+          url='https://en.wikipedia.org/wiki/2026%E2%80%9327_FC_Porto_season'
+          request=urllib.request.Request(url,headers={'User-Agent':'CalcitoSeasonReference/1.0 (read-only licensed reference)'})
+          with urllib.request.urlopen(request,timeout=20) as response:html=response.read(2000000).decode()
+          soup=BeautifulSoup(html,'html.parser')
+          result={'details':len(soup.select('details')),'vevent':len(soup.select('.vevent'))}
+          nodes=soup.find_all(string=re.compile('^10 October 2026'))
+          result['ancestors']=[str(n.parent.parent)[:2200]for n in nodes[:2]]
+          if soup.select('details'): result['details_sample']=str(soup.select('details')[0])[:2200]
+          print('::notice title=Club layout::'+json.dumps(result,ensure_ascii=False).replace('%','%25').replace('\n','%0A'))
+          PY
