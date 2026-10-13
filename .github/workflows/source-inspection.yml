@@ -13,3 +13,5 @@ jobs:
         run: python3 scripts/inspect-flashscore.py
       - name: Check a small historical sample from existing public backend
         run: node scripts/check-real-import-sample.mjs
+      - name: Inspect freely licensed dated historical football reference
+        run: python3 scripts/check-licensed-football-sample.py

@@ -21,7 +21,11 @@ def get(url):
                 notes.append('Page trop grande pour cette inspection limitée.'); return None
             notes.append(f'{url}: HTTP {response.status}, {response.headers.get("Content-Type", "unknown")}')
             text = content.decode('utf-8', errors='replace')
-            if re.search(r'captcha|access denied|verify you are human|just a moment', text, re.I):
+            title = re.search(r'<title[^>]*>(.*?)</title>', text, re.I | re.S)
+            visible = re.sub(r'<script.*?</script>|<style.*?</style>', '', text, flags=re.I | re.S)
+            visible = re.sub(r'<[^>]+>', ' ', visible)
+            challenge = r'access denied|verify you are human|just a moment|vérifiez que vous êtes humain|complete the captcha|résoudre le captcha'
+            if re.search(challenge, title.group(1) if title else '', re.I) or (len(visible) < 5000 and re.search(challenge, visible, re.I)):
                 notes.append('Protection détectée : inspection arrêtée, aucun contournement.'); return None
             return text
     except (urllib.error.URLError, TimeoutError) as error:
@@ -35,7 +39,10 @@ def inspect():
     notes.append(f'robots.txt autorise la page résultats pour cet agent : {rules.can_fetch(AGENT, RESULTS)}')
     if not rules.can_fetch(AGENT, ROOT):
         notes.append('La lecture automatisée de la page d’accueil est interdite par robots.txt.'); return
-    time.sleep(1)
+    delay = rules.crawl_delay(AGENT) or rules.crawl_delay('*') or 1
+    if delay > 10:
+        notes.append('Délai de crawl supérieur au budget de cette inspection : arrêt.'); return
+    time.sleep(delay)
     home = get(ROOT)
     if home is None: return
     links = re.findall(r'href=[\"\']([^\"\']+)[\"\']', home, re.I)
@@ -43,7 +50,7 @@ def inspect():
     legal = list(dict.fromkeys(link for link in legal if link.startswith('https://www.flashscore.fr/') or link.startswith('https://www.livesport.eu/')))
     notes.append('Liens de conditions trouvés : ' + (', '.join(legal[:3]) or 'aucun dans le HTML reçu'))
     if legal and legal[0].startswith(ROOT) and rules.can_fetch(AGENT, legal[0]):
-        time.sleep(1)
+        time.sleep(delay)
         content = get(legal[0])
         if content:
             readable = html.unescape(re.sub(r'<[^>]+>', ' ', content))
