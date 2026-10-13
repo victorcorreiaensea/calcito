@@ -1,0 +1,30 @@
+CALCITO — Liga Portugal 2026-2027
+Préparé le 13 octobre 2026. Extraction d’OpenFootball, licence CC0 1.0.
+
+IMPORTANT : fichier PARTIEL, non un relevé complet à jour.
+62 résultats sont renseignés dans la source (journées 1 à 7).
+16 équipes ont 7 résultats ; Braga et Gil Vicente en ont 6.
+La source ne renseigne pas les 9 scores de la journée 8 et signale Braga–Gil Vicente reporté.
+La source a été mise à jour le 22 septembre 2026 ; elle ne permet pas de confirmer les résultats d’octobre.
+Les résultats sont repris de cette source communautaire, sans confirmation indépendante officielle.
+
+IMPORT : utiliser UNIQUEMENT liga-portugal-2026-2027-resultats-disponibles.csv.
+Administration > Importer des matchs > Import CSV.
+Associer Liga Portugal, saison 2026-2027 et les noms des clubs à tes fiches existantes.
+Créer les équipes / la saison et enregistrer les 18 participants si nécessaire.
+Prévisualiser et vérifier les résultats avant publication. Importer d’abord en brouillon.
+
+Les 18 fichiers par-equipe sont des vues alternatives du même ensemble.
+NE PAS importer à la fois le global et les fichiers par équipe : chaque match apparaîtrait deux fois.
+matchs-a-completer-NE-PAS-IMPORTER.csv est une liste de travail avec scores vides.
+Ne pas l’importer avant d’avoir vérifié et rempli les scores ; supprimer les colonnes journee et etat_source avant import.
+couverture-par-equipe.csv est seulement un relevé, pas un fichier de matchs à importer.
+
+Les tirs, tirs cadrés, grosses occasions et notes sont vides : données non fournies, jamais remplacées par zéro.
+Les dates seules sont utilisées : aucune heure ni aucun fuseau n’a été supposé.
+Les vrais scores 0-0 sont conservés. Aucune donnée de production n’a été modifiée.
+
+Source figée :
+https://github.com/openfootball/football.json/blob/e6744429ee395bc86f247348c6184bb08d4eb361/2026-27/pt.1.json
+Source amont comparée : https://github.com/openfootball/europe/blob/e16fa332068b639c4210d57319df459b190470dd/portugal/2026-27_pt1.txt
+Licence : https://github.com/openfootball/football.json/blob/master/LICENSE.md
