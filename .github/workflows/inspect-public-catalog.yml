@@ -1,0 +1,24 @@
+name: Inspect published Calcito catalog
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Read published records only
+        env:
+          SUPABASE_URL: https://vxodonurvxzfbwvfvzxr.supabase.co
+          SUPABASE_PUBLIC_KEY: sb_publishable_2mbxPqgUHffn8F4D65B43g_viZS8Zaf
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request
+          for table in ['teams','competitions','seasons','season_teams','matches']:
+            request=urllib.request.Request(os.environ['SUPABASE_URL']+'/rest/v1/'+table+'?select=*&limit=1000',headers={'apikey':os.environ['SUPABASE_PUBLIC_KEY']})
+            with urllib.request.urlopen(request,timeout=20) as response: rows=json.load(response)
+            for index in range(0,max(len(rows),1),40):
+              payload=json.dumps(rows[index:index+40],ensure_ascii=False).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+              print('::notice title=Public catalog '+table+' '+str(index)+'::'+payload)
+          PY
