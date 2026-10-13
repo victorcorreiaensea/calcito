@@ -1,0 +1,13 @@
+name: Inspect Flashscore public access
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read public access rules without collecting matches
+        run: python3 scripts/inspect-flashscore.py
