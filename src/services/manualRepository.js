@@ -121,6 +121,37 @@ export async function saveMatch(payload, { timeoutMs } = {}) {
   invalidateManualData();
   return data;
 }
+
+export async function publishDraft(item) {
+  if (
+    !["matches", "simplified_results"].includes(item.table) ||
+    !item.expectedUpdatedAt
+  )
+    throw new Error("Prévisualisation invalide : rechargez les brouillons.");
+  const client = await requireOwner();
+  const patch =
+    item.table === "matches"
+      ? { is_published: true, verified_at: new Date().toISOString() }
+      : { is_published: true };
+  let query = client
+    .from(item.table)
+    .update(patch)
+    .eq("id", item.id)
+    .eq("is_published", false)
+    .eq("updated_at", item.expectedUpdatedAt);
+  if (item.table === "simplified_results")
+    query = query.is("converted_at", null);
+  const { data, error } = await query
+    .select("id")
+    .abortSignal(AbortSignal.timeout(20000));
+  if (error) {
+    const translated = translateError(error);
+    translated.code = error.code;
+    throw translated;
+  }
+  invalidateManualData();
+  return data.map((row) => row.id);
+}
 export function translateError(error) {
   if (
     error.code === "P0001" &&

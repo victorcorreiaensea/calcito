@@ -26,6 +26,7 @@ import { normalizeClub } from "../domain/simplified";
 import CatalogManager from "./CatalogManager";
 import DataTools from "./DataTools";
 import MatchImport from "./MatchImport";
+import BulkPublish from "./BulkPublish";
 import { DATE_ONLY_MARKER } from "../domain/matchImport";
 
 function Login() {
@@ -479,193 +480,203 @@ function Dashboard() {
       )}
       {tab === "matches" && (
         <section className="admin-panel">
-          <div className="panel-heading">
-            <h2>Matchs & brouillons</h2>
-            <button
-              className="button button-secondary"
-              onClick={() => setTab("imports")}
-            >
-              Importer des matchs
-            </button>
-            <button
-              className="button button-primary"
-              onClick={() => {
-                openEntry("complete");
-              }}
-            >
-              <Plus size={15} />
-              Ajouter
-            </button>
-          </div>
-          <div className="filter-field">
-            <label htmlFor="admin-match-filter">Afficher</label>
-            <select
-              id="admin-match-filter"
-              value={filter}
-              onChange={(event) => {
-                setFilter(event.target.value);
-                setPage(0);
-              }}
-            >
-              <option value="all">Tous</option>
-              <option value="draft">Brouillons</option>
-              <option value="published">Publiés</option>
-              <option value="complete">Matchs complets</option>
-              <option value="simplified">Résultats rapides</option>
-              <option value="incomplete">Statistiques manquantes</option>
-            </select>
-          </div>
-          <div className="admin-match-list">
-            {visible.slice(page * 20, (page + 1) * 20).map((match) => (
-              <article key={match.id}>
-                <div>
-                  <span className="eyebrow">
-                    {match.entry_type === "simplified"
-                      ? match.competition_name
-                      : dataset.competitions.find(
-                          (c) =>
-                            c.id ===
-                            dataset.seasons.find(
-                              (s) => s.id === match.season_id,
-                            )?.competition_id,
-                        )?.name}{" "}
-                    ·{" "}
-                    {match.entry_type === "simplified"
-                      ? "Résultat rapide"
-                      : match.round}
-                  </span>
-                  <h3>
-                    {
-                      dataset.teams.find(
-                        (t) =>
-                          t.id ===
-                          (match.entry_type === "simplified"
-                            ? match.team_id
-                            : match.home_team_id),
-                      )?.name
-                    }{" "}
-                    <span>
-                      {(match.entry_type === "simplified"
-                        ? match.goals_for
-                        : match.goals_home) ?? "—"}{" "}
-                      –{" "}
-                      {(match.entry_type === "simplified"
-                        ? match.goals_against
-                        : match.goals_away) ?? "—"}
-                    </span>{" "}
-                    {match.entry_type === "simplified"
-                      ? match.opponent_name
-                      : dataset.teams.find((t) => t.id === match.away_team_id)
-                          ?.name}
-                  </h3>
-                  <p>
-                    {match.entry_type === "simplified" ||
-                    (match.comment || "").includes(DATE_ONLY_MARKER)
-                      ? new Date(match.kickoff).toLocaleDateString("fr-FR")
-                      : new Date(match.kickoff).toLocaleString("fr-FR")}{" "}
-                    · {match.is_published ? "Publié" : "Brouillon privé"} ·
-                    {match.entry_type === "simplified"
-                      ? "Résultat seul · statistiques non renseignées"
-                      : `Complétude ${completeness(match).percent} %`}
-                  </p>
-                </div>
-                <div className="row-actions">
-                  <button
-                    aria-label="Modifier le match"
-                    onClick={() => {
-                      openEntry(
-                        match.entry_type === "simplified"
-                          ? "simplified"
-                          : "complete",
-                        "",
-                        match,
-                      );
-                    }}
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  {match.entry_type === "simplified" && (
+          <fieldset disabled={importBusy} className="admin-operation-guard">
+            <div className="panel-heading">
+              <h2>Matchs & brouillons</h2>
+              <button
+                className="button button-secondary"
+                onClick={() => setTab("imports")}
+              >
+                Importer des matchs
+              </button>
+              <button
+                className="button button-primary"
+                onClick={() => {
+                  openEntry("complete");
+                }}
+              >
+                <Plus size={15} />
+                Ajouter
+              </button>
+            </div>
+            <BulkPublish
+              dataset={dataset}
+              reload={reload}
+              onBusyChange={setImportBusy}
+            />
+            <div className="filter-field">
+              <label htmlFor="admin-match-filter">Afficher</label>
+              <select
+                id="admin-match-filter"
+                value={filter}
+                onChange={(event) => {
+                  setFilter(event.target.value);
+                  setPage(0);
+                }}
+              >
+                <option value="all">Tous</option>
+                <option value="draft">Brouillons</option>
+                <option value="published">Publiés</option>
+                <option value="complete">Matchs complets</option>
+                <option value="simplified">Résultats rapides</option>
+                <option value="incomplete">Statistiques manquantes</option>
+              </select>
+            </div>
+            <div className="admin-match-list">
+              {visible.slice(page * 20, (page + 1) * 20).map((match) => (
+                <article key={match.id}>
+                  <div>
+                    <span className="eyebrow">
+                      {match.entry_type === "simplified"
+                        ? match.competition_name
+                        : dataset.competitions.find(
+                            (c) =>
+                              c.id ===
+                              dataset.seasons.find(
+                                (s) => s.id === match.season_id,
+                              )?.competition_id,
+                          )?.name}{" "}
+                      ·{" "}
+                      {match.entry_type === "simplified"
+                        ? "Résultat rapide"
+                        : match.round}
+                    </span>
+                    <h3>
+                      {
+                        dataset.teams.find(
+                          (t) =>
+                            t.id ===
+                            (match.entry_type === "simplified"
+                              ? match.team_id
+                              : match.home_team_id),
+                        )?.name
+                      }{" "}
+                      <span>
+                        {(match.entry_type === "simplified"
+                          ? match.goals_for
+                          : match.goals_home) ?? "—"}{" "}
+                        –{" "}
+                        {(match.entry_type === "simplified"
+                          ? match.goals_against
+                          : match.goals_away) ?? "—"}
+                      </span>{" "}
+                      {match.entry_type === "simplified"
+                        ? match.opponent_name
+                        : dataset.teams.find((t) => t.id === match.away_team_id)
+                            ?.name}
+                    </h3>
+                    <p>
+                      {match.entry_type === "simplified" ||
+                      (match.comment || "").includes(DATE_ONLY_MARKER)
+                        ? new Date(match.kickoff).toLocaleDateString("fr-FR")
+                        : new Date(match.kickoff).toLocaleString("fr-FR")}{" "}
+                      · {match.is_published ? "Publié" : "Brouillon privé"} ·
+                      {match.entry_type === "simplified"
+                        ? "Résultat seul · statistiques non renseignées"
+                        : `Complétude ${completeness(match).percent} %`}
+                    </p>
+                  </div>
+                  <div className="row-actions">
                     <button
-                      onClick={() => convert(match)}
-                      aria-label="Convertir en match complet"
+                      aria-label="Modifier le match"
+                      onClick={() => {
+                        openEntry(
+                          match.entry_type === "simplified"
+                            ? "simplified"
+                            : "complete",
+                          "",
+                          match,
+                        );
+                      }}
                     >
-                      Convertir
+                      <Pencil size={16} />
                     </button>
-                  )}
-                  {match.is_published && (
+                    {match.entry_type === "simplified" && (
+                      <button
+                        onClick={() => convert(match)}
+                        aria-label="Convertir en match complet"
+                      >
+                        Convertir
+                      </button>
+                    )}
+                    {match.is_published && (
+                      <button
+                        aria-label="Dépublier le match"
+                        onClick={() =>
+                          action(
+                            () =>
+                              mutate(
+                                match.entry_type === "simplified"
+                                  ? "simplified_results"
+                                  : "matches",
+                                "update",
+                                { is_published: false },
+                                match.id,
+                              ),
+                            "Match dépublié.",
+                          )
+                        }
+                      >
+                        <EyeOff size={16} />
+                      </button>
+                    )}
                     <button
-                      aria-label="Dépublier le match"
-                      onClick={() =>
-                        action(
-                          () =>
-                            mutate(
+                      aria-label="Supprimer le match"
+                      onClick={() => setDeleteId(match.id)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                  {deleteId === match.id && (
+                    <div className="delete-confirm">
+                      <span>
+                        Supprimer ce match et ses statistiques ? Le classement
+                        sera recalculé.
+                      </span>
+                      <button
+                        onClick={() =>
+                          action(async () => {
+                            await mutate(
                               match.entry_type === "simplified"
                                 ? "simplified_results"
                                 : "matches",
-                              "update",
-                              { is_published: false },
+                              "delete",
+                              null,
                               match.id,
-                            ),
-                          "Match dépublié.",
-                        )
-                      }
-                    >
-                      <EyeOff size={16} />
-                    </button>
+                            );
+                            setDeleteId(null);
+                          }, "Match supprimé et opération auditée.")
+                        }
+                      >
+                        Confirmer la suppression
+                      </button>
+                      <button onClick={() => setDeleteId(null)}>Annuler</button>
+                    </div>
                   )}
-                  <button
-                    aria-label="Supprimer le match"
-                    onClick={() => setDeleteId(match.id)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-                {deleteId === match.id && (
-                  <div className="delete-confirm">
-                    <span>
-                      Supprimer ce match et ses statistiques ? Le classement
-                      sera recalculé.
-                    </span>
-                    <button
-                      onClick={() =>
-                        action(async () => {
-                          await mutate(
-                            match.entry_type === "simplified"
-                              ? "simplified_results"
-                              : "matches",
-                            "delete",
-                            null,
-                            match.id,
-                          );
-                          setDeleteId(null);
-                        }, "Match supprimé et opération auditée.")
-                      }
-                    >
-                      Confirmer la suppression
-                    </button>
-                    <button onClick={() => setDeleteId(null)}>Annuler</button>
-                  </div>
-                )}
-              </article>
-            ))}
-          </div>
-          {!visible.length && (
-            <p className="muted-text">Aucun match dans cette sélection.</p>
-          )}
-          <div className="pagination">
-            <button disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
-              Précédent
-            </button>
-            <span>
-              Page {page + 1} / {Math.max(1, Math.ceil(visible.length / 20))}
-            </span>
-            <button
-              disabled={(page + 1) * 20 >= visible.length}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Suivant
-            </button>
-          </div>
+                </article>
+              ))}
+            </div>
+            {!visible.length && (
+              <p className="muted-text">Aucun match dans cette sélection.</p>
+            )}
+            <div className="pagination">
+              <button
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Précédent
+              </button>
+              <span>
+                Page {page + 1} / {Math.max(1, Math.ceil(visible.length / 20))}
+              </span>
+              <button
+                disabled={(page + 1) * 20 >= visible.length}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Suivant
+              </button>
+            </div>
+          </fieldset>
         </section>
       )}
       {["teams", "competitions", "seasons"].includes(tab) && (

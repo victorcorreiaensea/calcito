@@ -4218,3 +4218,13 @@ input[type="checkbox"] {
   color: var(--muted);
   font-size: 10px;
 }
+
+.admin-operation-guard {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.bulk-publish-panel {
+  margin-block: 20px;
+}
