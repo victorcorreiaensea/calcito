@@ -121,10 +121,11 @@ export default function Teams() {
 }
 export function TeamDetail() {
   const { teamId } = useParams();
-  const [year, setYear] = useState("");
-  const state = useFootball("team", {teamId,season:year});
+  const [detailParams] = useSearchParams();
+  const [year, setYear] = useState(detailParams.get("season") || "");
+  const state = useFootball("team", { teamId, season: year });
   const analysis = useTeamAnalysis(state.result?.data.id, year);
-  const history = useFootball("matches", { season: year });
+  const history = useFootball("teamHistory", { teamId, season: year });
   const standings = useFootball(
     "standings",
     { competition: state.result?.data.competitionId, season: year },
@@ -196,6 +197,12 @@ export function TeamDetail() {
             </section>
             <section className="analysis-panel">
               <h2>Historique des résultats publiés</h2>
+              <p className="muted-text">
+                {team.coverage?.sampleSize || 0} / 5 résultats ·{" "}
+                {team.coverage?.detailed || 0} détaillés ·{" "}
+                {team.coverage?.simplified || 0} simplifiés.{" "}
+                {team.coverage?.label}
+              </p>
               {history.error ? (
                 <p role="alert">Les résultats ne sont pas disponibles.</p>
               ) : !relevantHistory.length ? (
@@ -214,6 +221,9 @@ export function TeamDetail() {
                               "fr-FR",
                             )}{" "}
                             · {match.competition.name}
+                            {match.entry_type === "simplified"
+                              ? " · Résultat simplifié"
+                              : ""}
                           </span>
                           <strong>
                             {match.home.name} {match.goalsHome ?? "—"} –{" "}

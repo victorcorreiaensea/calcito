@@ -1,11 +1,16 @@
 import { databaseConfig } from "./supabaseClient.js";
 import { getDataset } from "./manualRepository.js";
+import {
+  teamHistory,
+  formCoverage,
+  isTrackedLeague,
+} from "../domain/simplified.js";
 import { buildStandings } from "../domain/standings.js";
 
 function latestYear(dataset) {
   return dataset.seasons.reduce(
     (year, season) => Math.max(year, season.start_year),
-    0,
+    Math.max(0, ...(dataset.simplified || []).map((r) => r.season_start_year)),
   );
 }
 export function manualTeam(raw, dataset, year = latestYear(dataset)) {
@@ -29,29 +34,42 @@ export function manualTeam(raw, dataset, year = latestYear(dataset)) {
       item.is_valid &&
       item.is_published,
   );
+  const history = teamHistory(dataset, raw.id, year);
+  const coverage = formCoverage(history, form);
   return {
     ...raw,
     short: raw.short,
     logo: raw.logo_url,
     color: "#2F8CFF",
     competitionId: comp?.id || null,
-    competitionName: comp?.name || null,
-    season: memberships.some(member=>dataset.seasons.some(s=>s.id===member.season_id&&s.start_year===year))?year:null,
-    score: form?.score == null ? null : Number(form.score),
+    competitionName: comp?.name || raw.domestic_league || null,
+    season:
+      memberships.some((member) =>
+        dataset.seasons.some(
+          (s) => s.id === member.season_id && s.start_year === year,
+        ),
+      ) || history.length
+        ? year
+        : null,
+    score: coverage.score,
+    coverage,
     source: "manual",
-    formHistory: dataset.forms
-      .filter(
-        (item) =>
-          item.team_id === raw.id &&
-          item.season_start_year === year &&
-          item.is_valid &&
-          item.is_published,
-      )
-      .map((item) => ({
-        score: Number(item.score),
-        calculatedAt: item.calculated_at,
-        version: item.model_version,
-      })),
+    formHistory:
+      coverage.status === "unavailable"
+        ? []
+        : dataset.forms
+            .filter(
+              (item) =>
+                item.team_id === raw.id &&
+                item.season_start_year === year &&
+                item.is_valid &&
+                item.is_published,
+            )
+            .map((item) => ({
+              score: Number(item.score),
+              calculatedAt: item.calculated_at,
+              version: item.model_version,
+            })),
   };
 }
 function selectedSeason(dataset, competitionId, year) {
@@ -129,6 +147,12 @@ export function publicDataset(dataset) {
           ),
       ),
   );
+  const simplified = (dataset.simplified || []).filter(
+    (row) =>
+      row.is_published &&
+      !row.converted_at &&
+      teams.some((t) => t.id === row.team_id),
+  );
   const predictions = dataset.predictions.filter(
     (row) =>
       row.is_published &&
@@ -147,6 +171,7 @@ export function publicDataset(dataset) {
     stats,
     forms,
     predictions,
+    simplified,
   };
 }
 async function query(compute) {
@@ -166,7 +191,7 @@ async function query(compute) {
     source: { name: "Saisie manuelle · matchs publiés" },
     fetchedAt: new Date().toISOString(),
     updatedAt:
-      [...publicData.matches, ...publicData.stats]
+      [...publicData.matches, ...publicData.stats, ...publicData.simplified]
         .map((row) => row.updated_at)
         .filter(Boolean)
         .sort()
@@ -185,6 +210,17 @@ export const manualAdapter = {
         hasSeasons: d.seasons.some((s) => s.competition_id === comp.id),
       })),
     ),
+  seasonYears: ({ competition } = {}) =>
+    query((d) =>
+      [
+        ...new Set([
+          ...d.seasons
+            .filter((s) => !competition || s.competition_id === competition)
+            .map((s) => s.start_year),
+          ...(!competition ? d.simplified.map((r) => r.season_start_year) : []),
+        ]),
+      ].sort((a, b) => b - a),
+    ),
   teams: ({ search = "", competition = "", season } = {}) =>
     query((d) => {
       const selected = competition
@@ -196,7 +232,20 @@ export const manualAdapter = {
             team.name
               .toLocaleLowerCase("fr")
               .includes(search.toLocaleLowerCase("fr")) &&
-            (!season || d.members.some(m=>m.team_id===team.id&&d.seasons.some(s=>s.id===m.season_id&&s.start_year===Number(season)))) &&
+            (!season ||
+              d.members.some(
+                (m) =>
+                  m.team_id === team.id &&
+                  d.seasons.some(
+                    (s) =>
+                      s.id === m.season_id && s.start_year === Number(season),
+                  ),
+              ) ||
+              d.simplified.some(
+                (r) =>
+                  r.team_id === team.id &&
+                  r.season_start_year === Number(season),
+              )) &&
             (!competition ||
               d.members.some(
                 (m) => m.team_id === team.id && m.season_id === selected?.id,
@@ -206,8 +255,11 @@ export const manualAdapter = {
     }),
   team: (params) =>
     query((d) => {
-      const id=typeof params==="string"?params:params.teamId;
-      const year=typeof params==="string"?latestYear(d):Number(params.season)||latestYear(d);
+      const id = typeof params === "string" ? params : params.teamId;
+      const year =
+        typeof params === "string"
+          ? latestYear(d)
+          : Number(params.season) || latestYear(d);
       const raw = d.teams.find((t) => t.id === id);
       if (!raw)
         throw new Error("Cette équipe n’est pas publiée ou n’existe pas.");
@@ -234,6 +286,16 @@ export const manualAdapter = {
       const { competition, season: year } =
         typeof params === "string" ? { competition: params } : params;
       const season = selectedSeason(d, competition, year);
+      const comp = d.competitions.find((c) => c.id === season?.competition_id);
+      if (!isTrackedLeague(comp))
+        return {
+          rows: [],
+          partial: true,
+          unsupported: [],
+          recordedMatches: 0,
+          expectedMatches: null,
+          season: null,
+        };
       if (!season)
         return {
           rows: [],
@@ -258,6 +320,15 @@ export const manualAdapter = {
         season,
       };
     }),
+  teamHistory: (params) =>
+    query((d) => {
+      const year = Number(params.season) || latestYear(d);
+      return teamHistory(d, params.teamId, year).map((m) =>
+        m.entry_type === "simplified"
+          ? manualSimplified(m, d)
+          : manualMatch(m, d),
+      );
+    }),
   recentMatches: (params) =>
     query((d) => {
       const id = typeof params === "string" ? params : params.teamId;
@@ -265,32 +336,24 @@ export const manualAdapter = {
         typeof params === "string"
           ? latestYear(d)
           : Number(params.season) || latestYear(d);
-      return d.matches
-        .filter(
-          (match) =>
-            match.status === "finished" &&
-            [match.home_team_id, match.away_team_id].includes(id) &&
-            d.seasons.find((s) => s.id === match.season_id)?.start_year ===
-              year,
-        )
-        .slice(0, 5)
-        .map((match) => {
-          const stats = d.stats.find(
-            (item) => item.match_id === match.id && item.team_id === id,
-          );
-          return {
-            ...manualMatch(match, d),
-            teamStats: {
-              shots: stats?.shots ?? null,
-              bigChances: stats?.big_chances ?? null,
-              rating:
-                stats?.team_rating == null ? null : Number(stats.team_rating),
-              bonuses: stats?.bonuses ?? null,
-            },
-            sourceReference: match.source,
-            manualStats: stats || null,
-          };
-        });
+      return teamHistory(d, id, year, { limit: 5 }).map((m) => ({
+        ...(m.entry_type === "simplified"
+          ? manualSimplified(m, d)
+          : manualMatch(m, d)),
+        entry_type: m.entry_type,
+        teamStats: {
+          shots: m.stats?.shots ?? null,
+          bigChances: m.stats?.big_chances ?? null,
+          rating:
+            m.stats?.team_rating == null ? null : Number(m.stats.team_rating),
+          bonuses: m.stats?.bonuses ?? null,
+        },
+        manualStats: m.stats,
+        sourceReference:
+          m.entry_type === "simplified"
+            ? "Résultat rapide · saisi manuellement"
+            : m.source,
+      }));
     }),
   statistics: (params) =>
     query((d) => {
@@ -299,15 +362,7 @@ export const manualAdapter = {
         typeof params === "string"
           ? latestYear(d)
           : Number(params.season) || latestYear(d);
-      const matches = d.matches
-        .filter(
-          (match) =>
-            match.status === "finished" &&
-            [match.home_team_id, match.away_team_id].includes(id) &&
-            d.seasons.find((s) => s.id === match.season_id)?.start_year ===
-              year,
-        )
-        .slice(0, 5);
+      const matches = teamHistory(d, id, year, { limit: 5 });
       if (!matches.length) return null;
       const metrics = [
         ["shotsPerMatch", "shots"],
@@ -316,15 +371,10 @@ export const manualAdapter = {
         ["bigChancesPerMatch", "big_chances"],
         ["teamRating", "team_rating"],
       ].map(([key, field]) => {
-        const values = matches.map(
-          (match) =>
-            d.stats.find((s) => s.match_id === match.id && s.team_id === id)?.[
-              field
-            ],
-        );
+        const values = matches.map((m) => m.stats?.[field]);
         return {
           key,
-          value: values.every((v) => v !== null && v !== undefined)
+          value: values.every((v) => v != null)
             ? values.reduce((sum, v) => sum + Number(v), 0) / values.length
             : null,
           available: values.filter((v) => v != null).length,
@@ -339,3 +389,34 @@ export const manualAdapter = {
     }),
   dataset: () => query((d) => d),
 };
+
+export function manualSimplified(row, d) {
+  const tracked = manualTeam(
+    d.teams.find((t) => t.id === row.team_id),
+    d,
+    row.season_start_year,
+  );
+  // An optional link is shown only when that opponent's fiche is public.
+  const linked = d.teams.find((t) => t.id === row.opponent_team_id);
+  const opponent = linked
+    ? manualTeam(linked, d, row.season_start_year)
+    : {
+        id: null,
+        name: row.opponent_name,
+        short: row.opponent_name.slice(0, 3),
+        score: null,
+      };
+  const home = row.venue === "home";
+  return {
+    ...row,
+    entry_type: "simplified",
+    status: "finished",
+    home: home ? tracked : opponent,
+    away: home ? opponent : tracked,
+    goalsHome: home ? row.goals_for : row.goals_against,
+    goalsAway: home ? row.goals_against : row.goals_for,
+    season: row.season_start_year,
+    competition: { id: null, name: row.competition_name, coefficient: null },
+    verifiedAt: null,
+  };
+}

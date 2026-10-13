@@ -85,6 +85,9 @@ export default function CatalogManager({ kind, dataset, reload }) {
             short: form.short.toUpperCase(),
             country: form.country,
             logo_url: form.logo_url || null,
+            ...(dataset.simplifiedReady
+              ? { domestic_league: form.domestic_league?.trim() || null }
+              : {}),
             is_published: form.is_published,
           }
         : table === "competitions"
@@ -272,6 +275,11 @@ export default function CatalogManager({ kind, dataset, reload }) {
                   {table === "teams" ? (
                     <>
                       {field("short", "Abréviation")}
+                      {dataset.simplifiedReady &&
+                        field(
+                          "domestic_league",
+                          "Championnat d’origine (facultatif)",
+                        )}
                       {field("logo_url", "URL HTTPS du logo", "url")}
                     </>
                   ) : (

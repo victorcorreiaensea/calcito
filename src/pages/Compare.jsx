@@ -143,8 +143,16 @@ export default function Compare() {
   const leftId = params.get("team") || "",
     rightId = params.get("against") || "",
     year = params.get("season") || "";
-  const left = useFootball("team", {teamId:leftId,season:year}, { enabled: Boolean(leftId) }),
-    right = useFootball("team", {teamId:rightId,season:year}, { enabled: Boolean(rightId) });
+  const left = useFootball(
+      "team",
+      { teamId: leftId, season: year },
+      { enabled: Boolean(leftId) },
+    ),
+    right = useFootball(
+      "team",
+      { teamId: rightId, season: year },
+      { enabled: Boolean(rightId) },
+    );
   const a = useTeamAnalysis(left.result?.data.id, year),
     b = useTeamAnalysis(right.result?.data.id, year);
   function set(key, value) {
@@ -211,6 +219,16 @@ export default function Compare() {
         >
           {left.result && right.result && (
             <>
+              {left.result.data.coverage?.compatibilityGroup &&
+                right.result.data.coverage?.compatibilityGroup &&
+                left.result.data.coverage.compatibilityGroup !==
+                  right.result.data.coverage.compatibilityGroup && (
+                  <Notice>
+                    Ces indices proviennent de variantes ou de méthodes
+                    distinctes. Ils ne peuvent pas être comparés directement ;
+                    les résultats et statistiques restent consultables.
+                  </Notice>
+                )}
               <div className="comparison-summaries">
                 <TeamSummary
                   team={left.result.data}

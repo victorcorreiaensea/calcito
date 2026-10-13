@@ -1,3 +1,4 @@
+import { calculateSimplifiedForm } from "../domain/simplified.js";
 export const requiredStatistics = ["shots", "bigChances", "rating", "bonuses"];
 export const EUROPEAN_COEFFICIENT = 1.2;
 // The owner must explicitly supply the competition IDs to which 1.20 applies.
@@ -50,6 +51,7 @@ export function prepareCalcitoInput({
       missing.push(`${match.id} : coefficient de compétition non défini.`);
     return {
       matchId: match.id,
+      entryType: match.entry_type || "complete",
       kickoff: match.kickoff,
       opponent: home ? match.away.name : match.home.name,
       result,
@@ -63,10 +65,25 @@ export function prepareCalcitoInput({
       sourceReference: match.sourceReference ?? null,
     };
   });
-  return { teamId, complete: missing.length === 0, missing, trace };
+  const indexVariant = recent.some((m) => m.entry_type === "simplified")
+    ? "provisional"
+    : "complete";
+  return {
+    teamId,
+    indexVariant,
+    complete: missing.length === 0,
+    missing,
+    trace,
+  };
 }
 export function calculateCalcitoForm(input, { formula, formulaVersion } = {}) {
   const prepared = prepareCalcitoInput(input);
+  if (prepared.indexVariant === "provisional")
+    return {
+      ...prepared,
+      ...calculateSimplifiedForm(prepared),
+      formulaVersion: null,
+    };
   if (!prepared.complete)
     return {
       ...prepared,

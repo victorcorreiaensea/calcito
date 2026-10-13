@@ -67,14 +67,8 @@ export function CompetitionSelect({ value, onChange, all = true }) {
   );
 }
 export function SeasonSelect({ competition, value, onChange }) {
-  const { result } = useFootball("competitions");
-  const years = [
-    ...new Set(
-      (result?.data || [])
-        .filter((item) => !competition || item.id === competition)
-        .flatMap((item) => item.seasons),
-    ),
-  ].sort((a, b) => b - a);
+  const { result } = useFootball("seasonYears", { competition });
+  const years = result?.data || [];
   return (
     <div className="filter-field">
       <label htmlFor="season-filter">Saison</label>

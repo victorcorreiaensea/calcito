@@ -67,7 +67,13 @@ export function FormValue({ score, demo = false }) {
   return (
     <div className="form-value">
       <strong>{Number.isFinite(score) ? `${score} %` : "—"}</strong>
-      <span>{demo ? "Indice simulé" : "Indice indisponible"}</span>
+      <span>
+        {demo
+          ? "Indice simulé"
+          : Number.isFinite(score)
+            ? "Indice Calcito"
+            : "Indice indisponible"}
+      </span>
       {Number.isFinite(score) && <FormBar score={score} />}
     </div>
   );
@@ -128,6 +134,13 @@ export function Notice({ children }) {
   );
 }
 export function TeamLink({ team }) {
+  if (!team.id)
+    return (
+      <span className="team-link">
+        <TeamBadge team={team} small />
+        <span>{team.name}</span>
+      </span>
+    );
   return (
     <Link className="team-link" to={`/equipes/${encodeURIComponent(team.id)}`}>
       <TeamBadge team={team} small />

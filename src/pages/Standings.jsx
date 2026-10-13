@@ -9,6 +9,8 @@ import {
   Results,
   FormValue,
 } from "../components/FootballUI";
+import { isTrackedLeague } from "../domain/simplified";
+import { europeanRows, compatibleRankingGroups } from "../domain/european";
 import { SourceCaption } from "../components/DataContext";
 
 function Table({ rows, group, season }) {
@@ -83,8 +85,7 @@ export default function Standings() {
   const [competition, setCompetition] = useState(""),
     [year, setYear] = useState("");
   const comps = useFootball("competitions");
-  const leagueComps =
-    comps.result?.data.filter((comp) => comp.type === "league") || [];
+  const leagueComps = comps.result?.data.filter(isTrackedLeague) || [];
   const selectedId =
     competition ||
     leagueComps.find((comp) => comp.slug === "ligue-1")?.id ||
@@ -208,96 +209,64 @@ export default function Standings() {
 export function EuropeanRanking() {
   const [competition, setCompetition] = useState(""),
     [year, setYear] = useState(""),
-    [onlyCalculated, setOnlyCalculated] = useState(false);
+    [scope, setScope] = useState("all"),
+    [quality, setQuality] = useState("all");
   const state = useFootball("dataset");
   const d = state.result?.data;
-  const leagues = d?.competitions.filter((c) => c.type === "league") || [];
-  const years = [
-    ...new Set(
-      d?.seasons
-        .filter((s) => leagues.some((c) => c.id === s.competition_id))
-        .map((s) => s.start_year) || [],
-    ),
-  ].sort((a, b) => b - a);
+  const leagues = d?.competitions.filter(isTrackedLeague) || [];
+  const years = [...new Set(d?.seasons.map((s) => s.start_year) || [])].sort(
+    (a, b) => b - a,
+  );
   const selectedYear = Number(year) || years[0];
-  const members =
-    d?.members.filter((m) => {
-      const season = d.seasons.find((s) => s.id === m.season_id);
-      return (
-        season?.start_year === selectedYear &&
-        leagues.some((c) => c.id === season.competition_id) &&
-        (!competition || season.competition_id === competition)
-      );
-    }) || [];
-  const candidates = [...new Set(members.map((m) => m.team_id))]
-    .map((id) => {
-      const team = d.teams.find((t) => t.id === id),
-        member = members.find((m) => m.team_id === id),
-        season = d.seasons.find((s) => s.id === member.season_id),
-        form = d.forms.find(
-          (f) =>
-            f.team_id === id &&
-            f.season_start_year === selectedYear &&
-            f.is_valid &&
-            f.is_published,
-        );
-      const recent = d.matches
-        .filter(
-          (m) =>
-            m.is_published &&
-            m.status === "finished" &&
-            [m.home_team_id, m.away_team_id].includes(id) &&
-            d.seasons.find((s) => s.id === m.season_id)?.start_year ===
-              selectedYear,
-        )
-        .slice(0, 5)
-        .reverse()
-        .map((m) => {
-          const home = m.home_team_id === id,
-            gf = home ? m.goals_home : m.goals_away,
-            ga = home ? m.goals_away : m.goals_home;
-          return gf > ga ? "V" : gf === ga ? "N" : "D";
-        });
-      return {
-        results: recent,
-        team: { ...team, logo: team?.logo_url },
-        comp: d.competitions.find((c) => c.id === season.competition_id),
-        score: form?.score == null ? null : Number(form.score),
-      };
-    })
-    .filter((row) => row.team?.id);
-  const rows = candidates
-    .filter((row) => !onlyCalculated || row.score !== null)
-    .sort(
-      (a, b) =>
-        (b.score ?? -1) - (a.score ?? -1) ||
-        a.team.name.localeCompare(b.team.name),
-    );
+  const candidates = d ? europeanRows(d, selectedYear) : [];
+  const rows = candidates.filter(
+    (r) =>
+      (!competition || r.league?.id === competition) &&
+      (scope === "all" || (scope === "tracked" ? !r.extra : r.extra)) &&
+      (quality === "all" ||
+        (quality === "complete"
+          ? r.status === "complete"
+          : r.variant === "provisional")),
+  );
+  const groups = compatibleRankingGroups(rows);
   return (
     <section className="container page-content">
       <PageHeading
-        label="UNE ÉCHELLE COMMUNE, PAS UN CLASSEMENT UEFA"
+        label="FORME DES CLUBS · PAS UN CLASSEMENT UEFA"
         title="Classement européen Calcito"
-        description="Les clubs des six championnats, regroupés par saison et classés uniquement lorsqu’un indice Calcito valide est disponible."
+        description="Les six championnats suivis et les clubs supplémentaires inscrits aux coupes européennes. Résultats complets et rapides réunis, sans inventer d’indice."
       />
       <Notice>
-        La formule propriétaire n’est pas encore fournie. Aucun indice ni rang
-        européen n’est inventé. Ce classement n’est pas un classement officiel
-        UEFA.
+        Les indices complets et provisoires ne sont classés ensemble que si leur
+        compatibilité mathématique est validée. Chaque variante et groupe de
+        méthode possède ici son propre classement. Sans méthode définie, les
+        clubs restent sans rang ni pourcentage.
       </Notice>
       <DataState {...state}>
         <div className="filter-bar">
+          <div className="filter-field">
+            <label htmlFor="europe-scope">Clubs</label>
+            <select
+              id="europe-scope"
+              value={scope}
+              onChange={(e) => setScope(e.target.value)}
+            >
+              <option value="all">Tous les clubs</option>
+              <option value="tracked">Six championnats suivis</option>
+              <option value="extra">Clubs européens supplémentaires</option>
+            </select>
+          </div>
           <div className="filter-field">
             <label htmlFor="europe-league">Championnat</label>
             <select
               id="europe-league"
               value={competition}
-              onChange={(event) => setCompetition(event.target.value)}
+              onChange={(e) => setCompetition(e.target.value)}
             >
               <option value="">Tous les championnats</option>
-              {leagues.map((comp) => (
-                <option key={comp.id} value={comp.id}>
-                  {comp.name}
+              {leagues.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
@@ -307,67 +276,94 @@ export function EuropeanRanking() {
             <select
               id="europe-season"
               value={year}
-              onChange={(event) => setYear(event.target.value)}
+              onChange={(e) => setYear(e.target.value)}
             >
               <option value="">Dernière saison publiée</option>
-              {years.map((value) => (
-                <option key={value} value={value}>
-                  {value}–{value + 1}
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}–{y + 1}
                 </option>
               ))}
             </select>
           </div>
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={onlyCalculated}
-              onChange={(event) => setOnlyCalculated(event.target.checked)}
-            />
-            Indices calculables uniquement
-          </label>
-        </div>
-        {rows.length ? (
-          <div className="table-scroll">
-            <table className="official-table">
-              <thead>
-                <tr>
-                  <th>Rang Calcito</th>
-                  <th>Équipe</th>
-                  <th>Championnat</th>
-                  <th>Indice</th>
-                  <th>5 derniers</th>
-                  <th>Historique</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => (
-                  <tr key={row.team.id}>
-                    <td>{row.score === null ? "—" : index + 1}</td>
-                    <td>
-                      <TeamLink team={row.team} />
-                    </td>
-                    <td>{row.comp.name}</td>
-                    <td>
-                      {row.score === null
-                        ? "Indice indisponible"
-                        : `${row.score} %`}
-                    </td>
-                    <td>
-                      <Results results={row.results} demo={false} />
-                    </td>
-                    <td>
-                      <Link to={`/equipes/${row.team.id}`}>
-                        Voir les matchs →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="filter-field">
+            <label htmlFor="europe-quality">Indices et complétude</label>
+            <select
+              id="europe-quality"
+              value={quality}
+              onChange={(e) => setQuality(e.target.value)}
+            >
+              <option value="all">Toutes les données</option>
+              <option value="complete">Indices complets uniquement</option>
+              <option value="provisional">
+                Indices provisoires / méthode en attente
+              </option>
+            </select>
           </div>
-        ) : (
+        </div>
+        {groups.map((group) => (
+          <section key={group.key} className="analysis-panel">
+            <h2>{group.label}</h2>
+            {group.key === "unavailable" && (
+              <p className="muted-text">
+                Ordre alphabétique, sans classement sportif.
+              </p>
+            )}
+            <div className="table-scroll">
+              <table className="official-table">
+                <thead>
+                  <tr>
+                    <th>Rang</th>
+                    <th>Équipe</th>
+                    <th>Pays</th>
+                    <th>Championnat d’origine</th>
+                    <th>Indice / complétude</th>
+                    <th>5 derniers</th>
+                    <th>Historique</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.rows.map((row) => (
+                    <tr key={row.team.id}>
+                      <td>{row.rank ?? "—"}</td>
+                      <td>
+                        <TeamLink team={row.team} />
+                      </td>
+                      <td>{row.team.country}</td>
+                      <td>{row.origin}</td>
+                      <td>
+                        {row.score == null
+                          ? "Indice indisponible"
+                          : `${row.score} %`}
+                        <small className="coverage-caption">
+                          {row.sampleSize} / 5 résultats · {row.detailed}{" "}
+                          détaillés · {row.simplified} simplifiés
+                          <br />
+                          {row.label}
+                        </small>
+                      </td>
+                      <td>
+                        <Results results={row.results} demo={false} />
+                      </td>
+                      <td>
+                        <Link
+                          to={`/equipes/${row.team.id}?season=${selectedYear}`}
+                        >
+                          Voir les matchs →
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ))}
+        {!rows.length && (
           <p className="muted-text">
-            Aucune équipe avec des données publiées dans cette sélection.
+            Aucun club dans cette sélection. Les clubs supplémentaires
+            apparaissent après publication de leur fiche et de leur
+            participation à une saison européenne.
           </p>
         )}
         <SourceCaption result={state.result} />

@@ -10,6 +10,13 @@ export default function Methodology() {
         title="Méthodologie"
         description="Les résultats vérifiés, les classements reconstruits et les futurs modèles ont chacun leur rôle. Les données manquantes restent visibles."
       />
+      <Notice>
+        Les résultats rapides des championnats non suivis rejoignent les cinq
+        derniers matchs. Ils renseignent uniquement le score : les statistiques
+        absentes restent inconnues. La méthode provisoire attend une validation,
+        sans pourcentage inventé. Ces résultats ne modifient jamais les
+        classements nationaux.
+      </Notice>
       <div className="method-grid">
         {[
           [

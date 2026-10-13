@@ -2,6 +2,7 @@ import { useFootball } from "../hooks/useFootball";
 import { calculateCalcitoForm } from "../engines/calcitoEngine";
 import { calcitoModel } from "../config/calcitoModel";
 import { SourceCaption } from "./DataContext";
+import { formCoverage } from "../domain/simplified";
 import { Results, Notice } from "./FootballUI";
 
 export function useTeamAnalysis(id, season = "") {
@@ -35,7 +36,15 @@ export function useTeamAnalysis(id, season = "") {
   const results = [...engine.trace]
     .reverse()
     .map((match) => match.result || "?");
-  return { recent, statistics, engine, results };
+  const coverage = formCoverage(
+    (recent.result?.data || []).map((m) => ({
+      entry_type: m.entry_type || "complete",
+      stats: m.manualStats,
+      goals_for: m.home.id === id ? m.goalsHome : m.goalsAway,
+      goals_against: m.home.id === id ? m.goalsAway : m.goalsHome,
+    })),
+  );
+  return { recent, statistics, engine, results, coverage };
 }
 export function CalculationTrace({ analysis }) {
   const { recent, engine } = analysis;
@@ -44,8 +53,8 @@ export function CalculationTrace({ analysis }) {
       <h2>Cinq derniers matchs officiels</h2>
       <Notice>
         {engine.trace.length} / 5 matchs publiés dans la saison sélectionnée.
-        Indice indisponible tant que la formule ou les données nécessaires
-        manquent.
+        {analysis.coverage.detailed} avec les données du moteur ·{" "}
+        {analysis.coverage.simplified} simplifiés. {analysis.coverage.label}.
       </Notice>
       {recent.loading ? (
         <p role="status">Chargement des matchs…</p>
@@ -64,6 +73,9 @@ export function CalculationTrace({ analysis }) {
                   <span>
                     {new Date(match.kickoff).toLocaleDateString("fr-FR")} ·{" "}
                     {match.result || "Résultat indisponible"}
+                    {match.entryType === "simplified"
+                      ? " · Résultat rapide"
+                      : ""}
                   </span>
                 </header>
                 <p className="result-score">

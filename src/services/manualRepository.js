@@ -12,10 +12,13 @@ export async function readAll(
       offset,
       offset + 999,
     );
-    if (result.error)
-      throw new Error(
+    if (result.error) {
+      const error = new Error(
         "Lecture des données impossible. Vérifiez la connexion et la configuration de la base.",
       );
+      error.code = result.error.code;
+      throw error;
+    }
     data.push(...result.data);
     if (result.data.length < 1000) return data;
   }
@@ -47,6 +50,7 @@ export async function getDataset() {
       stats,
       forms,
       predictions,
+      simplified,
     ] = await Promise.all([
       readAll("competitions", "*", (q) => q.order("name")),
       readAll("seasons", "*", (q) =>
@@ -60,6 +64,15 @@ export async function getDataset() {
         q.order("calculated_at", { ascending: false }),
       ),
       readAll("prediction_history"),
+      readAll("simplified_results", "*", (q) =>
+        q.order("kickoff", { ascending: false }),
+      )
+        .then((rows) => ({ rows, ready: true }))
+        .catch((error) => {
+          if (["42P01", "PGRST205"].includes(error.code))
+            return { rows: [], ready: false };
+          throw error;
+        }),
     ]);
     if (generation !== dataGeneration)
       throw new Error(
@@ -74,6 +87,8 @@ export async function getDataset() {
       stats,
       forms,
       predictions,
+      simplified: simplified.rows,
+      simplifiedReady: simplified.ready,
     };
     cached = { at: Date.now(), value };
     return value;
@@ -101,6 +116,11 @@ export function translateError(error) {
   if (
     error.code === "P0001" &&
     error.message === "La date ne correspond pas à la saison sélectionnée."
+  )
+    return new Error(error.message);
+  if (
+    error.code === "P0001" &&
+    /conversion|converti|adversaire/i.test(error.message)
   )
     return new Error(error.message);
   if (error.code === "23505")
@@ -134,6 +154,7 @@ export async function mutate(table, action, payload, id) {
     "seasons",
     "season_teams",
     "matches",
+    "simplified_results",
   ]);
   if (!allowed.has(table))
     throw new Error("Cette table ne peut pas être modifiée ici.");
@@ -159,4 +180,14 @@ export async function setParticipants(seasonId, participants) {
 }
 export function hasDatabase() {
   return Boolean(supabase);
+}
+
+export async function saveSimplified(payload) {
+  const client = await requireOwner();
+  const { data, error } = await client.rpc("save_simplified_result", {
+    payload,
+  });
+  if (error) throw translateError(error);
+  invalidateManualData();
+  return data;
 }

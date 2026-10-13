@@ -228,13 +228,41 @@ test("public pages hide private drafts and source statistics even for a logged-i
   );
 });
 
-test('team profiles use the selected season for league affiliation and form, without borrowing another year',async()=>{
-  const {manualTeam}=await import('../src/services/manualAdapter.js');
-  const raw={id:'a',name:'A'};
-  const data={seasons:[{id:'old',competition_id:'first',start_year:2025},{id:'new',competition_id:'second',start_year:2026}],competitions:[{id:'first',name:'Old league',type:'league'},{id:'second',name:'New league',type:'league'}],members:[{team_id:'a',season_id:'old'},{team_id:'a',season_id:'new'}],forms:[{team_id:'a',season_start_year:2025,is_valid:true,is_published:true,score:70,calculated_at:'2025-12-01T00:00:00Z'}]};
-  assert.equal(manualTeam(raw,data,2025).competitionName,'Old league');
-  assert.equal(manualTeam(raw,data,2025).score,70);
-  assert.equal(manualTeam(raw,data,2026).competitionName,'New league');
-  assert.equal(manualTeam(raw,data,2026).score,null);
-  assert.equal(manualTeam(raw,data,2024).season,null);
+test("team profiles use the selected season for league affiliation and form, without borrowing another year", async () => {
+  const { manualTeam } = await import("../src/services/manualAdapter.js");
+  const raw = { id: "a", name: "A" };
+  const data = {
+    seasons: [
+      { id: "old", competition_id: "first", start_year: 2025 },
+      { id: "new", competition_id: "second", start_year: 2026 },
+    ],
+    competitions: [
+      { id: "first", name: "Old league", type: "league" },
+      { id: "second", name: "New league", type: "league" },
+    ],
+    members: [
+      { team_id: "a", season_id: "old" },
+      { team_id: "a", season_id: "new" },
+    ],
+    forms: [
+      {
+        team_id: "a",
+        season_start_year: 2025,
+        is_valid: true,
+        is_published: true,
+        score: 70,
+        calculated_at: "2025-12-01T00:00:00Z",
+      },
+    ],
+  };
+  assert.equal(manualTeam(raw, data, 2025).competitionName, "Old league");
+  // An old stored score cannot be shown without its five supporting results.
+  assert.equal(manualTeam(raw, data, 2025).score, null);
+  assert.equal(
+    manualTeam(raw, data, 2025).coverage.label,
+    "Moins de cinq résultats",
+  );
+  assert.equal(manualTeam(raw, data, 2026).competitionName, "New league");
+  assert.equal(manualTeam(raw, data, 2026).score, null);
+  assert.equal(manualTeam(raw, data, 2024).season, null);
 });

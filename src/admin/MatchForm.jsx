@@ -10,7 +10,7 @@ import {
 import { Notice } from "../components/FootballUI";
 import { saveMatch } from "../services/manualRepository";
 
-function TeamSearch({
+export function TeamSearch({
   label,
   value,
   onChange,
@@ -187,12 +187,25 @@ export default function MatchForm({ dataset, editing, onSaved, onCancel }) {
       <div className="panel-heading">
         <div>
           <span className="eyebrow">UN MATCH. DEUX ÉQUIPES.</span>
-          <h2>{editing ? "Modifier le match" : "Saisie rapide"}</h2>
+          <h2>
+            {editing?.converting
+              ? "Convertir en match complet"
+              : editing
+                ? "Modifier le match"
+                : "Match complet"}
+          </h2>
         </div>
         <span className="status-pill">
           <CalendarDays size={13} /> Week-end & coupes
         </span>
       </div>
+      {editing?.converting && (
+        <Notice>
+          La conversion conserve l’identifiant, la date, le terrain et le score.
+          Le résultat rapide d’origine sera archivé. Renseignez la journée et la
+          source avant publication.
+        </Notice>
+      )}
       <p className="muted-text">
         Tab pour avancer. Entrée enregistre puis passe au match suivant. Un
         champ vide reste non renseigné ; zéro signifie une valeur réellement

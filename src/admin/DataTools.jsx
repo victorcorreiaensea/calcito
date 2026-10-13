@@ -34,7 +34,14 @@ const matchHeaders = [
     ].map((key) => `${side}_${key}`),
   ),
 ];
-const teamHeaders = ["slug", "name", "short", "country", "logo_url"];
+const teamHeaders = [
+  "slug",
+  "name",
+  "short",
+  "country",
+  "logo_url",
+  "domestic_league",
+];
 export default function DataTools({ dataset, reload }) {
   const [kind, setKind] = useState("matches"),
     [preview, setPreview] = useState([]),
@@ -62,7 +69,11 @@ export default function DataTools({ dataset, reload }) {
         seen.add(row.slug);
         payload = {
           ...Object.fromEntries(
-            teamHeaders.map((key) => [key, row[key] || null]),
+            teamHeaders
+              .filter(
+                (key) => key !== "domestic_league" || dataset.simplifiedReady,
+              )
+              .map((key) => [key, row[key] || null]),
           ),
           is_published: false,
         };
@@ -233,6 +244,34 @@ export default function DataTools({ dataset, reload }) {
         slugs ; la saison est son libellé ou son année de début.
       </p>
       <div className="admin-actions">
+        <button
+          className="button button-secondary"
+          onClick={() =>
+            downloadCSV(
+              "calcito-resultats-rapides.csv",
+              dataset.simplified || [],
+              [
+                "id",
+                "team_id",
+                "opponent_name",
+                "opponent_team_id",
+                "kickoff",
+                "season_start_year",
+                "season_end_year",
+                "competition_name",
+                "venue",
+                "goals_for",
+                "goals_against",
+                "is_published",
+                "converted_match_id",
+                "converted_at",
+                "updated_at",
+              ],
+            )
+          }
+        >
+          Exporter les résultats rapides & conversions
+        </button>
         <button className="button button-secondary" onClick={exportMatches}>
           Exporter matchs & statistiques
         </button>

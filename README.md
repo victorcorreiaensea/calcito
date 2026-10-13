@@ -1,4 +1,10 @@
-# CALCITO V3 — Football Intelligence
+# CALCITO V3.1 — Football Intelligence
+
+## Résultats rapides
+
+Deux modes de saisie, adversaires libres, historiques fusionnés, suivi de couverture et clubs européens supplémentaires. Les indices provisoires attendent une méthode validée ; aucun pourcentage n’est simulé. L’identité noire et bleue est conservée.
+
+Pour activer les nouvelles fonctions dans le projet Supabase existant, appliquer **uniquement la migration 002** suivant [le guide V3.1](docs/V3_1_SETUP.md). Avant activation, les matchs complets restent utilisables.
 
 Plateforme de football sur fond noir, cartes bleu foncé, accents bleu électrique et textes blancs. React/Vite, CSS classique, Lucide React, Supabase. Mascotte originale Calcito : robot sportif en panneaux de ballon, cœur bleu, brassard et crampons.
 
