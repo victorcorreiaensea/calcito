@@ -1,0 +1,21 @@
+name: Read licensed dated club results
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      max-parallel: 2
+      fail-fast: false
+      matrix:
+        league: [ligue-1, liga-portugal, premier-league, laliga, serie-a, bundesliga]
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install beautifulsoup4==4.13.4
+      - name: Read linked CC BY-SA season pages
+        env:
+          LEAGUE: ${{ matrix.league }}
+        run: python3 scripts/collect-licensed-club-results.py
