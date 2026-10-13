@@ -18,7 +18,7 @@ jobs:
           for table in ['teams','competitions','seasons','season_teams','matches']:
             request=urllib.request.Request(os.environ['SUPABASE_URL']+'/rest/v1/'+table+'?select=*&limit=1000',headers={'apikey':os.environ['SUPABASE_PUBLIC_KEY']})
             with urllib.request.urlopen(request,timeout=20) as response: rows=json.load(response)
-            for index in range(0,max(len(rows),1),40):
-              payload=json.dumps(rows[index:index+40],ensure_ascii=False).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+            for index in range(0,max(len(rows),1),2):
+              payload=json.dumps(rows[index:index+2],ensure_ascii=False).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
               print('::notice title=Public catalog '+table+' '+str(index)+'::'+payload)
           PY
