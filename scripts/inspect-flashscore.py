@@ -53,6 +53,7 @@ def inspect():
         time.sleep(delay)
         content = get(legal[0])
         if content:
+            content = re.sub(r'<script.*?</script>|<style.*?</style>', '', content, flags=re.I | re.S)
             readable = html.unescape(re.sub(r'<[^>]+>', ' ', content))
             readable = re.sub(r'\s+', ' ', readable)
             for match in list(re.finditer(r'automat|scrap|robot|extract|extraction|personnel|commercial|reproduction', readable, re.I))[:8]:

@@ -42,7 +42,7 @@ const teamHeaders = [
   "logo_url",
   "domestic_league",
 ];
-export default function DataTools({ dataset, reload }) {
+export default function DataTools({ dataset, reload, onImport }) {
   const [kind, setKind] = useState("matches"),
     [preview, setPreview] = useState([]),
     [message, setMessage] = useState(""),
@@ -244,6 +244,11 @@ export default function DataTools({ dataset, reload }) {
         slugs ; la saison est son libellé ou son année de début.
       </p>
       <div className="admin-actions">
+        {onImport && (
+          <button className="button button-primary" onClick={onImport}>
+            Importer des matchs avec correspondances
+          </button>
+        )}
         <button
           className="button button-secondary"
           onClick={() =>

@@ -25,6 +25,8 @@ import Coverage from "./Coverage";
 import { normalizeClub } from "../domain/simplified";
 import CatalogManager from "./CatalogManager";
 import DataTools from "./DataTools";
+import MatchImport from "./MatchImport";
+import { DATE_ONLY_MARKER } from "../domain/matchImport";
 
 function Login() {
   const [email, setEmail] = useState(""),
@@ -74,7 +76,11 @@ function Login() {
             {auth.error ||
               "Ce compte ne possède pas les autorisations administrateur."}
           </Notice>
-          <button className="button button-secondary" onClick={auth.signOut}>
+          <button
+            className="button button-secondary"
+            disabled={importBusy}
+            onClick={auth.signOut}
+          >
             Se déconnecter
           </button>
         </>
@@ -128,6 +134,7 @@ const tabs = [
   ["teams", "Équipes"],
   ["competitions", "Compétitions"],
   ["seasons", "Saisons & participants"],
+  ["imports", "Importer des matchs"],
   ["tools", "Import / Export"],
   ["audit", "Journal"],
 ];
@@ -139,6 +146,7 @@ function Dashboard() {
     [editing, setEditing] = useState(null),
     [entryMode, setEntryMode] = useState("complete"),
     [initialTeam, setInitialTeam] = useState(""),
+    [importBusy, setImportBusy] = useState(false),
     [page, setPage] = useState(0),
     [deleteId, setDeleteId] = useState(null),
     [message, setMessage] = useState(""),
@@ -296,7 +304,11 @@ function Dashboard() {
           title="Administration"
           description="La saisie du week-end et des coupes, dans un seul espace privé. Match complet pour deux équipes, résultat rapide pour une équipe suivie."
         />
-        <button className="button button-secondary" onClick={auth.signOut}>
+        <button
+          className="button button-secondary"
+          disabled={importBusy}
+          onClick={auth.signOut}
+        >
           <LogOut size={15} /> Déconnexion
         </button>
       </div>
@@ -304,6 +316,7 @@ function Dashboard() {
         {tabs.map(([key, label]) => (
           <button
             key={key}
+            disabled={importBusy}
             aria-current={tab === key ? "page" : undefined}
             onClick={() => {
               setTab(key);
@@ -473,6 +486,12 @@ function Dashboard() {
           <div className="panel-heading">
             <h2>Matchs & brouillons</h2>
             <button
+              className="button button-secondary"
+              onClick={() => setTab("imports")}
+            >
+              Importer des matchs
+            </button>
+            <button
               className="button button-primary"
               onClick={() => {
                 openEntry("complete");
@@ -544,7 +563,8 @@ function Dashboard() {
                           ?.name}
                   </h3>
                   <p>
-                    {match.entry_type === "simplified"
+                    {match.entry_type === "simplified" ||
+                    (match.comment || "").includes(DATE_ONLY_MARKER)
                       ? new Date(match.kickoff).toLocaleDateString("fr-FR")
                       : new Date(match.kickoff).toLocaleString("fr-FR")}{" "}
                     · {match.is_published ? "Publié" : "Brouillon privé"} ·
@@ -660,7 +680,20 @@ function Dashboard() {
           reload={reload}
         />
       )}
-      {tab === "tools" && <DataTools dataset={dataset} reload={reload} />}
+      {tab === "imports" && (
+        <MatchImport
+          dataset={dataset}
+          reload={reload}
+          onBusyChange={setImportBusy}
+        />
+      )}
+      {tab === "tools" && (
+        <DataTools
+          dataset={dataset}
+          reload={reload}
+          onImport={() => setTab("imports")}
+        />
+      )}
       {tab === "audit" && (
         <section className="admin-panel">
           <h2>Journal des modifications</h2>

@@ -53,7 +53,7 @@ export function FixtureCard({ match }) {
         <span>
           {new Date(match.kickoff).toLocaleString("fr-FR", {
             dateStyle: "medium",
-            timeStyle: "short",
+            ...(match.timeKnown === false ? {} : { timeStyle: "short" }),
           })}
         </span>
         <Link

@@ -4128,3 +4128,75 @@ input[type="checkbox"] {
     grid-column: 1 / -1;
   }
 }
+
+/* Reviewed CSV import. Inputs stay aligned; wide previews scroll inside their card. */
+.match-import textarea {
+  width: 100%;
+  resize: vertical;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #fff;
+  padding: 14px;
+  font: inherit;
+}
+.import-controls {
+  margin: 24px 0;
+}
+.import-preview {
+  min-width: 900px;
+}
+.import-preview td {
+  vertical-align: top;
+  max-width: 320px;
+}
+.import-preview label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 10px 0;
+}
+.import-preview input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: #fff;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px;
+  font: inherit;
+}
+.import-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+.import-score input {
+  width: 65px;
+  font-variant-numeric: tabular-nums;
+}
+.import-row-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.import-preview details summary {
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+}
+.import-report {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  margin-top: 24px;
+}
+.import-report p {
+  color: var(--muted);
+  line-height: 1.8;
+}
+.match-import button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

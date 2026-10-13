@@ -101,14 +101,23 @@ export async function getDataset() {
 export async function requireOwner() {
   const client = requireDatabase();
   const { data, error } = await client.rpc("is_calcito_admin");
-  if (error || data !== true)
-    throw new Error("Accès réservé au compte administrateur.");
+  if (error || data !== true) {
+    const denied = new Error("Accès réservé au compte administrateur.");
+    denied.code = "42501";
+    throw denied;
+  }
   return client;
 }
-export async function saveMatch(payload) {
+export async function saveMatch(payload, { timeoutMs } = {}) {
   const client = await requireOwner();
-  const { data, error } = await client.rpc("save_match", { payload });
-  if (error) throw translateError(error);
+  let request = client.rpc("save_match", { payload });
+  if (timeoutMs) request = request.abortSignal(AbortSignal.timeout(timeoutMs));
+  const { data, error } = await request;
+  if (error) {
+    const translated = translateError(error);
+    translated.code = error.code;
+    throw translated;
+  }
   invalidateManualData();
   return data;
 }

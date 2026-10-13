@@ -1,5 +1,9 @@
 # CALCITO V3.1 — Football Intelligence
 
+## Import CSV et relevé Flashscore
+
+Import de résultats avec aperçu modifiable, association des noms d’équipe, choix ignorer/mettre à jour les doublons, données inconnues NULL et bilan des erreurs/imports partiels. L’onglet Flashscore propose un relevé humain fonctionnel ; aucune extraction automatique non autorisée n’est annoncée. [Guide d’utilisation et limites](docs/IMPORT_MATCHES.md). Aucune nouvelle migration pour cet import.
+
 ## Résultats rapides
 
 Deux modes de saisie, adversaires libres, historiques fusionnés, suivi de couverture et clubs européens supplémentaires. Les indices provisoires attendent une méthode validée ; aucun pourcentage n’est simulé. L’identité noire et bleue est conservée.

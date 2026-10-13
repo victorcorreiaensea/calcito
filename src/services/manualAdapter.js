@@ -1,3 +1,4 @@
+import { DATE_ONLY_MARKER } from "../domain/matchImport.js";
 import { databaseConfig } from "./supabaseClient.js";
 import { getDataset } from "./manualRepository.js";
 import {
@@ -105,6 +106,7 @@ export function manualMatch(match, dataset) {
     season: season?.start_year,
     kickoff: match.kickoff,
     status: match.status,
+    timeKnown: !(match.comment || "").includes(DATE_ONLY_MARKER),
     goalsHome: match.goals_home,
     goalsAway: match.goals_away,
     source: "manual",

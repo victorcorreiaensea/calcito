@@ -1,4 +1,18 @@
-export function parseCSV(text) {
+export function parseCSV(text, delimiter) {
+  if (!delimiter) {
+    const header = text.replace(/^\uFEFF/, "").split(/\r?\n/)[0];
+    let quoted = false;
+    const counts = { ",": 0, ";": 0, "\t": 0 };
+    for (let i = 0; i < header.length; i++) {
+      if (header[i] === '"') {
+        if (quoted && header[i + 1] === '"') i++;
+        else quoted = !quoted;
+      } else if (!quoted && header[i] in counts) counts[header[i]]++;
+    }
+    delimiter = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+  }
+  if (![",", ";", "\t"].includes(delimiter))
+    throw new Error("Séparateur CSV non pris en charge.");
   const rows = [];
   let row = [],
     cell = "",
@@ -16,7 +30,7 @@ export function parseCSV(text) {
         afterQuote = true;
       } else cell += char;
     } else if (char === '"' && !cell && !afterQuote) quoted = true;
-    else if (char === ",") {
+    else if (char === delimiter) {
       row.push(cell);
       cell = "";
       afterQuote = false;
