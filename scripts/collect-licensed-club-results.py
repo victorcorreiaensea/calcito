@@ -18,7 +18,11 @@ for ref in [r for r in refs if r['league']==league]:
   if e.code in (401,403,429):break
   continue
  except Exception as e:coverage.append({'url':url,'error':type(e).__name__});continue
- soup=BeautifulSoup(html,'html.parser');count=0
+ soup=BeautifulSoup(html,'html.parser');count=0;contexts={};hierarchy={}
+ for node in soup.find_all(['h2','h3','h4','h5','div','table']):
+  if node.name.startswith('h'):
+   level=int(node.name[1]);hierarchy={k:v for k,v in hierarchy.items()if k<level};hierarchy[level]=node.get_text(' ',strip=True)
+  elif 'footballbox' in node.get('class',[]):contexts[id(node)]=' > '.join(hierarchy.values())
  for box in soup.select('.footballbox'):
   fields={name:box.select_one('.'+name)for name in ['fdate','fhome','faway','fscore']}
   if not all(fields.values()):continue
@@ -28,7 +32,7 @@ for ref in [r for r in refs if r['league']==league]:
   if not date_match or not score:continue
   date=datetime.datetime.strptime(date_match.group(0),'%d %B %Y').date().isoformat()
   if date>'2026-10-13':continue
-  records.append({'date':date,'home':texts['fhome'],'away':texts['faway'],'home_goals':int(score[1]),'away_goals':int(score[2]),'league':league,'source_url':url,'reference_club':ref['club']});count+=1
+  records.append({'date':date,'home':texts['fhome'],'away':texts['faway'],'home_goals':int(score[1]),'away_goals':int(score[2]),'league':league,'source_url':url,'reference_club':ref['club'],'competition_context':contexts.get(id(box),'')});count+=1
  coverage.append({'url':url,'status':200,'dated_boxes':count,'boxes':len(soup.select('.footballbox'))})
  time.sleep(1)
 encoded=base64.b64encode(gzip.compress(json.dumps({'league':league,'records':records,'coverage':coverage},ensure_ascii=False).encode())).decode()
