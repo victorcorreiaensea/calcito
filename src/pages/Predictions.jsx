@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useFootball } from "../hooks/useFootball";
 import { useTeamAnalysis } from "../components/TeamAnalysis";
 import {
@@ -18,8 +18,16 @@ export default function Predictions() {
   const homeId = params.get("home") || "",
     awayId = params.get("away") || "",
     year = params.get("season") || "";
-  const home = useFootball("team", {teamId:homeId,season:year}, { enabled: Boolean(homeId) }),
-    away = useFootball("team", {teamId:awayId,season:year}, { enabled: Boolean(awayId) });
+  const home = useFootball(
+      "team",
+      { teamId: homeId, season: year },
+      { enabled: Boolean(homeId) },
+    ),
+    away = useFootball(
+      "team",
+      { teamId: awayId, season: year },
+      { enabled: Boolean(awayId) },
+    );
   const a = useTeamAnalysis(home.result?.data.id, year),
     b = useTeamAnalysis(away.result?.data.id, year);
   const dataset = useFootball("dataset");
@@ -39,9 +47,12 @@ export default function Predictions() {
       />
       <CalcitoMascot
         variant="analysis"
-        title="Modèle de pronostics en développement"
-        message="Un indice de forme n’est pas une probabilité de victoire. Je ne présente aucun pronostic ni aucune cote inventée."
+        title="La forme avant les probabilités"
+        message="Un indice de forme n’est pas une probabilité de victoire. Les cotes de l’Arène reposent sur un modèle de buts distinct, uniquement après validation historique."
       />
+      <Link className="button button-primary arena-link" to="/arene">
+        Découvrir l’Arène & les Calcithunes →
+      </Link>
       <div className="filter-bar">
         <SeasonSelect value={year} onChange={(value) => set("season", value)} />
       </div>

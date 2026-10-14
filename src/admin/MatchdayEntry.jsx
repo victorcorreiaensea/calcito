@@ -156,6 +156,16 @@ export default function MatchdayEntry({ dataset, reload, onBusyChange }) {
       </div>
       <fieldset disabled={busy} className="admin-operation-guard">
         <fieldset disabled={!editingHeader} className="admin-operation-guard">
+          <label className="admin-checkbox">
+            <input
+              type="checkbox"
+              checked={header.future === true}
+              onChange={(e) =>
+                setHeader((h) => ({ ...h, future: e.target.checked }))
+              }
+            />
+            Préparer une journée à venir (sans scores)
+          </label>
           <div className="admin-grid">
             <div className="admin-field">
               <label htmlFor="day-competition">Championnat ou coupe</label>
@@ -196,6 +206,21 @@ export default function MatchdayEntry({ dataset, reload, onBusyChange }) {
                 ))}
               </select>
             </div>
+            {header.future && (
+              <label className="admin-field">
+                Fuseau de l’heure officielle
+                <select
+                  value={header.timezone || "Europe/Paris"}
+                  onChange={(e) =>
+                    setHeader((h) => ({ ...h, timezone: e.target.value }))
+                  }
+                >
+                  <option>Europe/Paris</option>
+                  <option>Europe/Lisbon</option>
+                  <option>Europe/London</option>
+                </select>
+              </label>
+            )}
             <div className="admin-field">
               <label htmlFor="day-round">Journée ou tour</label>
               <input
@@ -240,9 +265,12 @@ export default function MatchdayEntry({ dataset, reload, onBusyChange }) {
           <>
             <Notice>
               Les affiches ne sont pas inventées : choisissez les équipes de
-              chaque rencontre. Dates et scores sont requis pour enregistrer un
-              résultat. Les statistiques absentes restent inconnues. Pour une
-              coupe, ajustez le nombre de matchs au tour concerné.
+              chaque rencontre.{" "}
+              {header.future
+                ? "Dates et heures exactes sont requises ; aucun score n’est saisi."
+                : "Dates et scores sont requis pour enregistrer un résultat."}{" "}
+              Les statistiques absentes restent inconnues. Pour une coupe,
+              ajustez le nombre de matchs au tour concerné.
             </Notice>
             <div className="admin-field">
               <label htmlFor="day-source">
@@ -317,25 +345,27 @@ export default function MatchdayEntry({ dataset, reload, onBusyChange }) {
                           teams={teams}
                           exclude={row.home_team}
                         />
-                        {["home", "away"].map((side) => (
-                          <div className="admin-field" key={side}>
-                            <label htmlFor={`day-${side}-score-${index}`}>
-                              Score {side === "home" ? "domicile" : "extérieur"}{" "}
-                              · match {index + 1}
-                            </label>
-                            <input
-                              id={`day-${side}-score-${index}`}
-                              type="number"
-                              min="0"
-                              max="32767"
-                              inputMode="numeric"
-                              value={row[`${side}_goals`]}
-                              onChange={(e) =>
-                                field(index, `${side}_goals`, e.target.value)
-                              }
-                            />
-                          </div>
-                        ))}
+                        {!header.future &&
+                          ["home", "away"].map((side) => (
+                            <div className="admin-field" key={side}>
+                              <label htmlFor={`day-${side}-score-${index}`}>
+                                Score{" "}
+                                {side === "home" ? "domicile" : "extérieur"} ·
+                                match {index + 1}
+                              </label>
+                              <input
+                                id={`day-${side}-score-${index}`}
+                                type="number"
+                                min="0"
+                                max="32767"
+                                inputMode="numeric"
+                                value={row[`${side}_goals`]}
+                                onChange={(e) =>
+                                  field(index, `${side}_goals`, e.target.value)
+                                }
+                              />
+                            </div>
+                          ))}
                         <div className="admin-field">
                           <label htmlFor={`day-date-${index}`}>
                             Date · match {index + 1}
@@ -350,47 +380,64 @@ export default function MatchdayEntry({ dataset, reload, onBusyChange }) {
                           />
                         </div>
                       </div>
+                      {header.future && (
+                        <label className="admin-field">
+                          Heure officielle · match {index + 1}
+                          <input
+                            type="time"
+                            value={row.time || ""}
+                            onChange={(e) =>
+                              field(index, "time", e.target.value)
+                            }
+                          />
+                        </label>
+                      )}
                       <details className="admin-extra">
                         <summary>
-                          {competition?.type === "european-cup"
-                            ? "Statistiques du match européen"
-                            : "Ajouter les statistiques et la source du match"}
+                          {header.future
+                            ? "Source du calendrier"
+                            : competition?.type === "european-cup"
+                              ? "Statistiques du match européen"
+                              : "Ajouter les statistiques et la source du match"}
                         </summary>
                         <div className="admin-grid">
-                          {statFields.flatMap(([key, label, type]) =>
-                            ["home", "away"].map((side) => {
-                              const column = `${side}_${key === "team_rating" ? "rating" : key}`;
-                              return (
-                                <div className="admin-field" key={column}>
-                                  <label
-                                    htmlFor={`day-stat-${index}-${column}`}
-                                  >
-                                    {label} ·{" "}
-                                    {side === "home" ? "domicile" : "extérieur"}{" "}
-                                    · match {index + 1}
-                                  </label>
-                                  <input
-                                    id={`day-stat-${index}-${column}`}
-                                    type="number"
-                                    min="0"
-                                    step={type === "integer" ? "1" : "any"}
-                                    max={
-                                      type === "rating"
-                                        ? 10
-                                        : type === "possession"
-                                          ? 100
-                                          : undefined
-                                    }
-                                    value={row[column]}
-                                    onChange={(e) =>
-                                      field(index, column, e.target.value)
-                                    }
-                                    placeholder="Non renseigné"
-                                  />
-                                </div>
-                              );
-                            }),
-                          )}
+                          {!header.future &&
+                            statFields.flatMap(([key, label, type]) =>
+                              ["home", "away"].map((side) => {
+                                const column = `${side}_${key === "team_rating" ? "rating" : key}`;
+                                return (
+                                  <div className="admin-field" key={column}>
+                                    <label
+                                      htmlFor={`day-stat-${index}-${column}`}
+                                    >
+                                      {label} ·{" "}
+                                      {side === "home"
+                                        ? "domicile"
+                                        : "extérieur"}{" "}
+                                      · match {index + 1}
+                                    </label>
+                                    <input
+                                      id={`day-stat-${index}-${column}`}
+                                      type="number"
+                                      min="0"
+                                      step={type === "integer" ? "1" : "any"}
+                                      max={
+                                        type === "rating"
+                                          ? 10
+                                          : type === "possession"
+                                            ? 100
+                                            : undefined
+                                      }
+                                      value={row[column]}
+                                      onChange={(e) =>
+                                        field(index, column, e.target.value)
+                                      }
+                                      placeholder="Non renseigné"
+                                    />
+                                  </div>
+                                );
+                              }),
+                            )}
                           <div className="admin-field full">
                             <label htmlFor={`day-source-${index}`}>
                               Source particulière · match {index + 1}

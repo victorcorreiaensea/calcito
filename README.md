@@ -1,4 +1,10 @@
-# CALCITO V3.1 — Football Intelligence
+# CALCITO V5 — Football Intelligence
+
+## Arène et Calcithunes
+
+Nouvel espace `#/arene` : jeu entièrement virtuel, portefeuille serveur, plafond de risque 5 % / 10 C, défis, bookmaker, combinés, missions gratuites, niveaux et comparaison joueur/Calcito. Le modèle probabiliste est distinct de la forme V4 et bloque les cotes sans validation historique suffisante. L’administration prépare les futures journées avec dates/heures réelles.
+
+**Activation nécessaire dans le Supabase existant : migration 003**, une seule fois, puis configuration des comptes et contrôle historique. Le déploiement du site n’installe pas cette migration. Suivre [le guide V5](docs/ARENE_V5.md). Les données actuelles sont conservées ; aucun faux portefeuille ou match n’est créé par le frontend.
 
 ## Import CSV et relevé Flashscore
 
@@ -42,7 +48,7 @@ La V3 utilise les données manuelles publiées dans Supabase. Le backend API-Foo
 - Classement européen Calcito séparé des classements officiels et des saisons ; indices indisponibles sans modèle réel.
 - Équipes, recherche globale, fiches, statistiques sources et historique.
 - Comparateur entre championnats avec données absentes explicites.
-- Pronostics : modèle en développement ; aucune probabilité ou cote inventée.
+- Pronostics : lecture de forme ; Arène avec modèle de buts provisoire testé côté serveur, cotes uniquement après validation historique et contrôle de données.
 - Administration `/calcito/#/admin` : authentification Supabase, autorisations PostgreSQL/RLS, saisie rapide, brouillons, publication, modification, suppression confirmée, gestion du catalogue et des participants.
 - Import CSV avec aperçu et contrôle de doublons ; exports ; journal d’audit non modifiable depuis le navigateur.
 
@@ -61,7 +67,7 @@ Le formulaire enregistre un seul match et les statistiques de ses deux équipes 
 - `tests/` : moteurs, domaines, données et tests PostgreSQL/RLS avec PGlite.
 - `public/images/mascot/` : image effectivement générée et intégrée. Les variantes utilisent actuellement la même pose ; d’autres poses officielles pourront la remplacer.
 
-La mascotte est une illustration de marque. Elle ne prétend pas exécuter un modèle d’analyse déjà disponible. Les polices sont locales via Fontsource, l’administration est chargée à la demande et les bibliothèques sont séparées dans le build.
+La mascotte accompagne les analyses et le jeu ; les calculs probabilistes de l’Arène restent contrôlés par le serveur et leur validation historique. Les polices sont locales via Fontsource, l’administration est chargée à la demande et les bibliothèques sont séparées dans le build.
 
 ## Publication GitHub Pages
 

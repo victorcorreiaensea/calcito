@@ -8,9 +8,18 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./styles.css";
+import "./arena.css";
+import { consumeAuthCallback } from "./services/authCallback";
 
-createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+consumeAuthCallback().then((error) =>
+  createRoot(document.getElementById("root")).render(
+    <React.StrictMode>
+      {error && (
+        <p className="container auth-callback-error" role="alert">
+          {error}
+        </p>
+      )}
+      <App />
+    </React.StrictMode>,
+  ),
 );

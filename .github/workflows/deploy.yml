@@ -63,6 +63,24 @@ jobs:
             if (table === 'admin_users' && rows.length) throw new Error('Private administrator records are publicly readable');
             console.log(`${table}: public access checked`);
           }
+          const arenaResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/arena_status`, {
+            method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{}'
+          });
+          const arena = await arenaResponse.json();
+          if (!arenaResponse.ok && arena.code === 'PGRST202') {
+            console.log('Arène: frontend ready; migration 003 still needs installation in Supabase');
+          } else {
+            if (!arenaResponse.ok || arena.installed !== true) throw new Error('Arène readiness check failed');
+            console.log(`Arène installed; model enabled: ${arena.enabled}`);
+            for (const table of ['arena_wallets', 'arena_tickets', 'arena_ledger']) {
+              const privateResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, { headers });
+              if ([401, 403].includes(privateResponse.status)) continue;
+              if (!privateResponse.ok) throw new Error(`${table}: unexpected public response`);
+              const rows = await privateResponse.json();
+              if (!Array.isArray(rows) || rows.length) throw new Error(`${table}: private records are publicly readable`);
+            }
+            console.log('Arène: private account tables deny anonymous reads');
+          }
           JS
       - name: Configure Pages
         uses: actions/configure-pages@v5

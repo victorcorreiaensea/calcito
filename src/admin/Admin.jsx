@@ -28,6 +28,7 @@ import DataTools from "./DataTools";
 import MatchImport from "./MatchImport";
 import BulkPublish from "./BulkPublish";
 import MatchdayEntry from "./MatchdayEntry";
+import ArenaOps from "./ArenaOps";
 import { DATE_ONLY_MARKER } from "../domain/matchImport";
 
 function Login() {
@@ -128,6 +129,7 @@ const tabs = [
   ["dashboard", "Vue d’ensemble"],
   ["entry", "Saisie rapide"],
   ["matchday", "Saisie par journée"],
+  ["arena", "Arène & cotes"],
   ["coverage", "Suivi de couverture"],
   ["matches", "Matchs & brouillons"],
   ["teams", "Équipes"],
@@ -393,6 +395,9 @@ function Dashboard() {
           reload={reload}
           onBusyChange={setImportBusy}
         />
+      )}
+      {tab === "arena" && (
+        <ArenaOps dataset={dataset} onPrepare={() => setTab("matchday")} />
       )}
       {tab === "coverage" && (
         <Coverage

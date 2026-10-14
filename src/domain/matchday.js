@@ -1,4 +1,8 @@
-import { planMatchImport } from "./matchImport.js";
+import {
+  planMatchImport,
+  parseImportDate,
+  isFlashscoreSource,
+} from "./matchImport.js";
 import { statFields } from "./match.js";
 const sizes = {
   "ligue-1": 9,
@@ -31,6 +35,7 @@ export function createMatchdaySlots(count, date = "") {
     away_goals: "",
     date,
     source_url: "",
+    time: "",
     ...Object.fromEntries(
       statFields.flatMap(([key]) =>
         ["home", "away"].map((side) => [
@@ -42,6 +47,8 @@ export function createMatchdaySlots(count, date = "") {
   }));
 }
 export function planMatchday(slots, header, dataset) {
+  if (header.future === true)
+    return planScheduledMatchday(slots, header, dataset);
   const filled = slots
     .map((row, index) => ({ row, index }))
     .filter(({ row }) =>
@@ -102,4 +109,119 @@ export function planMatchday(slots, header, dataset) {
     }
   }
   return plan;
+}
+
+export function planScheduledMatchday(
+  slots,
+  header,
+  dataset,
+  now = new Date(),
+) {
+  const filled = slots
+    .map((row, slot) => ({ row, slot }))
+    .filter(({ row }) => row.home_team || row.away_team || row.source_url);
+  const seen = new Map();
+  return filled.map(({ row, slot }) => {
+    const errors = [];
+    let kickoff = "";
+    try {
+      if (!row.date || !row.time)
+        throw new Error("Date et heure réelles requises.");
+      kickoff = parseImportDate(
+        `${row.date}T${row.time}`,
+        header.timezone || "Europe/Paris",
+      ).iso;
+      if (Date.parse(kickoff) <= now.getTime())
+        throw new Error("Choisissez une rencontre future.");
+    } catch (e) {
+      errors.push(e.message);
+    }
+    const season = dataset.seasons.find((s) => s.id === header.season_id);
+    const validTeam = (id) =>
+      dataset.teams.some((t) => t.id === id) &&
+      dataset.members.some(
+        (m) => m.team_id === id && m.season_id === header.season_id,
+      );
+    if (!season || season.competition_id !== header.competition_id)
+      errors.push("Saison et compétition requises.");
+    if (
+      season &&
+      row.date &&
+      (Number(row.date.slice(0, 4)) < season.start_year ||
+        Number(row.date.slice(0, 4)) > season.end_year)
+    )
+      errors.push("La date doit appartenir à la saison.");
+    if (!header.round.trim()) errors.push("Journée requise.");
+    if (
+      !validTeam(row.home_team) ||
+      !validTeam(row.away_team) ||
+      row.home_team === row.away_team
+    )
+      errors.push("Deux équipes participantes différentes requises.");
+    for (const id of [row.home_team, row.away_team].filter(Boolean)) {
+      if (seen.has(id)) {
+        errors.push("Équipe répétée dans cette journée.");
+        seen.get(id).push("Équipe répétée dans cette journée.");
+      } else seen.set(id, errors);
+    }
+    const existing = dataset.matches.find(
+      (m) =>
+        m.season_id === header.season_id &&
+        m.home_team_id === row.home_team &&
+        m.away_team_id === row.away_team &&
+        m.kickoff.slice(0, 10) === kickoff.slice(0, 10),
+    );
+    if (
+      !existing &&
+      dataset.matches.some(
+        (m) =>
+          m.season_id === header.season_id &&
+          m.round === header.round.trim() &&
+          [m.home_team_id, m.away_team_id].some((id) =>
+            [row.home_team, row.away_team].includes(id),
+          ),
+      )
+    )
+      errors.push("Une équipe possède déjà une rencontre de cette journée.");
+    const source = row.source_url || header.source_url || "";
+    if (isFlashscoreSource(source) && !header.flashscoreConsent)
+      errors.push(
+        "Confirmez votre autorisation de réutilisation de la source Flashscore.",
+      );
+    if (source) {
+      try {
+        const u = new URL(source);
+        if (u.protocol !== "https:" || u.username || u.password)
+          throw new Error();
+      } catch {
+        errors.push("Source HTTPS valide requise.");
+      }
+    }
+    return {
+      slot,
+      row,
+      index: slot,
+      errors,
+      warnings: [],
+      action: existing ? "ignore" : "insert",
+      existing,
+      payload: {
+        id: crypto.randomUUID(),
+        season_id: header.season_id,
+        round: header.round.trim(),
+        kickoff,
+        home_team_id: row.home_team,
+        away_team_id: row.away_team,
+        status: "scheduled",
+        goals_home: null,
+        goals_away: null,
+        source,
+        verified_at: null,
+        comment: `Heure saisie dans le fuseau ${header.timezone || "Europe/Paris"}.`,
+        is_published: false,
+        home_stats: {},
+        away_stats: {},
+      },
+    };
+  });
 }

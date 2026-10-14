@@ -61,6 +61,8 @@ export function AuthProvider({ children }) {
     try {
       if (auth.user)
         sessionStorage.removeItem(`calcito:matchday:${auth.user.id}`);
+      if (auth.user)
+        sessionStorage.removeItem(`calcito:arena-pending:${auth.user.id}`);
     } catch {
       /* Storage may be unavailable. */
     }

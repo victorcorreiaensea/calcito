@@ -15,6 +15,7 @@ import Home from "./pages/Home";
 import Matches from "./pages/Matches";
 import Standings, { EuropeanRanking } from "./pages/Standings";
 const Admin = lazy(() => import("./admin/Admin"));
+const Arena = lazy(() => import("./pages/Arena"));
 import { AuthProvider } from "./admin/AuthProvider";
 import Teams, { TeamDetail } from "./pages/Teams";
 import Compare from "./pages/Compare";
@@ -28,6 +29,7 @@ const navigation = [
   ["Équipes", "/equipes"],
   ["Comparateur", "/comparateur"],
   ["Pronostics", "/pronostics"],
+  ["L’Arène", "/arene"],
   ["Méthodologie", "/methodologie"],
 ];
 function Logo() {
@@ -90,7 +92,7 @@ function Navbar() {
         >
           <Search size={19} />
         </button>
-        <span className="version-badge">V4</span>
+        <span className="version-badge">V5</span>
         {searchOpen && (
           <form
             className="global-search-form"
@@ -165,7 +167,7 @@ function Footer() {
       </nav>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} CALCITO</span>
-        <span>V4 · Données vérifiées, forme dynamique</span>
+        <span>V5 · Football intelligence & Calcithunes virtuelles</span>
         <Link to="/admin">Administration privée</Link>
         <button
           onClick={() =>
@@ -238,6 +240,20 @@ export default function App() {
             <Route path="/equipes/:teamId" element={<TeamDetail />} />
             <Route path="/comparateur" element={<Compare />} />
             <Route path="/pronostics" element={<Predictions />} />
+            <Route
+              path="/arene"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="container state-panel" role="status">
+                      Chargement de l’Arène…
+                    </div>
+                  }
+                >
+                  <Arena />
+                </Suspense>
+              }
+            />
             <Route path="/methodologie" element={<Methodology />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
