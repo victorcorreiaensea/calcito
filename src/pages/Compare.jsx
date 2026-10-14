@@ -1,3 +1,4 @@
+import FormEvolution from "../components/FormEvolution";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowLeftRight } from "lucide-react";
@@ -243,6 +244,29 @@ export default function Compare() {
                   season={year}
                 />
               </div>
+              <FormEvolution
+                title="Deux équipes, une même ligne du temps"
+                loading={a.timeline.loading || b.timeline.loading}
+                error={a.timeline.error || b.timeline.error}
+                series={[
+                  {
+                    team: left.result.data,
+                    history: a.timeline.result?.data.history || [],
+                    teams: (a.recent.result?.data || []).flatMap((m) => [
+                      m.home,
+                      m.away,
+                    ]),
+                  },
+                  {
+                    team: right.result.data,
+                    history: b.timeline.result?.data.history || [],
+                    teams: (b.recent.result?.data || []).flatMap((m) => [
+                      m.home,
+                      m.away,
+                    ]),
+                  },
+                ]}
+              />
               <ComparativeStatistics
                 left={a}
                 right={b}

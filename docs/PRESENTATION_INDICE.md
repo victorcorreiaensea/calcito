@@ -1,5 +1,7 @@
 # Présentation de l’indice Calcito
 
+> Ce document décrit la refonte visuelle initiale. Depuis la [V4 dynamique](INDICE_DYNAMIQUE_V4.md), les noyaux ajoutent la contribution relative et les fiches disposent d’un historique chronologique.
+
 Refonte visuelle uniquement : la formule `results-context-v2`, ses poids et les données enregistrées restent inchangés. L’identité reste noire et bleue, avec la mascotte existante.
 
 - `FormCore` : noyau SVG accessible, score sur 100, lecture compacte ou détaillée. Les transitions respectent `prefers-reduced-motion`. Un score absent n’est jamais représenté par zéro.

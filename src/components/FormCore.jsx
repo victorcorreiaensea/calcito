@@ -7,12 +7,16 @@ export default function FormCore({
   dataMode,
   children,
   dimensions = [],
+  initialized = false,
 }) {
   const available = Number.isFinite(score) && score >= 0 && score <= 100;
   const value = available
     ? Number(score.toFixed(1)).toLocaleString("fr-FR")
     : "—";
-  const label = formAppreciation(score);
+  const label =
+    initialized && available
+      ? "Référence initialisée"
+      : formAppreciation(score);
   const showDimensions =
     available &&
     dimensions.length > 0 &&
@@ -67,9 +71,11 @@ export default function FormCore({
           {demo
             ? "Démonstration fictive"
             : available
-              ? variant === "provisional"
-                ? "Indice simplifié · provisoire"
-                : "Indice Calcito"
+              ? initialized
+                ? "Référence avec moins de cinq matchs"
+                : variant === "provisional"
+                  ? "Indice de forme · provisoire"
+                  : "Indice Calcito"
               : "Cinq résultats valides requis"}
         </span>
         {dataMode && available && (
@@ -99,7 +105,7 @@ export default function FormCore({
               </strong>
               <i
                 aria-hidden="true"
-                style={{ width: `${Math.min(100, d.value)}%` }}
+                style={{ width: `${Math.min(100, Math.abs(d.value))}%` }}
               />
             </div>
           ))}

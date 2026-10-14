@@ -84,6 +84,14 @@ export default function FormStory({ analysis }) {
           </span>
         </p>
       </div>
+      {coverage.dynamic && (
+        <p className="form-footnote">
+          Force adverse mesurée avant match sur {coverage.relativeReliable} des{" "}
+          {engine.trace.length} rencontres ; les autres références sont
+          initialisées ou inconnues. Seules les références complètes peuvent
+          déclencher un label d’exploit.
+        </p>
+      )}
       <div className="form-timeline-heading">
         <h3>Les cinq derniers matchs</h3>
         <span>Du plus ancien au plus récent</span>
@@ -97,7 +105,10 @@ export default function FormStory({ analysis }) {
               : m.home
             : { name: t.opponent, short: t.opponent || "?" };
           const i = engine.trace.findIndex((r) => r.matchId === t.matchId);
-          const contribution = story.contributions[i];
+          const contribution =
+            m?.dynamic && Number.isFinite(coverage.score)
+              ? m.dynamic.performance / 5
+              : story.contributions[i];
           return (
             <article className="timeline-match" key={t.matchId}>
               <div className="timeline-top">
@@ -125,6 +136,25 @@ export default function FormStory({ analysis }) {
                     ? "Extérieur"
                     : "Terrain inconnu"}
               </span>
+              {m?.dynamic && (
+                <small className="timeline-variation">
+                  {m.dynamic.before.toLocaleString("fr-FR", {
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  →{" "}
+                  {m.dynamic.after.toLocaleString("fr-FR", {
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  ({m.dynamic.delta > 0 ? "+" : ""}
+                  {m.dynamic.delta.toLocaleString("fr-FR", {
+                    maximumFractionDigits: 1,
+                  })}
+                  ){m.dynamic.afterInitialized ? " · Initialisation" : ""}
+                </small>
+              )}
+              {m?.dynamic?.label && (
+                <span className="exploit-label">{m.dynamic.label}</span>
+              )}
               {Number.isFinite(contribution) ? (
                 <div className="timeline-contribution">
                   <div aria-hidden="true">
@@ -146,7 +176,8 @@ export default function FormStory({ analysis }) {
           );
         })}
       </div>
-      {story.contributions.length > 0 && (
+      {(story.contributions.length > 0 ||
+        (Number.isFinite(coverage.score) && raw.some((m) => m.dynamic))) && (
         <p className="form-footnote">
           Chaque contribution est sa part dans la moyenne des cinq matchs, pas
           une variation avant / après. Leur somme donne l’indice ; l’affichage

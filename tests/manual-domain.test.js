@@ -260,7 +260,7 @@ test("team profiles use the selected season for league affiliation and form, wit
   assert.equal(manualTeam(raw, data, 2025).score, null);
   assert.equal(
     manualTeam(raw, data, 2025).coverage.label,
-    "Moins de cinq résultats",
+    "Cinq résultats chronologiques nécessaires",
   );
   assert.equal(manualTeam(raw, data, 2026).competitionName, "New league");
   assert.equal(manualTeam(raw, data, 2026).score, null);

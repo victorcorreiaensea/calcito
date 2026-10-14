@@ -32,8 +32,9 @@ export default function FormPlayground() {
           <span className="eyebrow">ESSAYEZ POUR COMPRENDRE</span>
           <h2>Un résultat change la lecture.</h2>
           <p>
-            Modifiez ces cinq rencontres fictives : le noyau utilise la
-            véritable formule actuelle.
+            Modifiez ces cinq rencontres fictives : le noyau montre la base
+            intrinsèque conservée. La surprise relative est expliquée dans les
+            exemples ci-dessus.
           </p>
         </div>
         <span className="demo-label">DÉMONSTRATION FICTIVE</span>

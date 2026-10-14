@@ -1,3 +1,4 @@
+import FormEvolution from "../components/FormEvolution";
 import { formDimensions } from "../domain/formPresentation";
 import FormStory from "../components/FormStory";
 import { MascotEditorial } from "../components/FormEducation";
@@ -201,16 +202,18 @@ export function TeamDetail() {
               <CalculationTrace analysis={analysis} />
               <TeamStatistics state={analysis.statistics} />
             </div>
-            <section className="analysis-panel">
-              <h2>Évolution de la forme</h2>
-              <FormHistory
-                history={
-                  year && Number(year) !== team.season
-                    ? []
-                    : team.formHistory || []
-                }
-              />
-            </section>
+            <FormEvolution
+              loading={analysis.timeline.loading}
+              error={analysis.timeline.error}
+              series={[
+                {
+                  team,
+                  excluded: analysis.timeline.result?.data.excluded,
+                  history: analysis.timeline.result?.data.history || [],
+                  teams: relevantHistory.flatMap((m) => [m.home, m.away]),
+                },
+              ]}
+            />
             <section className="analysis-panel">
               <h2>Historique des résultats publiés</h2>
               <p className="muted-text">
@@ -239,6 +242,25 @@ export function TeamDetail() {
                               ? " · Résultat simplifié"
                               : ""}
                           </span>
+                          <small className="history-before">
+                            Avant match :{" "}
+                            {match.dynamic?.sides
+                              ?.find((r) => r.teamId === match.home.id)
+                              ?.before?.toLocaleString("fr-FR", {
+                                maximumFractionDigits: 1,
+                              }) ?? "—"}{" "}
+                            /{" "}
+                            {match.dynamic?.sides
+                              ?.find((r) => r.teamId === match.away.id)
+                              ?.before?.toLocaleString("fr-FR", {
+                                maximumFractionDigits: 1,
+                              }) ?? "—"}
+                            {match.dynamic?.sides?.some(
+                              (r) => r.beforeInitialized,
+                            )
+                              ? " · Initialisation"
+                              : ""}
+                          </small>
                           <strong>
                             {match.home.name} {match.goalsHome ?? "—"} –{" "}
                             {match.goalsAway ?? "—"} {match.away.name}
@@ -269,56 +291,5 @@ export function TeamDetail() {
         )}
       </DataState>
     </section>
-  );
-}
-
-function FormHistory({ history }) {
-  if (history.length < 2)
-    return (
-      <p className="muted-text">
-        Aucun historique suffisant d’indice calculé n’est disponible. Le
-        graphique apparaît uniquement après des calculs réels et versionnés.
-      </p>
-    );
-  const rows = [...history].sort(
-    (a, b) => Date.parse(a.calculatedAt) - Date.parse(b.calculatedAt),
-  );
-  const points = rows
-    .map(
-      (row, i) =>
-        `${15 + (i / (rows.length - 1)) * 470},${150 - row.score * 1.3}`,
-    )
-    .join(" ");
-  return (
-    <div>
-      <svg
-        className="form-history-chart"
-        viewBox="0 0 500 175"
-        role="img"
-        aria-label={`Historique réel de forme de ${rows[0].score} à ${rows.at(-1).score} %`}
-      >
-        <line x1="15" x2="485" y1="150" y2="150" stroke="#25344D" />
-        <polyline
-          points={points}
-          fill="none"
-          stroke="#2F8CFF"
-          strokeWidth="3"
-        />
-        {rows.map((row, i) => (
-          <circle
-            key={i}
-            cx={15 + (i / (rows.length - 1)) * 470}
-            cy={150 - row.score * 1.3}
-            r="4"
-            fill="#73B5FF"
-          />
-        ))}
-      </svg>
-      <p className="muted-text">
-        {new Date(rows[0].calculatedAt).toLocaleDateString("fr-FR")} —{" "}
-        {new Date(rows.at(-1).calculatedAt).toLocaleDateString("fr-FR")} ·
-        Calculs versionnés
-      </p>
-    </div>
   );
 }

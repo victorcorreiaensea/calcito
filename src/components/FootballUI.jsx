@@ -71,6 +71,7 @@ export function FormValue({
   dataMode,
   compact = true,
   dimensions,
+  initialized,
 }) {
   return (
     <div className={`form-value ${compact ? "" : "form-value-expanded"}`}>
@@ -81,6 +82,7 @@ export function FormValue({
         dataMode={dataMode}
         compact={compact}
         dimensions={dimensions}
+        initialized={initialized}
       />
     </div>
   );

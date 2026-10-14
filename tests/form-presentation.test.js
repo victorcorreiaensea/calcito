@@ -108,3 +108,35 @@ test("appreciations describe current index levels and do not claim a trend or a 
   for (const s of [null, NaN, undefined, 101, -1])
     assert.equal(formAppreciation(s), "Indice indisponible");
 });
+test("v4 dimensions sum to the actual bounded dynamic index and disclose estimated context", async () => {
+  const { reconstructDynamicForms } =
+    await import("../src/engines/dynamicFormEngine.js");
+  const dataset = {
+    seasons: [{ id: "s", start_year: 2026 }],
+    matches: Array.from({ length: 8 }, (_, i) => ({
+      id: String(i),
+      season_id: "s",
+      home_team_id: "a",
+      away_team_id: "b",
+      goals_home: i % 2 ? 32767 : 0,
+      goals_away: i % 2 ? 0 : 32767,
+      status: "finished",
+      is_published: true,
+      kickoff: `2026-08-${String(i + 1).padStart(2, "0")}T18:00:00Z`,
+    })),
+    simplified: [],
+  };
+  const ledger = reconstructDynamicForms(dataset, 2026);
+  for (const history of ledger.histories.values())
+    for (let i = 4; i < history.length; i++) {
+      const dimensions = formDimensions(
+        history.slice(i - 4, i + 1),
+        ledger.version,
+      );
+      assert.ok(
+        Math.abs(
+          dimensions.reduce((n, d) => n + d.value, 0) - history[i].after,
+        ) < 1e-10,
+      );
+    }
+});

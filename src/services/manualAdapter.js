@@ -1,3 +1,4 @@
+import { dynamicCoverage, dynamicForms } from "../engines/dynamicFormEngine.js";
 import { DATE_ONLY_MARKER } from "../domain/matchImport.js";
 import { databaseConfig } from "./supabaseClient.js";
 import { getDataset } from "./manualRepository.js";
@@ -36,7 +37,18 @@ export function manualTeam(raw, dataset, year = latestYear(dataset)) {
       item.is_published,
   );
   const history = teamHistory(dataset, raw.id, year);
-  const coverage = formCoverage(history, form);
+  const ids = new Set(
+    (dynamicForms(dataset, year).histories.get(raw.id) || [])
+      .slice(-5)
+      .map((r) => r.matchId),
+  );
+  const selectedHistory = history.filter((m) => ids.has(m.id));
+  const coverage = dynamicCoverage(
+    dataset,
+    raw.id,
+    year,
+    formCoverage(selectedHistory, form),
+  );
   return {
     ...raw,
     short: raw.short,
@@ -55,22 +67,7 @@ export function manualTeam(raw, dataset, year = latestYear(dataset)) {
     score: coverage.score,
     coverage,
     source: "manual",
-    formHistory:
-      coverage.status === "unavailable" || coverage.variant === "provisional"
-        ? []
-        : dataset.forms
-            .filter(
-              (item) =>
-                item.team_id === raw.id &&
-                item.season_start_year === year &&
-                item.is_valid &&
-                item.is_published,
-            )
-            .map((item) => ({
-              score: Number(item.score),
-              calculatedAt: item.calculated_at,
-              version: item.model_version,
-            })),
+    formHistory: coverage.dynamicHistory,
   };
 }
 function selectedSeason(dataset, competitionId, year) {
@@ -111,6 +108,8 @@ export function manualMatch(match, dataset) {
     goalsAway: match.goals_away,
     source: "manual",
     verifiedAt: match.verified_at,
+    dynamic:
+      dynamicForms(dataset, season?.start_year).matches.get(match.id) || null,
   };
 }
 export function publicDataset(dataset) {
@@ -149,12 +148,19 @@ export function publicDataset(dataset) {
           ),
       ),
   );
-  const simplified = (dataset.simplified || []).filter(
-    (row) =>
-      row.is_published &&
-      !row.converted_at &&
-      teams.some((t) => t.id === row.team_id),
-  );
+  const simplified = (dataset.simplified || [])
+    .filter(
+      (row) =>
+        row.is_published &&
+        !row.converted_at &&
+        teams.some((t) => t.id === row.team_id),
+    )
+    .map((row) => ({
+      ...row,
+      opponent_team_id: teams.some((t) => t.id === row.opponent_team_id)
+        ? row.opponent_team_id
+        : null,
+    }));
   const predictions = dataset.predictions.filter(
     (row) =>
       row.is_published &&
@@ -324,12 +330,14 @@ export const manualAdapter = {
     }),
   teamHistory: (params) =>
     query((d) => {
-      const year = Number(params.season) || latestYear(d);
-      return teamHistory(d, params.teamId, year).map((m) =>
-        m.entry_type === "simplified"
+      const year = Number(params.season) || latestYear(d),
+        ledger = dynamicForms(d, year);
+      return teamHistory(d, params.teamId, year).map((m) => ({
+        ...(m.entry_type === "simplified"
           ? manualSimplified(m, d)
-          : manualMatch(m, d),
-      );
+          : manualMatch(m, d)),
+        dynamic: ledger.matches.get(m.id) || null,
+      }));
     }),
   recentMatches: (params) =>
     query((d) => {
@@ -338,24 +346,48 @@ export const manualAdapter = {
         typeof params === "string"
           ? latestYear(d)
           : Number(params.season) || latestYear(d);
-      return teamHistory(d, id, year, { limit: 5 }).map((m) => ({
-        ...(m.entry_type === "simplified"
-          ? manualSimplified(m, d)
-          : manualMatch(m, d)),
-        entry_type: m.entry_type,
-        teamStats: {
-          shots: m.stats?.shots ?? null,
-          bigChances: m.stats?.big_chances ?? null,
-          rating:
-            m.stats?.team_rating == null ? null : Number(m.stats.team_rating),
-          bonuses: m.stats?.bonuses ?? null,
-        },
-        manualStats: m.stats,
-        sourceReference:
-          m.entry_type === "simplified"
-            ? "Résultat rapide · saisi manuellement"
-            : m.source,
-      }));
+      const ledger = dynamicForms(d, year);
+      const ids = new Set(
+        (ledger.histories.get(id) || []).slice(-5).map((r) => r.matchId),
+      );
+      return teamHistory(d, id, year)
+        .filter((m) => ids.has(m.id))
+        .slice(0, 5)
+        .map((m) => ({
+          ...(m.entry_type === "simplified"
+            ? manualSimplified(m, d)
+            : manualMatch(m, d)),
+          entry_type: m.entry_type,
+          dynamic: ledger.matches.get(m.id)?.sides.find((r) => r.teamId === id),
+          teamStats: {
+            shots: m.stats?.shots ?? null,
+            bigChances: m.stats?.big_chances ?? null,
+            rating:
+              m.stats?.team_rating == null ? null : Number(m.stats.team_rating),
+            bonuses: m.stats?.bonuses ?? null,
+          },
+          manualStats: m.stats,
+          sourceReference:
+            m.entry_type === "simplified"
+              ? "Résultat rapide · saisi manuellement"
+              : m.source,
+        }));
+    }),
+  formTimeline: ({ teamId, season } = {}) =>
+    query((d) => {
+      const year = Number(season) || latestYear(d);
+      const ledger = dynamicForms(d, year);
+      return {
+        history: ledger.histories.get(teamId) || [],
+        version: ledger.version,
+        year,
+        excluded: ledger.excluded.filter((e) => e.teamIds?.includes(teamId)),
+        coverage: manualTeam(
+          d.teams.find((t) => t.id === teamId),
+          d,
+          year,
+        ).coverage,
+      };
     }),
   statistics: (params) =>
     query((d) => {
@@ -364,7 +396,14 @@ export const manualAdapter = {
         typeof params === "string"
           ? latestYear(d)
           : Number(params.season) || latestYear(d);
-      const matches = teamHistory(d, id, year, { limit: 5 });
+      const ids = new Set(
+        (dynamicForms(d, year).histories.get(id) || [])
+          .slice(-5)
+          .map((r) => r.matchId),
+      );
+      const matches = teamHistory(d, id, year)
+        .filter((m) => ids.has(m.id))
+        .slice(0, 5);
       if (!matches.length) return null;
       const metrics = [
         ["shotsPerMatch", "shots"],

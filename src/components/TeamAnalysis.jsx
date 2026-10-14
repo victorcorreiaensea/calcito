@@ -1,8 +1,8 @@
 import { useFootball } from "../hooks/useFootball";
-import { calculateCalcitoForm } from "../engines/calcitoEngine";
+import { prepareCalcitoInput } from "../engines/calcitoEngine";
 import { calcitoModel } from "../config/calcitoModel";
 import { SourceCaption } from "./DataContext";
-import { formCoverage, simplifiedModel } from "../domain/simplified";
+import { formCoverage } from "../domain/simplified";
 import { Results, Notice } from "./FootballUI";
 
 export function useTeamAnalysis(id, season = "") {
@@ -11,32 +11,29 @@ export function useTeamAnalysis(id, season = "") {
   const statistics = useFootball("statistics", params, {
     enabled: Boolean(id),
   });
-  const engine = calculateCalcitoForm(
-    {
-      teamId: id,
-      matches: recent.result?.data || [],
-      competitionCoefficients: {
-        ...calcitoModel.competitionCoefficients,
-        ...Object.fromEntries(
-          (recent.result?.data || [])
-            .filter(
-              (match) =>
-                Number.isFinite(Number(match.competition.coefficient)) &&
-                match.competition.coefficient != null,
-            )
-            .map((match) => [
-              match.competition.id,
-              Number(match.competition.coefficient),
-            ]),
-        ),
-      },
+  const engine = prepareCalcitoInput({
+    teamId: id,
+    matches: recent.result?.data || [],
+    competitionCoefficients: {
+      ...calcitoModel.competitionCoefficients,
+      ...Object.fromEntries(
+        (recent.result?.data || [])
+          .filter(
+            (match) =>
+              Number.isFinite(Number(match.competition.coefficient)) &&
+              match.competition.coefficient != null,
+          )
+          .map((match) => [
+            match.competition.id,
+            Number(match.competition.coefficient),
+          ]),
+      ),
     },
-    { formula: calcitoModel.formula, formulaVersion: calcitoModel.version },
-  );
+  });
   const results = [...engine.trace]
     .reverse()
     .map((match) => match.result || "?");
-  const coverage = formCoverage(
+  const baseCoverage = formCoverage(
     (recent.result?.data || []).map((m) => ({
       entry_type: m.entry_type || "complete",
       stats: m.manualStats,
@@ -45,17 +42,30 @@ export function useTeamAnalysis(id, season = "") {
       goals_against: m.home.id === id ? m.goalsAway : m.goalsHome,
     })),
   );
-  const shownEngine =
-    engine.score == null && coverage.score != null
-      ? {
-          ...engine,
-          score: coverage.score,
-          status: "provisional",
-          indexVariant: "provisional",
-          formulaVersion: simplifiedModel.version,
-        }
-      : engine;
-  return { recent, statistics, engine: shownEngine, results, coverage };
+  const timeline = useFootball("formTimeline", params, {
+    enabled: Boolean(id),
+  });
+  const coverage = timeline.result?.data.coverage || {
+    ...baseCoverage,
+    score: null,
+    breakdown: [],
+    status: "unavailable",
+  };
+  const shownEngine = {
+    ...engine,
+    score: coverage.score,
+    status: coverage.status,
+    indexVariant: "provisional",
+    formulaVersion: timeline.result?.data.version || null,
+  };
+  return {
+    recent,
+    statistics,
+    engine: shownEngine,
+    results,
+    coverage,
+    timeline,
+  };
 }
 export function CalculationTrace({ analysis }) {
   const { recent, engine } = analysis;
@@ -68,12 +78,12 @@ export function CalculationTrace({ analysis }) {
       </Notice>
       {analysis.coverage.status === "provisional" && (
         <Notice>
-          Forme provisoire v2 : résultats, buts marqués et encaissés, bonus de
-          terrain. Sur ces cinq matchs : {analysis.coverage.points} points sur
-          15, {analysis.coverage.goalsFor} buts marqués et{" "}
-          {analysis.coverage.goalsAgainst} encaissés. Les points sont un repère,
-          pas la formule de l’indice. Les statistiques avancées absentes restent
-          inconnues.
+          Forme dynamique v4 : résultats, buts marqués et encaissés, bonus de
+          terrain et surprise face à l’adversaire. Sur ces cinq matchs :{" "}
+          {analysis.coverage.points} points sur 15, {analysis.coverage.goalsFor}{" "}
+          buts marqués et {analysis.coverage.goalsAgainst} encaissés. Les points
+          sont un repère, pas la formule de l’indice. Les statistiques avancées
+          absentes restent inconnues.
           {analysis.coverage.venueKnown < 5 &&
             " Terrain inconnu sur certains matchs : aucun bonus de terrain pour ces matchs."}
         </Notice>

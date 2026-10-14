@@ -84,3 +84,7 @@ Dans l’administration, **Saisie par journée** prépare une grille de matchs s
 ## Signature visuelle de la forme
 
 Noyau de forme réutilisable, synthèse des cinq derniers matchs, contributions réelles et méthodologie interactive. La formule et les données restent inchangées ; les statistiques avancées sont un complément de lecture. Voir [la présentation et ses limites](docs/PRESENTATION_INDICE.md).
+
+## Indice dynamique V4
+
+La forme ajoute une surprise bornée face à l’adversaire, avec des références avant/après et un historique rejoué chronologiquement. Courbes interactives et comparateur sur dates réelles ; dans l’historique des matchs, les indices affichés en priorité sont ceux d’avant la rencontre. Voir [le modèle, l’initialisation et les limites](docs/INDICE_DYNAMIQUE_V4.md). Aucun changement de schéma Supabase ni coût supplémentaire.

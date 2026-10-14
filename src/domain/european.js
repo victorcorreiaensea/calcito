@@ -1,3 +1,4 @@
+import { dynamicCoverage, dynamicForms } from "../engines/dynamicFormEngine.js";
 import { isTrackedLeague, teamHistory, formCoverage } from "./simplified.js";
 export function europeanRows(dataset, year) {
   const seasons = dataset.seasons.filter((s) => s.start_year === Number(year));
@@ -17,7 +18,14 @@ export function europeanRows(dataset, year) {
     const league = affiliations.find(isTrackedLeague);
     const european = affiliations.some((c) => c.type === "european-cup");
     if (!league && !european) return [];
-    const history = teamHistory(dataset, team.id, year, { limit: 5 });
+    const ids = new Set(
+      (dynamicForms(dataset, year).histories.get(team.id) || [])
+        .slice(-5)
+        .map((r) => r.matchId),
+    );
+    const history = teamHistory(dataset, team.id, year)
+      .filter((m) => ids.has(m.id))
+      .slice(0, 5);
     const snapshot = dataset.forms.find(
       (f) =>
         f.team_id === team.id &&
@@ -32,7 +40,12 @@ export function europeanRows(dataset, year) {
         extra: !league,
         origin:
           league?.name || team.domestic_league || "Championnat non renseigné",
-        ...formCoverage(history, snapshot),
+        ...dynamicCoverage(
+          dataset,
+          team.id,
+          year,
+          formCoverage(history, snapshot),
+        ),
       },
     ];
   });

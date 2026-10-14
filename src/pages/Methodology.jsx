@@ -1,3 +1,4 @@
+import SurpriseEducation from "../components/SurpriseEducation";
 import { FormFactors, MascotEditorial } from "../components/FormEducation";
 import FormCore from "../components/FormCore";
 import FormPlayground from "../components/FormPlayground";
@@ -30,6 +31,7 @@ export default function Methodology() {
         <FormCore score={null} />
       </section>
       <FormFactors />
+      <SurpriseEducation />
       <MascotEditorial />
       <section className="analysis-panel methodology-five">
         <span className="eyebrow">UNE FENÊTRE SUR LA DYNAMIQUE</span>
@@ -123,7 +125,31 @@ export default function Methodology() {
           </p>
           <details className="missing-details">
             <summary>Voir la méthode de calcul et ses poids</summary>
-            <h2>Forme provisoire v2 : résultats, buts et terrain</h2>
+            <h2>Indice dynamique v4</h2>
+            <p>
+              Chaque performance intrinsèque, déjà comprise entre 0 et 100,
+              reçoit un ajustement de surprise limité à ±8. La performance
+              finale est bornée à 0–100 ; la forme est la moyenne des cinq
+              dernières performances, avec le même poids. Aucun bonus n’est
+              recompté et il sort de la fenêtre avec le match.
+            </p>
+            <p>
+              Attente = 1 / (1 + exp(−(indice propre − indice adverse + avantage
+              terrain) / 18)), avantage terrain +4 à domicile, −4 à l’extérieur.
+              Résultat observé : 1 victoire, 0,5 nul, 0 défaite. Surprise =
+              résultat observé − attente ; ajustement = 8 × surprise. Ce score
+              attendu n’est pas une probabilité de victoire et ces paramètres
+              restent provisoires, non calibrés.
+            </p>
+            <p>
+              Version results-relative-v4. Initialisation : référence neutre 50
+              ; avant cinq résultats, les places manquantes dans la fenêtre
+              gardent cette référence, sans inventer de matchs. Les estimations
+              initialisées sont identifiées dans les courbes et ne classent pas
+              les équipes. Les anciennes versions sont conservées dans le code
+              et ne sont pas mélangées.
+            </p>
+            <h2>Base intrinsèque conservée : résultats, buts et terrain</h2>
             <p>
               Les cinq derniers matchs publiés de la saison, toutes compétitions
               confondues, ont le même poids. Les résultats dominent le calcul ;
@@ -147,19 +173,19 @@ export default function Methodology() {
             </ul>
             <p>
               BM = buts marqués ; BE = buts encaissés. Chaque match reçoit la
-              somme de ces contributions. L’indice vaut 100 × la moyenne des
-              cinq matchs / 97. Le plafond commun de 97 tient compte de
+              somme de ces contributions. La base intrinsèque vaut 100 × le
+              total du match / 97. Le plafond commun de 97 tient compte de
               l’exclusion mutuelle des bonus domicile et extérieur : l’indice
               reste entre 0 et 100, avec la même échelle pour toutes les
               équipes. Un terrain inconnu ne reçoit aucun bonus et est signalé.
             </p>
             <p>
               Ces poids constituent une proposition provisoire explicite, sans
-              calibration prédictive. Version : results-context-v2. Les anciens
-              indices basés uniquement sur les points ne sont pas réutilisés.
-              Les statistiques avancées ne changent pas ce calcul. La formule
-              propriétaire reste distincte et les groupes de comparaison
-              séparés.
+              calibration prédictive. Base conservée : results-context-v2. Les
+              anciens indices basés uniquement sur les points ne sont pas
+              réutilisés. Les statistiques avancées ne changent pas ce calcul.
+              La formule propriétaire reste distincte et les groupes de
+              comparaison séparés.
             </p>
           </details>
           <details className="missing-details">

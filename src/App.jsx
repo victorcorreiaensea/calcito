@@ -90,7 +90,7 @@ function Navbar() {
         >
           <Search size={19} />
         </button>
-        <span className="version-badge">V3</span>
+        <span className="version-badge">V4</span>
         {searchOpen && (
           <form
             className="global-search-form"
@@ -165,7 +165,7 @@ function Footer() {
       </nav>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} CALCITO</span>
-        <span>V3 · Données vérifiées, forme en préparation</span>
+        <span>V4 · Données vérifiées, forme dynamique</span>
         <Link to="/admin">Administration privée</Link>
         <button
           onClick={() =>

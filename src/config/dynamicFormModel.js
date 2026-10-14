@@ -1,0 +1,15 @@
+export const dynamicFormModel = Object.freeze({
+  version: "results-relative-v4",
+  intrinsicVersion: "results-context-v2",
+  window: 5,
+  initial: 50,
+  surpriseLimit: 8,
+  expectationScale: 18,
+  homeAdvantage: 4,
+  exploitGap: 20,
+  exploitSurprise: 0.35,
+  performanceGap: 5,
+  performanceSurprise: 0.2,
+  drawGap: 15,
+  drawSurprise: 0.15,
+});

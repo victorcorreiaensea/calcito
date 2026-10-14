@@ -1,3 +1,4 @@
+import { dynamicFormModel } from "../config/dynamicFormModel.js";
 import { resultsFormModel } from "../config/resultsFormModel.js";
 export function formAppreciation(score) {
   if (!Number.isFinite(score) || score < 0 || score > 100)
@@ -130,6 +131,37 @@ export function buildFormStory(
 }
 
 export function formDimensions(breakdown = [], modelVersion) {
+  if (
+    modelVersion === dynamicFormModel.version &&
+    breakdown.length === 5 &&
+    breakdown.every(
+      (r) => r.intrinsicBreakdown && Number.isFinite(r.performance),
+    )
+  ) {
+    const intrinsic = formDimensions(
+      breakdown.map((r) => r.intrinsicBreakdown),
+      resultsFormModel.version,
+    );
+    if (!intrinsic.length) return [];
+    const known = breakdown.filter((r) => Number.isFinite(r.appliedAdjustment));
+    if (!known.length) return intrinsic;
+    return [
+      ...intrinsic,
+      {
+        key: "surprise",
+        label:
+          known.length < 5
+            ? "Surprise partielle"
+            : breakdown.some(
+                  (r) => r.beforeInitialized || r.opponentInitialized,
+                )
+              ? "Surprise estimée"
+              : "Surprise relative",
+        value: known.reduce((n, r) => n + r.appliedAdjustment, 0) / 5,
+      },
+    ];
+  }
+
   if (
     modelVersion !== resultsFormModel.version ||
     breakdown.length !== 5 ||

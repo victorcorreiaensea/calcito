@@ -1,3 +1,5 @@
+import { publicDataset } from "../services/manualAdapter";
+import { dynamicCoverage } from "../engines/dynamicFormEngine";
 import { useState } from "react";
 import { coverageRows } from "../domain/simplified";
 export default function Coverage({ dataset, onAdd }) {
@@ -10,7 +12,11 @@ export default function Coverage({ dataset, onAdd }) {
   const [selected, setSelected] = useState(""),
     [search, setSearch] = useState("");
   const year = Number(selected) || years[0] || new Date().getFullYear();
-  const rows = coverageRows(dataset, year);
+  const publicData = publicDataset(dataset);
+  const rows = coverageRows(dataset, year).map((row) => ({
+    ...row,
+    ...dynamicCoverage(publicData, row.team.id, year, row),
+  }));
   const complete = rows.filter((r) => r.status === "complete").length;
   return (
     <section className="admin-panel">

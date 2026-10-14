@@ -95,7 +95,7 @@ export default function Home() {
               <strong>Meet Calcito.</strong>
               <span>Du terrain aux données.</span>
             </div>
-            <span className="nameplate-status">V3</span>
+            <span className="nameplate-status">V4</span>
           </div>
         </div>
       </section>

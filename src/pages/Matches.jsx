@@ -41,22 +41,77 @@ export function FixtureCard({ match }) {
       </div>
       <div className="fixture-forms">
         <div>
-          <span>Forme domicile</span>
+          <span>Avant match · domicile</span>
           <FormValue
+            initialized={
+              match.dynamic?.sides.find((r) => r.teamId === match.home.id)
+                ?.beforeInitialized
+            }
             variant={match.home.coverage?.variant}
-            dataMode={match.home.coverage?.dataMode}
-            score={match.home.score}
+            score={
+              match.dynamic?.sides.find((r) => r.teamId === match.home.id)
+                ?.before ?? null
+            }
           />
         </div>
         <div>
-          <span>Forme extérieur</span>
+          <span>Avant match · extérieur</span>
           <FormValue
+            initialized={
+              match.dynamic?.sides.find((r) => r.teamId === match.away.id)
+                ?.beforeInitialized
+            }
             variant={match.away.coverage?.variant}
-            dataMode={match.away.coverage?.dataMode}
-            score={match.away.score}
+            score={
+              match.dynamic?.sides.find((r) => r.teamId === match.away.id)
+                ?.before ?? null
+            }
           />
         </div>
       </div>
+      {match.dynamic?.sides.length === 2 && (
+        <details className="fixture-shift">
+          <summary>Évolution après match</summary>
+          <div className="fixture-shift-content">
+            <span className="eyebrow">FORME LORS DE CETTE RENCONTRE</span>
+            {match.dynamic.sides.map((r) => (
+              <div key={r.teamId}>
+                <span>
+                  {r.teamId === match.home.id
+                    ? match.home.name
+                    : match.away.name}
+                </span>
+                <strong>
+                  {r.before.toLocaleString("fr-FR", {
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  →{" "}
+                  {r.after.toLocaleString("fr-FR", {
+                    maximumFractionDigits: 1,
+                  })}
+                </strong>
+                <small>
+                  {r.delta > 0 ? "+" : ""}
+                  {r.delta.toLocaleString("fr-FR", {
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  points
+                  {r.beforeInitialized || r.afterInitialized
+                    ? " · Initialisation"
+                    : ""}
+                </small>
+                {r.label && <span className="exploit-label">{r.label}</span>}
+              </div>
+            ))}
+            <small>
+              Valeurs figées avant le match, puis recalculées après.{" "}
+              {match.dynamic.conservativeDay
+                ? "Heure inconnue : référence avant la journée entière."
+                : ""}
+            </small>
+          </div>
+        </details>
+      )}
       <div className="fixture-footer">
         <span>
           {new Date(match.kickoff).toLocaleString("fr-FR", {

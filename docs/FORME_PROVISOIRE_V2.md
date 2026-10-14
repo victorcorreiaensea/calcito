@@ -1,5 +1,7 @@
 # Forme provisoire v2
 
+> Base intrinsèque archivée et conservée dans la [V4 dynamique](INDICE_DYNAMIQUE_V4.md). Les indices publics actuels utilisent la V4.
+
 Proposition demandée par le propriétaire : résultats, buts et contexte domicile/extérieur. Version `results-context-v2`, distincte de la formule propriétaire non intégrée. Les poids sont explicites, modifiables dans `src/config/resultsFormModel.js` et ne proviennent pas d’une calibration prédictive. Un changement de formule ou de poids doit changer la version.
 
 Sur chacun des cinq derniers matchs publiés de la saison, toutes compétitions confondues, avec F = buts marqués et A = buts encaissés :
