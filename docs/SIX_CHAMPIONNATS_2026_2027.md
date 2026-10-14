@@ -70,6 +70,8 @@ Fichiers publiés :
 
 Autorisé par le propriétaire comme méthode **distincte** de sa formule propriétaire qui n’est pas intégrée.
 
+> Historique : la méthode ci-dessous décrit la v1 lors de cet import. Elle est remplacée par la [forme provisoire v2](FORME_PROVISOIRE_V2.md), qui intègre les buts et le terrain. Les anciens scores v1 ne sont pas réutilisés.
+
 Pour les cinq derniers résultats valides de la saison, toutes compétitions enregistrées confondues :
 
 `indice = 100 × (3 × victoires + matchs nuls) / 15`

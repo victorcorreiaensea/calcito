@@ -6,7 +6,7 @@ Import de résultats avec aperçu modifiable, association des noms d’équipe, 
 
 ## Résultats rapides
 
-Deux modes de saisie, adversaires libres, historiques fusionnés, suivi de couverture et clubs européens supplémentaires. Les indices provisoires attendent une méthode validée ; aucun pourcentage n’est simulé. L’identité noire et bleue est conservée.
+Deux modes de saisie, adversaires libres, historiques fusionnés, suivi de couverture et clubs européens supplémentaires. Un indice provisoire documenté utilise les résultats, les buts et le terrain ; aucun pourcentage n’est simulé. L’identité noire et bleue est conservée.
 
 Pour activer les nouvelles fonctions dans le projet Supabase existant, appliquer **uniquement la migration 002** suivant [le guide V3.1](docs/V3_1_SETUP.md). Avant activation, les matchs complets restent utilisables.
 
@@ -75,4 +75,8 @@ Le déploiement du frontend ne crée pas le projet Supabase et ne prouve pas que
 
 ### Six championnats 2026–2027
 
-Préparation privée des 78 clubs manquants et import d’un relevé **partiel** de 348 résultats, avec contrôle des correspondances et doublons. L’indice résultats provisoire (points sur les cinq derniers matchs) est distinct de la formule propriétaire. Voir [le bilan et la procédure](docs/SIX_CHAMPIONNATS_2026_2027.md). Aucune nouvelle migration n’est requise.
+Préparation privée des 78 clubs manquants et import d’un relevé **partiel** de 348 résultats, avec contrôle des correspondances et doublons. L’indice résultats provisoire (résultats, buts et terrain sur les cinq derniers matchs) est distinct de la formule propriétaire. Voir [le bilan et la procédure](docs/SIX_CHAMPIONNATS_2026_2027.md). Aucune nouvelle migration n’est requise.
+
+## Saisie par journée et forme provisoire v2
+
+Dans l’administration, **Saisie par journée** prépare une grille de matchs sans inventer d’affiches. Seules les lignes remplies sont enregistrées en brouillon. Voir [la saisie](docs/SAISIE_PAR_JOURNEE.md) et [la formule provisoire v2](docs/FORME_PROVISOIRE_V2.md). Aucune migration supplémentaire n’est nécessaire.

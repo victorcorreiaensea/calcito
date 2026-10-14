@@ -2,7 +2,7 @@ import { useFootball } from "../hooks/useFootball";
 import { calculateCalcitoForm } from "../engines/calcitoEngine";
 import { calcitoModel } from "../config/calcitoModel";
 import { SourceCaption } from "./DataContext";
-import { formCoverage } from "../domain/simplified";
+import { formCoverage, simplifiedModel } from "../domain/simplified";
 import { Results, Notice } from "./FootballUI";
 
 export function useTeamAnalysis(id, season = "") {
@@ -40,6 +40,7 @@ export function useTeamAnalysis(id, season = "") {
     (recent.result?.data || []).map((m) => ({
       entry_type: m.entry_type || "complete",
       stats: m.manualStats,
+      venue: m.home.id === id ? "home" : "away",
       goals_for: m.home.id === id ? m.goalsHome : m.goalsAway,
       goals_against: m.home.id === id ? m.goalsAway : m.goalsHome,
     })),
@@ -51,7 +52,7 @@ export function useTeamAnalysis(id, season = "") {
           score: coverage.score,
           status: "provisional",
           indexVariant: "provisional",
-          formulaVersion: "results-points-v1",
+          formulaVersion: simplifiedModel.version,
         }
       : engine;
   return { recent, statistics, engine: shownEngine, results, coverage };
@@ -68,12 +69,14 @@ export function CalculationTrace({ analysis }) {
       </Notice>
       {analysis.coverage.status === "provisional" && (
         <Notice>
-          Indice résultats provisoire : {analysis.coverage.points} points sur 15
-          possibles, ramenés sur 100. Buts sur ces cinq matchs :{" "}
-          {analysis.coverage.goalsFor} marqués,
-          {analysis.coverage.goalsAgainst} encaissés. Cette méthode distincte
-          utilise seulement les résultats ; aucune statistique manquante ni
-          aucun bonus n’est remplacé par zéro.
+          Forme provisoire v2 : résultats, buts marqués et encaissés, bonus de
+          terrain. Sur ces cinq matchs : {analysis.coverage.points} points sur
+          15, {analysis.coverage.goalsFor} buts marqués et{" "}
+          {analysis.coverage.goalsAgainst} encaissés. Les points sont un repère,
+          pas la formule de l’indice. Les statistiques avancées absentes restent
+          inconnues.
+          {analysis.coverage.venueKnown < 5 &&
+            " Terrain inconnu sur certains matchs : aucun bonus de terrain pour ces matchs."}
         </Notice>
       )}
       {recent.loading ? (
@@ -92,7 +95,8 @@ export function CalculationTrace({ analysis }) {
                   <strong>vs {match.opponent}</strong>
                   <span>
                     {new Date(match.kickoff).toLocaleDateString("fr-FR")} ·{" "}
-                    {match.result || "Résultat indisponible"}
+                    {match.result || "Résultat indisponible"} ·{" "}
+                    {match.venue === "home" ? "Domicile" : "Extérieur"}
                     {match.entryType === "simplified"
                       ? " · Résultat rapide"
                       : ""}

@@ -27,6 +27,7 @@ import CatalogManager from "./CatalogManager";
 import DataTools from "./DataTools";
 import MatchImport from "./MatchImport";
 import BulkPublish from "./BulkPublish";
+import MatchdayEntry from "./MatchdayEntry";
 import { DATE_ONLY_MARKER } from "../domain/matchImport";
 
 function Login() {
@@ -126,6 +127,7 @@ function Login() {
 const tabs = [
   ["dashboard", "Vue d’ensemble"],
   ["entry", "Saisie rapide"],
+  ["matchday", "Saisie par journée"],
   ["coverage", "Suivi de couverture"],
   ["matches", "Matchs & brouillons"],
   ["teams", "Équipes"],
@@ -385,6 +387,13 @@ function Dashboard() {
           </Notice>
         </>
       )}
+      {tab === "matchday" && (
+        <MatchdayEntry
+          dataset={dataset}
+          reload={reload}
+          onBusyChange={setImportBusy}
+        />
+      )}
       {tab === "coverage" && (
         <Coverage
           dataset={dataset}
@@ -483,6 +492,12 @@ function Dashboard() {
           <fieldset disabled={importBusy} className="admin-operation-guard">
             <div className="panel-heading">
               <h2>Matchs & brouillons</h2>
+              <button
+                className="button button-secondary"
+                onClick={() => setTab("matchday")}
+              >
+                Saisir une journée
+              </button>
               <button
                 className="button button-secondary"
                 onClick={() => setTab("imports")}

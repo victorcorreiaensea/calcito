@@ -24,7 +24,7 @@ const bundle = JSON.parse(
     "utf8",
   ),
 );
-test("results benchmark has exact standard-points boundaries, no missing-as-zero and identical outputs for enriched matches", () => {
+test("results benchmark uses goals with bounded scores, no missing-as-zero and identical outputs for enriched matches", () => {
   const win = {
     goals_for: 2,
     goals_against: 0,
@@ -33,9 +33,10 @@ test("results benchmark has exact standard-points boundaries, no missing-as-zero
   };
   const draw = { ...win, goals_for: 0, goals_against: 0 };
   const loss = { ...win, goals_for: 0, goals_against: 1 };
-  assert.equal(calculateSimplifiedForm(Array(5).fill(win)).score, 100);
-  assert.equal(calculateSimplifiedForm(Array(5).fill(loss)).score, 0);
-  assert.equal(calculateSimplifiedForm(Array(5).fill(draw)).score, 100 / 3);
+  const expected = calculateSimplifiedForm(Array(5).fill(win)).score;
+  assert.ok(expected > 70 && expected < 100);
+  assert.ok(calculateSimplifiedForm(Array(5).fill(loss)).score < 20);
+  assert.ok(calculateSimplifiedForm(Array(5).fill(draw)).score < expected);
   assert.equal(calculateSimplifiedForm([win, win, draw, loss, loss]).points, 7);
   assert.equal(calculateSimplifiedForm(Array(4).fill(win)).score, null);
   assert.equal(
@@ -56,12 +57,15 @@ test("results benchmark has exact standard-points boundaries, no missing-as-zero
   const basic = formCoverage(Array(5).fill(win));
   const mixed = formCoverage([enriched, win, win, win, win]);
   const detailed = formCoverage(Array(5).fill(enriched));
-  assert.deepEqual([basic.score, mixed.score, detailed.score], [100, 100, 100]);
+  assert.deepEqual(
+    [basic.score, mixed.score, detailed.score],
+    [expected, expected, expected],
+  );
   assert.deepEqual(
     [basic.dataMode, mixed.dataMode, detailed.dataMode],
     ["simplifié", "mixte", "complet"],
   );
-  assert.equal(basic.compatibilityGroup, "results-points-v1");
+  assert.equal(basic.compatibilityGroup, "results-context-v2");
   assert.equal(formCoverage([]).score, null);
 });
 test("partial six-league CSV is structurally valid, unique and uses the exact published French and Portuguese names", async () => {

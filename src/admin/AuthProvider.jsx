@@ -58,6 +58,12 @@ export function AuthProvider({ children }) {
     };
   }, []);
   async function signOut() {
+    try {
+      if (auth.user)
+        sessionStorage.removeItem(`calcito:matchday:${auth.user.id}`);
+    } catch {
+      /* Storage may be unavailable. */
+    }
     await supabase?.auth.signOut();
     invalidateManualData();
   }

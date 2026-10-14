@@ -13,10 +13,10 @@ export default function Methodology() {
       <Notice>
         Les résultats rapides des championnats non suivis rejoignent les cinq
         derniers matchs. Ils renseignent uniquement le score : les statistiques
-        absentes restent inconnues. L’indice résultats provisoire utilise
-        uniquement les points obtenus sur cinq matchs : 100 × (3 × victoires +
-        nuls) / 15. Il ne s’agit pas d’une probabilité de victoire. Ces
-        résultats ne modifient jamais les classements nationaux.
+        absentes restent inconnues. L’indice résultats provisoire utilise les
+        résultats, les buts et le terrain des cinq derniers matchs. Il ne s’agit
+        pas d’une probabilité de victoire. Ces résultats rapides ne modifient
+        jamais les classements nationaux.
       </Notice>
       <div className="method-grid">
         {[
@@ -51,20 +51,41 @@ export default function Methodology() {
       </div>
       <div className="detail-grid methodology-panels">
         <section className="analysis-panel">
-          <h2>Indice résultats provisoire</h2>
+          <h2>Forme provisoire v2 : résultats, buts et terrain</h2>
           <p>
-            Sur les cinq derniers matchs publiés, toutes compétitions
-            enregistrées dans la saison : 3 points pour une victoire, 1 pour un
-            nul, 0 pour une défaite. Cinq victoires valent 100 ; cinq nuls
-            valent 33,3. Aucun poids de récence, bonus européen ou coefficient
-            supplémentaire n’est ajouté à cette méthode distincte.
+            Les cinq derniers matchs publiés de la saison, toutes compétitions
+            confondues, ont le même poids. Les résultats dominent le calcul ;
+            marquer davantage et encaisser moins améliorent aussi la forme. Les
+            effets des buts diminuent progressivement pour éviter qu’une seule
+            large victoire écrase les autres matchs.
+          </p>
+          <ul className="feature-list">
+            <li>Résultat : poids 55 (victoire 1, nul 1/3, défaite 0)</li>
+            <li>
+              Différence de buts : poids 20, via (1 + tanh((BM − BE)/2))/2
+            </li>
+            <li>Défense : poids 10, via 1/(BE + 1)</li>
+            <li>Attaque : poids 5, via BM/(BM + 2)</li>
+            <li>
+              Résultat à l’extérieur : bonus 4 pour une victoire, 2 pour un nul
+            </li>
+            <li>Buts à l’extérieur : bonus 3 × BM/(BM + 2)</li>
+            <li>Clean sheet à domicile : bonus 3 si aucun but encaissé</li>
+          </ul>
+          <p>
+            BM = buts marqués ; BE = buts encaissés. Chaque match reçoit la
+            somme de ces contributions. L’indice vaut 100 × la moyenne des cinq
+            matchs / 97. Le plafond commun de 97 tient compte de l’exclusion
+            mutuelle des bonus domicile et extérieur : l’indice reste entre 0 et
+            100, avec la même échelle pour toutes les équipes. Un terrain
+            inconnu ne reçoit aucun bonus et est signalé.
           </p>
           <p>
-            Les buts sont conservés dans l’historique, sans pondération
-            arbitraire. Les données avancées sont signalées comme complètes,
-            mixtes ou simplifiées ; elles ne changent pas ce calcul provisoire.
-            Les indices propriétaires et provisoires restent dans des groupes de
-            comparaison séparés.
+            Ces poids constituent une proposition provisoire explicite, sans
+            calibration prédictive. Version : results-context-v2. Les anciens
+            indices basés uniquement sur les points ne sont pas réutilisés. Les
+            statistiques avancées ne changent pas ce calcul. La formule
+            propriétaire reste distincte et les groupes de comparaison séparés.
           </p>
           <h2>L’indice propriétaire Calcito</h2>
           <ul className="feature-list">

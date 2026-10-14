@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  calculateSimplifiedForm,
   teamHistory,
   formCoverage,
   resultLetter,
@@ -141,14 +142,17 @@ test("all mixed five-match combinations use a distinct results benchmark while p
       goals_for: 1,
       goals_against: 0,
     }));
-    assert.equal(formCoverage(history, snapshot).score, 100);
+    assert.equal(
+      formCoverage(history, snapshot).score,
+      calculateSimplifiedForm(history).score,
+    );
     const c = formCoverage(history, snapshot, {
       completeModel: { version: "validated-test", formula: () => 78 },
     });
     assert.equal(c.simplified, quick);
     assert.equal(c.detailed, 5 - quick);
     assert.equal(c.variant, quick ? "provisional" : "complete");
-    assert.equal(c.score, quick ? 100 : 78);
+    assert.equal(c.score, quick ? calculateSimplifiedForm(history).score : 78);
     if (quick) assert.match(c.label, /Indice résultats provisoire/);
   }
   assert.equal(
@@ -341,7 +345,12 @@ test("a simplified result cannot use the full formula, even when injected data a
     },
     formulaVersion: "test-only",
   });
-  assert.equal(result.score, 100);
+  assert.equal(
+    result.score,
+    calculateSimplifiedForm(
+      Array(5).fill({ goals_for: 1, goals_against: 0, venue: "home" }),
+    ).score,
+  );
   assert.equal(result.indexVariant, "provisional");
   assert.equal(called, false);
 });

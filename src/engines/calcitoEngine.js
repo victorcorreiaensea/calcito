@@ -55,6 +55,7 @@ export function prepareCalcitoInput({
       kickoff: match.kickoff,
       opponent: home ? match.away.name : match.home.name,
       result,
+      venue: home ? "home" : "away",
       goalsFor,
       goalsAgainst,
       statistics: Object.fromEntries(
@@ -82,7 +83,6 @@ export function calculateCalcitoForm(input, { formula, formulaVersion } = {}) {
     return {
       ...prepared,
       ...calculateSimplifiedForm(prepared),
-      formulaVersion: "results-points-v1",
     };
   if (!prepared.complete)
     return {

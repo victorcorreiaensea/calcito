@@ -1,3 +1,5 @@
+import { calculateResultsForm } from "../engines/resultsFormEngine.js";
+import { resultsFormModel } from "../config/resultsFormModel.js";
 import { calcitoModel } from "../config/calcitoModel.js";
 import { nullableNumber } from "./match.js";
 export const trackedLeagueSlugs = [
@@ -126,6 +128,7 @@ export function teamHistory(
         ...m,
         entry_type: "complete",
         team_id: teamId,
+        venue: home ? "home" : "away",
         goals_for: home ? m.goals_home : m.goals_away,
         goals_against: home ? m.goals_away : m.goals_home,
         stats,
@@ -148,11 +151,11 @@ export function teamHistory(
     )
     .slice(0, limit);
 }
-// Results-only benchmark: standard football points, never the proprietary model.
+// Recomputed from actual results; old points-only snapshots cannot be reused.
 export const simplifiedModel = Object.freeze({
-  version: "results-points-v1",
-  formula: (points) => (100 * points) / 15,
-  compatibilityGroup: "results-points-v1",
+  version: resultsFormModel.version,
+  formula: calculateResultsForm,
+  compatibilityGroup: resultsFormModel.version,
 });
 export function calculateSimplifiedForm(input = []) {
   const history = Array.isArray(input)
@@ -160,44 +163,9 @@ export function calculateSimplifiedForm(input = []) {
     : (input.trace || []).map((m) => ({
         goals_for: m.goalsFor,
         goals_against: m.goalsAgainst,
+        venue: m.venue,
       }));
-  const recent = history.slice(0, 5);
-  if (
-    recent.length !== 5 ||
-    recent.some((m) =>
-      [m.goals_for, m.goals_against].some(
-        (n) =>
-          n == null ||
-          (typeof n !== "number" && typeof n !== "string") ||
-          String(n).trim() === "" ||
-          !Number.isInteger(Number(n)) ||
-          Number(n) < 0,
-      ),
-    )
-  )
-    return {
-      score: null,
-      status: "unavailable",
-      reason: "Cinq résultats valides nécessaires",
-    };
-  const points = recent.reduce(
-    (total, m) =>
-      total +
-      (Number(m.goals_for) > Number(m.goals_against)
-        ? 3
-        : Number(m.goals_for) === Number(m.goals_against)
-          ? 1
-          : 0),
-    0,
-  );
-  return {
-    score: simplifiedModel.formula(points),
-    status: "provisional",
-    points,
-    goalsFor: recent.reduce((n, m) => n + Number(m.goals_for), 0),
-    goalsAgainst: recent.reduce((n, m) => n + Number(m.goals_against), 0),
-    formulaVersion: simplifiedModel.version,
-  };
+  return calculateResultsForm(history);
 }
 export function formCoverage(
   history,
@@ -255,6 +223,8 @@ export function formCoverage(
     detailed === 5 ? "complet" : advancedAvailable ? "mixte" : "simplifié";
   return {
     dataMode,
+    venueKnown: fallback ? provisional.venueKnown : null,
+    breakdown: fallback ? provisional.breakdown : [],
     points: fallback ? provisional.points : null,
     goalsFor: fallback ? provisional.goalsFor : null,
     goalsAgainst: fallback ? provisional.goalsAgainst : null,

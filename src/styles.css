@@ -4228,3 +4228,49 @@ input[type="checkbox"] {
 .bulk-publish-panel {
   margin-block: 20px;
 }
+
+.matchday-grid {
+  display: grid;
+  gap: 14px;
+  margin-block: 20px;
+}
+.matchday-row {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary);
+  min-width: 0;
+}
+.matchday-row > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.matchday-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(70px, 1fr) minmax(
+      70px,
+      1fr
+    ) minmax(130px, 1.3fr);
+  gap: 12px;
+}
+.matchday-fields .admin-field {
+  margin: 0;
+  min-width: 0;
+}
+@media (max-width: 1000px) {
+  .matchday-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .matchday-row {
+    padding: 12px;
+  }
+  .matchday-fields .admin-field:nth-child(-n + 2),
+  .matchday-fields .admin-field:last-child {
+    grid-column: 1 / -1;
+  }
+}
