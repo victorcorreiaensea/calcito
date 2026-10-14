@@ -1,3 +1,6 @@
+import { formDimensions } from "../domain/formPresentation";
+import FormStory from "../components/FormStory";
+import { MascotEditorial } from "../components/FormEducation";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowUpRight, Search } from "lucide-react";
@@ -162,6 +165,11 @@ export function TeamDetail() {
                 description="Résultats publiés, statistiques renseignées et indice de forme lorsqu’il est disponible."
               />
               <FormValue
+                compact={false}
+                dimensions={formDimensions(
+                  analysis.coverage.breakdown,
+                  analysis.engine.formulaVersion,
+                )}
                 variant={team.coverage?.variant}
                 dataMode={team.coverage?.dataMode}
                 score={year && Number(year) !== team.season ? null : team.score}
@@ -187,6 +195,8 @@ export function TeamDetail() {
                 <ArrowUpRight size={16} />
               </Link>
             </div>
+            <FormStory analysis={analysis} />
+            <MascotEditorial />
             <div className="detail-grid">
               <CalculationTrace analysis={analysis} />
               <TeamStatistics state={analysis.statistics} />
@@ -205,8 +215,6 @@ export function TeamDetail() {
               <h2>Historique des résultats publiés</h2>
               <p className="muted-text">
                 {team.coverage?.sampleSize || 0} / 5 résultats ·{" "}
-                {team.coverage?.detailed || 0} détaillés ·{" "}
-                {team.coverage?.simplified || 0} simplifiés.{" "}
                 {team.coverage?.label}
               </p>
               {history.error ? (

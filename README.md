@@ -80,3 +80,7 @@ Préparation privée des 78 clubs manquants et import d’un relevé **partiel**
 ## Saisie par journée et forme provisoire v2
 
 Dans l’administration, **Saisie par journée** prépare une grille de matchs sans inventer d’affiches. Seules les lignes remplies sont enregistrées en brouillon. Voir [la saisie](docs/SAISIE_PAR_JOURNEE.md) et [la formule provisoire v2](docs/FORME_PROVISOIRE_V2.md). Aucune migration supplémentaire n’est nécessaire.
+
+## Signature visuelle de la forme
+
+Noyau de forme réutilisable, synthèse des cinq derniers matchs, contributions réelles et méthodologie interactive. La formule et les données restent inchangées ; les statistiques avancées sont un complément de lecture. Voir [la présentation et ses limites](docs/PRESENTATION_INDICE.md).

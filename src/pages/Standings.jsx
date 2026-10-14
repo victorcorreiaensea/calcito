@@ -336,9 +336,11 @@ export function EuropeanRanking() {
                       <td>{row.team.country}</td>
                       <td>{row.origin}</td>
                       <td>
-                        {row.score == null
-                          ? "Indice indisponible"
-                          : `${row.score} %`}
+                        <FormValue
+                          score={row.score}
+                          variant={row.variant}
+                          dataMode={row.dataMode}
+                        />
                         <small className="coverage-caption">
                           {row.sampleSize} / 5 résultats · {row.detailed}{" "}
                           détaillés · {row.simplified} simplifiés

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Shield, Info, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
+import FormCore from "./FormCore";
 import CalcitoMascot from "./CalcitoMascot";
 
 export function DemoLabel({ compact = false }) {
@@ -63,30 +64,24 @@ export function Results({ results = [], demo = true }) {
     </div>
   );
 }
-export function FormValue({ score, demo = false, variant, dataMode }) {
+export function FormValue({
+  score,
+  demo = false,
+  variant,
+  dataMode,
+  compact = true,
+  dimensions,
+}) {
   return (
-    <div className="form-value">
-      <strong>
-        {Number.isFinite(score) ? `${Number(score.toFixed(1))} %` : "—"}
-      </strong>
-      <span>
-        {demo
-          ? "Indice simulé"
-          : Number.isFinite(score)
-            ? variant === "provisional"
-              ? "Indice résultats provisoire"
-              : "Indice Calcito"
-            : "Données insuffisantes"}
-      </span>
-      {Number.isFinite(score) && dataMode && (
-        <small>
-          Données{" "}
-          {{ complet: "complètes", mixte: "mixtes", simplifié: "simplifiées" }[
-            dataMode
-          ] || dataMode}
-        </small>
-      )}
-      {Number.isFinite(score) && <FormBar score={score} />}
+    <div className={`form-value ${compact ? "" : "form-value-expanded"}`}>
+      <FormCore
+        score={score}
+        demo={demo}
+        variant={variant}
+        dataMode={dataMode}
+        compact={compact}
+        dimensions={dimensions}
+      />
     </div>
   );
 }

@@ -61,11 +61,10 @@ export function CalculationTrace({ analysis }) {
   const { recent, engine } = analysis;
   return (
     <section className="analysis-panel">
-      <h2>Cinq derniers matchs officiels</h2>
+      <h2>Sources et données des cinq matchs</h2>
       <Notice>
         {engine.trace.length} / 5 matchs publiés dans la saison sélectionnée.
-        {analysis.coverage.detailed} avec les données du moteur ·{" "}
-        {analysis.coverage.simplified} simplifiés. {analysis.coverage.label}.
+        {analysis.coverage.label}.
       </Notice>
       {analysis.coverage.status === "provisional" && (
         <Notice>
@@ -88,31 +87,34 @@ export function CalculationTrace({ analysis }) {
       ) : (
         <>
           <Results results={analysis.results} demo={false} />
-          <div className="trace-list">
-            {engine.trace.map((match) => (
-              <div className="trace-match" key={match.matchId}>
-                <header>
-                  <strong>vs {match.opponent}</strong>
-                  <span>
-                    {new Date(match.kickoff).toLocaleDateString("fr-FR")} ·{" "}
-                    {match.result || "Résultat indisponible"} ·{" "}
-                    {match.venue === "home" ? "Domicile" : "Extérieur"}
-                    {match.entryType === "simplified"
-                      ? " · Résultat rapide"
-                      : ""}
-                  </span>
-                </header>
-                <p className="result-score">
-                  {match.goalsFor ?? "—"} – {match.goalsAgainst ?? "—"}
-                </p>
-                <small>
-                  Source : {match.sourceReference || "Non renseignée"}
-                </small>
-              </div>
-            ))}
-          </div>
           <details className="missing-details">
-            <summary>Données utilisées et éléments manquants</summary>
+            <summary>Consulter les résultats et leurs sources</summary>
+            <div className="trace-list">
+              {engine.trace.map((match) => (
+                <div className="trace-match" key={match.matchId}>
+                  <header>
+                    <strong>vs {match.opponent}</strong>
+                    <span>
+                      {new Date(match.kickoff).toLocaleDateString("fr-FR")} ·{" "}
+                      {match.result || "Résultat indisponible"} ·{" "}
+                      {match.venue === "home" ? "Domicile" : "Extérieur"}
+                      {match.entryType === "simplified"
+                        ? " · Résultat rapide"
+                        : ""}
+                    </span>
+                  </header>
+                  <p className="result-score">
+                    {match.goalsFor ?? "—"} – {match.goalsAgainst ?? "—"}
+                  </p>
+                  <small>
+                    Source : {match.sourceReference || "Non renseignée"}
+                  </small>
+                </div>
+              ))}
+            </div>
+          </details>
+          <details className="missing-details">
+            <summary>Données attendues pour l’indice propriétaire</summary>
             <ul>
               {engine.missing.map((item, i) => (
                 <li key={i}>{item}</li>

@@ -1,3 +1,6 @@
+import { formDimensions } from "../domain/formPresentation";
+import FormCore from "../components/FormCore";
+import { FormFactors, MascotEditorial } from "../components/FormEducation";
 import { Link } from "react-router-dom";
 import {
   ArrowUpRight,
@@ -19,6 +22,14 @@ export default function Home() {
     "matches",
     {},
     { enabled: databaseConfig.configured },
+  );
+  const teams = useFootball(
+    "teams",
+    {},
+    { enabled: databaseConfig.configured },
+  );
+  const featured = (teams.result?.data || []).find((t) =>
+    Number.isFinite(t.score),
   );
   const matches = state.result?.data.slice(0, 3) || [];
   return (
@@ -110,11 +121,60 @@ export default function Home() {
             <span>
               derniers matchs officiels
               <br />
-              pour préparer l’indice de forme
+              pour lire la forme actuelle
             </span>
           </div>
-          <span className="status-pill">FORMULE EN PRÉPARATION</span>
+          <span className="status-pill">INDICE DE FORME · PROVISOIRE</span>
         </div>
+      </div>
+      <section className="container home-form-signature">
+        <div className="home-form-copy">
+          <span className="eyebrow">LE NOYAU DE FORME CALCITO</span>
+          <h2>
+            Cinq matchs.
+            <br />
+            Une dynamique.
+          </h2>
+          <p>
+            Résultats, buts et terrain : une lecture de la forme sur 100,
+            expliquée par ce qui s’est passé sur le terrain.
+          </p>
+          <Link to="/methodologie" className="text-link">
+            Découvrir le fonctionnement <ArrowUpRight size={17} />
+          </Link>
+          <p className="form-footnote">
+            Un indice de forme, jamais une probabilité de victoire.
+          </p>
+        </div>
+        <div className="home-form-featured">
+          <FormCore
+            dimensions={formDimensions(
+              featured?.coverage?.breakdown,
+              featured?.coverage?.compatibilityGroup,
+            )}
+            score={featured?.score}
+            variant={featured?.coverage?.variant}
+            dataMode={featured?.coverage?.dataMode}
+          />
+          {featured ? (
+            <>
+              <TeamLink team={featured} />
+              <span className="form-footnote">
+                Équipe publiée · {featured.season}–{featured.season + 1}
+              </span>
+            </>
+          ) : (
+            <p className="form-footnote">
+              Le noyau s’allume lorsque cinq résultats sont disponibles.
+              {teams.error && " Données indisponibles pour le moment."}
+            </p>
+          )}
+        </div>
+        <SourceCaption result={teams.result} />
+      </section>
+      <div className="container">
+        <FormFactors />
+        <MascotEditorial />
       </div>
       <section className="container matches-section">
         <div className="section-heading">
@@ -216,7 +276,7 @@ export default function Home() {
                 SlidersHorizontal,
                 "02",
                 "Contextualiser",
-                "Les cinq derniers matchs officiels prépareront l’indice Calcito. Une donnée manquante reste explicitement indisponible.",
+                "Les cinq derniers matchs officiels expliquent l’indice provisoire. Une donnée manquante reste explicitement indisponible.",
               ],
               [
                 ChartNoAxesCombined,
