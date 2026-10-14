@@ -72,6 +72,7 @@ jobs:
           } else {
             if (!arenaResponse.ok || arena.installed !== true) throw new Error('Arène readiness check failed');
             console.log(`Arène installed; model enabled: ${arena.enabled}`);
+            console.log(`::notice title=Arena readiness::${JSON.stringify({ modelEnabled: arena.enabled, autonomousBookmaker: arena.autonomousBookmaker === true, training: arena.model?.training ?? null, validation: arena.model?.validation ?? null, reason: arena.model?.reason ?? null })}`);
             for (const table of ['arena_wallets', 'arena_tickets', 'arena_ledger']) {
               const privateResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, { headers });
               if ([401, 403].includes(privateResponse.status)) continue;

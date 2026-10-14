@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowUpRight, Search } from "lucide-react";
 import { useFootball } from "../hooks/useFootball";
+import { FixtureCard } from "./Matches";
 import {
   PageHeading,
   DataState,
@@ -134,6 +135,10 @@ export function TeamDetail() {
   const state = useFootball("team", { teamId, season: year });
   const analysis = useTeamAnalysis(state.result?.data.id, year);
   const history = useFootball("teamHistory", { teamId, season: year });
+  const nextMatches = useFootball("matches", {
+    season: year,
+    view: "upcoming",
+  });
   const standings = useFootball(
     "standings",
     { competition: state.result?.data.competitionId, season: year },
@@ -287,6 +292,39 @@ export function TeamDetail() {
               )}
             </section>
             <SourceCaption result={state.result} />
+            <section className="analysis-panel">
+              <h2>Prochaines rencontres de championnat</h2>
+              {nextMatches.loading ? (
+                <p role="status">Chargement du calendrier…</p>
+              ) : nextMatches.error ? (
+                <Notice>Calendrier indisponible.</Notice>
+              ) : (
+                <div className="fixture-grid">
+                  {nextMatches.result?.data
+                    .filter(
+                      (m) =>
+                        (m.home.id === teamId || m.away.id === teamId) &&
+                        m.status === "scheduled" &&
+                        m.competition.type === "league",
+                    )
+                    .slice(0, 2)
+                    .map((m) => (
+                      <FixtureCard key={m.id} match={m} />
+                    ))}
+                </div>
+              )}
+              {!nextMatches.loading &&
+                !nextMatches.result?.data.some(
+                  (m) =>
+                    (m.home.id === teamId || m.away.id === teamId) &&
+                    m.status === "scheduled" &&
+                    m.competition.type === "league",
+                ) && (
+                  <p className="muted-text">
+                    Aucune rencontre future vérifiée pour cette équipe.
+                  </p>
+                )}
+            </section>
           </>
         )}
       </DataState>

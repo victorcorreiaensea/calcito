@@ -19,6 +19,6 @@ jobs:
             request=urllib.request.Request(os.environ['SUPABASE_URL']+'/rest/v1/'+table+'?select=*&limit=1000',headers={'apikey':os.environ['SUPABASE_PUBLIC_KEY']})
             with urllib.request.urlopen(request,timeout=20) as response: rows=json.load(response)
             encoded=base64.b64encode(gzip.compress(json.dumps(rows,ensure_ascii=False).encode())).decode()
-            for index in range(0,len(encoded),3000):
-              print('::notice title=Public catalog '+table+' '+str(index)+'::'+encoded[index:index+3000])
+            for index in range(0,len(encoded),60000):
+              print('::notice title=Public catalog '+table+' '+str(index)+'::'+encoded[index:index+60000])
           PY

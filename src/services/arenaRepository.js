@@ -26,3 +26,12 @@ export const arenaCorrectVoid = (id, reason) =>
   rpc("arena_correct_void", { mid: id, reason });
 export const arenaAdminLog = () => rpc("arena_admin_log");
 export const arenaExport = () => rpc("arena_export");
+export const bookmakerPreview = (selection, odds) =>
+  rpc("arena_bookmaker_preview", { selection, offered_odds: odds });
+export const bookmakerOffer = (selection, odds, nonce, cap) =>
+  rpc("arena_offer_bookmaker", {
+    selection,
+    offered_odds: odds,
+    client_nonce: nonce,
+    exposure_cap: cap,
+  });

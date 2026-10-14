@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
+import { localDate } from "../domain/calendar";
 import { useFootball } from "../hooks/useFootball";
 import {
   PageHeading,
@@ -30,6 +31,12 @@ export function FixtureCard({ match }) {
         </span>
         <span className="status-pill">{labels[match.status]}</span>
       </div>
+      {match.status === "scheduled" &&
+        Date.parse(match.kickoff) > Date.now() && (
+          <Link className="text-link" to={`/arene?match=${match.id}`}>
+            Voir les pronostics →
+          </Link>
+        )}
       <div className="fixture-versus">
         <TeamLink team={match.home} />
         <strong className="fixture-score">
@@ -133,9 +140,12 @@ export default function Matches() {
   const [competition, setCompetition] = useState(""),
     [year, setYear] = useState(""),
     [view, setView] = useState(""),
-    [page, setPage] = useState(0);
+    [page, setPage] = useState(0),
+    [date, setDate] = useState("");
   const state = useFootball("matches", { competition, season: year, view });
-  const matches = state.result?.data || [];
+  const matches = (state.result?.data || []).filter(
+    (m) => !date || localDate(m.kickoff) === date,
+  );
   return (
     <section className="container page-content">
       <PageHeading
@@ -144,6 +154,17 @@ export default function Matches() {
         description="Calendrier et résultats vérifiés, saisis une seule fois pour les deux équipes. Seules les rencontres publiées par l’administrateur sont visibles."
       />
       <div className="filter-bar">
+        <label className="filter-field">
+          Date · heure de Paris
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              setPage(0);
+            }}
+          />
+        </label>
         <CompetitionSelect
           value={competition}
           onChange={(value) => {

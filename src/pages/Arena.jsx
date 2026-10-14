@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowUpRight,
   Coins,
@@ -19,6 +19,8 @@ import {
   arenaTicket,
   arenaMission,
   arenaExport,
+  bookmakerPreview,
+  bookmakerOffer,
 } from "../services/arenaRepository";
 import {
   arenaMarkets,
@@ -59,6 +61,8 @@ const coachLessons = [
   ],
 ];
 export default function Arena() {
+  const [params] = useSearchParams();
+  const targetMatch = params.get("match");
   const auth = useAuth(),
     data = useFootball("dataset");
   const [status, setStatus] = useState(null),
@@ -71,6 +75,7 @@ export default function Arena() {
     [offer, setOffer] = useState(""),
     [notice, setNotice] = useState(""),
     [reaction, setReaction] = useState(""),
+    [bookDecision, setBookDecision] = useState(null),
     [uncertain, setUncertain] = useState(false),
     [fixtureCompetition, setFixtureCompetition] = useState(""),
     [fixturePage, setFixturePage] = useState(0),
@@ -107,6 +112,7 @@ export default function Arena() {
     setReaction("");
     setStake("");
     setOffer("");
+    setBookDecision(null);
     request.current = null;
     try {
       const value = JSON.parse(
@@ -142,6 +148,7 @@ export default function Arena() {
     .filter(
       (m) =>
         m.is_published &&
+        (!targetMatch || m.id === targetMatch) &&
         (!fixtureCompetition ||
           d.seasons.find((s) => s.id === m.season_id)?.competition_id ===
             fixtureCompetition) &&
@@ -153,7 +160,10 @@ export default function Arena() {
     visiblePage = Math.min(fixturePage, fixturePages - 1);
   const playerLimit = Number(account?.limit || 0),
     botLimit = Number(status?.botLimit || 0),
-    amount = parseCoins(stake),
+    amount =
+      mode === "bookmaker"
+        ? Number(bookDecision?.stake || 0)
+        : parseCoins(stake),
     math = basket.length
       ? ticketNumbers(basket, amount || 0, mode, offer)
       : null;
@@ -171,12 +181,17 @@ export default function Arena() {
     math.userRisk <= playerLimit &&
     math.botRisk <= botLimit &&
     (mode !== "bookmaker" ||
-      (basket.length === 1 && math.odds >= 1.01 && math.odds <= 1000));
+      (status?.autonomousBookmaker &&
+        bookDecision?.accepted &&
+        basket.length === 1 &&
+        math.odds >= 1.01 &&
+        math.odds <= 1000));
   const level = levelFor(Number(account?.wallet.xp || 0)),
     next = levels.find((l) => l.xp > Number(account?.wallet.xp || 0));
   function add(q, m) {
     if (uncertain) return;
     setReaction("");
+    setBookDecision(null);
     setNotice("");
     request.current = null;
     if (mode === "bookmaker") {
@@ -213,6 +228,7 @@ export default function Arena() {
       amount,
       mode,
       odds: mode === "bookmaker" ? offer.replace(",", ".") : null,
+      cap: mode === "bookmaker" ? bookDecision.userRisk : null,
       nonce: crypto.randomUUID(),
     };
     request.current = payload;
@@ -225,22 +241,35 @@ export default function Arena() {
       /* The server nonce still protects retries in this tab. */
     }
     try {
-      const r = await arenaTicket(
-        payload.ids,
-        payload.amount,
-        payload.mode,
-        payload.odds,
-        payload.nonce,
-      );
+      const r =
+        payload.mode === "bookmaker"
+          ? await bookmakerOffer(
+              payload.ids,
+              payload.odds,
+              payload.nonce,
+              payload.cap,
+            )
+          : await arenaTicket(
+              payload.ids,
+              payload.amount,
+              payload.mode,
+              payload.odds,
+              payload.nonce,
+            );
+      if (payload.mode === "bookmaker") setBookDecision(r);
       setNotice(
         r.accepted
           ? "Ticket enregistré : les engagements sont maintenant réservés."
           : r.reason,
       );
       setReaction(
-        r.accepted
-          ? "Marché conclu. Les engagements sont réservés."
-          : "Non merci, cette offre ne me paraît pas intéressante.",
+        payload.mode === "bookmaker"
+          ? r.accepted
+            ? `Je relève le défi avec ${formatCoins(r.stake)} C. ${r.reason}`
+            : r.reason
+          : r.accepted
+            ? "Marché conclu. Les engagements sont réservés."
+            : "Non merci, cette offre ne me paraît pas intéressante.",
       );
       setBasket([]);
       setStake("");
@@ -256,6 +285,31 @@ export default function Arena() {
           : e.message,
       );
       if (!unknown) clearRequest();
+    } finally {
+      lock.current = false;
+      setBusy(false);
+    }
+  }
+  async function evaluateOffer() {
+    if (lock.current || basket.length !== 1 || !status?.autonomousBookmaker)
+      return;
+    lock.current = true;
+    setBusy(true);
+    setNotice("");
+    try {
+      const r = await bookmakerPreview(
+        basket.map((q) => q.id),
+        offer.replace(",", "."),
+      );
+      setBookDecision(r);
+      setReaction(
+        r.accepted
+          ? `Je prévois ${formatCoins(r.stake)} C pour ce défi, si les budgets le permettent à la validation.`
+          : r.reason,
+      );
+    } catch (e) {
+      setBookDecision(null);
+      setNotice(e.message);
     } finally {
       lock.current = false;
       setBusy(false);
@@ -445,6 +499,7 @@ export default function Arena() {
                   disabled={busy || uncertain}
                   onClick={() => {
                     setMode("challenge");
+                    setBookDecision(null);
                     setReaction("");
                     setBasket([]);
                     request.current = null;
@@ -457,6 +512,7 @@ export default function Arena() {
                   disabled={busy || uncertain}
                   onClick={() => {
                     setMode("bookmaker");
+                    setBookDecision(null);
                     setReaction("");
                     setBasket([]);
                     request.current = null;
@@ -497,6 +553,17 @@ export default function Arena() {
                     forme.
                   </p>
                 </div>
+              )}
+              {targetMatch && (
+                <Link className="text-link" to="/arene">
+                  Voir toutes les rencontres à venir
+                </Link>
+              )}
+              {mode === "bookmaker" && !status?.autonomousBookmaker && (
+                <Notice>
+                  Le bookmaker autonome attend l’activation du script calendrier
+                  004 dans Supabase.
+                </Notice>
               )}
               {d?.competitions?.length > 0 && (
                 <label className="arena-calendar-filter">
@@ -641,27 +708,77 @@ export default function Arena() {
                       value={offer}
                       onChange={(e) => {
                         setOffer(e.target.value);
+                        setBookDecision(null);
+                        setReaction("");
                         request.current = null;
                       }}
                       disabled={busy || uncertain}
                       placeholder="Ex. 3.20"
                     />
                   </label>
+                  <button
+                    className="button button-secondary"
+                    disabled={
+                      busy ||
+                      uncertain ||
+                      basket.length !== 1 ||
+                      !offer ||
+                      !status?.autonomousBookmaker
+                    }
+                    onClick={evaluateOffer}
+                  >
+                    Demander la décision de Calcito
+                  </button>
+                  {bookDecision && (
+                    <div className="arena-model-note">
+                      <h3>
+                        {bookDecision.ticket
+                          ? "Défi enregistré"
+                          : bookDecision.accepted
+                            ? "Proposition étudiée"
+                            : "Calcito passe son tour"}
+                      </h3>
+                      <p>{bookDecision.reason}</p>
+                      <p>
+                        Mise choisie : {formatCoins(bookDecision.stake)} C ·
+                        probabilité{" "}
+                        {(
+                          Number(bookDecision.probability) * 100
+                        ).toLocaleString("fr-FR", {
+                          maximumFractionDigits: 2,
+                        })}{" "}
+                        %.
+                      </p>
+                      <p>
+                        Retour brut de Calcito si sa sélection réussit :{" "}
+                        {formatCoins(bookDecision.gross)} C. Ta responsabilité :{" "}
+                        {formatCoins(bookDecision.userRisk)} C. S’il perd, sa
+                        mise te revient. Annulation : engagements rendus.
+                      </p>
+                      <p>
+                        {bookDecision.ticket
+                          ? "Engagements réservés par le serveur."
+                          : "Aucun engagement avant confirmation. Le serveur peut réduire la mise si les budgets changent ; il ne dépassera pas la responsabilité prévisualisée."}
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
-              <label>
-                {mode === "bookmaker" ? "Mise de Calcito (C)" : "Ta mise (C)"}
-                <input
-                  inputMode="decimal"
-                  value={stake}
-                  onChange={(e) => {
-                    setStake(e.target.value);
-                    request.current = null;
-                  }}
-                  disabled={busy || uncertain}
-                  placeholder="0,00"
-                />
-              </label>
+              {mode !== "bookmaker" && (
+                <label>
+                  Ta mise (C)
+                  <input
+                    inputMode="decimal"
+                    value={stake}
+                    onChange={(e) => {
+                      setStake(e.target.value);
+                      request.current = null;
+                    }}
+                    disabled={busy || uncertain}
+                    placeholder="0,00"
+                  />
+                </label>
+              )}
               <div className="slip-metrics">
                 <span>
                   Ton engagement maximal
@@ -692,7 +809,7 @@ export default function Arena() {
                     </span>
                     <span>
                       {mode === "bookmaker"
-                        ? "Ta responsabilité réservée"
+                        ? "Responsabilité à réserver"
                         : "Gain brut potentiel"}
                       <strong>
                         {formatCoins(
@@ -703,7 +820,7 @@ export default function Arena() {
                     </span>
                     <span>
                       {mode === "bookmaker"
-                        ? "Gain si Calcito perd"
+                        ? "Bénéfice si Calcito perd"
                         : "Bénéfice net potentiel"}
                       <strong>
                         {formatCoins(mode === "bookmaker" ? amount : math.net)}{" "}
@@ -736,7 +853,9 @@ export default function Arena() {
                   ? "Validation serveur…"
                   : uncertain
                     ? "Réessayer la même demande"
-                    : "Valider le défi"}
+                    : mode === "bookmaker"
+                      ? "Confirmer la proposition"
+                      : "Valider le défi"}
               </button>
               {uncertain && (
                 <button
@@ -846,6 +965,11 @@ function ArenaFixture({ match, dataset, enabled, onSelect, locked }) {
           {busy ? "Calcul serveur…" : "Consulter les cotes"}
         </button>
       )}
+      {!enabled && (
+        <p className="form-footnote">
+          Cote indisponible : connexion et modèle historique validé nécessaires.
+        </p>
+      )}
       {quote?.forecast && (
         <p className="form-footnote">
           1 / N / 2 :{" "}
@@ -890,7 +1014,9 @@ function ArenaFixture({ match, dataset, enabled, onSelect, locked }) {
           </button>
         </>
       )}
-      {quote?.reason && <p className="muted-text">{quote.reason}</p>}
+      {quote?.reason && (
+        <p className="muted-text">Cote indisponible : {quote.reason}</p>
+      )}
       {error && <p role="alert">{error}</p>}
     </article>
   );

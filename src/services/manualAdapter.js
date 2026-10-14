@@ -98,6 +98,7 @@ export function manualMatch(match, dataset) {
     competition: {
       id: comp?.id,
       name: comp?.name,
+      type: comp?.type,
       coefficient: comp?.form_coefficient,
     },
     season: season?.start_year,
@@ -284,9 +285,16 @@ export const manualAdapter = {
             (!view ||
               (view === "results"
                 ? match.status === "finished"
-                : match.status !== "finished"))
+                : (match.status === "scheduled" &&
+                    Date.parse(match.kickoff) > Date.now()) ||
+                  match.status === "live"))
           );
         })
+        .sort((a, b) =>
+          view === "upcoming"
+            ? Date.parse(a.kickoff) - Date.parse(b.kickoff)
+            : Date.parse(b.kickoff) - Date.parse(a.kickoff),
+        )
         .map((match) => manualMatch(match, d)),
     ),
   standings: (params) =>

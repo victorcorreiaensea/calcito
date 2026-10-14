@@ -6,6 +6,10 @@ Nouvel espace `#/arene` : jeu entièrement virtuel, portefeuille serveur, plafon
 
 **Activation nécessaire dans le Supabase existant : migration 003**, une seule fois, puis configuration des comptes et contrôle historique. Le déploiement du site n’installe pas cette migration. Suivre [le guide V5](docs/ARENE_V5.md). Les données actuelles sont conservées ; aucun faux portefeuille ou match n’est créé par le frontend.
 
+## Calendrier des pronostics et bookmaker autonome
+
+[Activation et règles](docs/CALENDRIER_BOOKMAKER.md) : migration **004** et initialisation des 105 rencontres préparées à partir du calendrier CC0. Dix affiches espagnoles restent sans heure et sont exclues. Actualisation avec aperçu propriétaire, identité stable, contrôle des horaires et bilan serveur. Calcito choisit lui-même sa mise bookmaker : quart de Kelly prudent, financé, plafonné par les deux portefeuilles. Les cotes restent soumises à la validation historique V5.
+
 ## Import CSV et relevé Flashscore
 
 Import de résultats avec aperçu modifiable, association des noms d’équipe, choix ignorer/mettre à jour les doublons, données inconnues NULL et bilan des erreurs/imports partiels. L’onglet Flashscore propose un relevé humain fonctionnel ; aucune extraction automatique non autorisée n’est annoncée. [Guide d’utilisation et limites](docs/IMPORT_MATCHES.md). Aucune nouvelle migration pour cet import.

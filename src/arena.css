@@ -784,3 +784,43 @@
   font-size: 12px;
   color: var(--muted);
 }
+.calendar-manager > .button {
+  margin: 10px 8px 10px 0;
+}
+.calendar-manager .admin-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 25px 0;
+}
+.calendar-manager details {
+  margin: 20px 0;
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 9px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.calendar-manager details summary {
+  cursor: pointer;
+  color: white;
+}
+@media (max-width: 600px) {
+  .calendar-manager .admin-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .calendar-manager > .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+.filter-field input[type="date"] {
+  font: inherit;
+  color: #fff;
+  color-scheme: dark;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 12px;
+  min-height: 42px;
+  min-width: 0;
+  width: 100%;
+}

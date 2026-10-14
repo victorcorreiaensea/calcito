@@ -29,6 +29,7 @@ import MatchImport from "./MatchImport";
 import BulkPublish from "./BulkPublish";
 import MatchdayEntry from "./MatchdayEntry";
 import ArenaOps from "./ArenaOps";
+import CalendarManager from "./CalendarManager";
 import { DATE_ONLY_MARKER } from "../domain/matchImport";
 
 function Login() {
@@ -130,6 +131,7 @@ const tabs = [
   ["entry", "Saisie rapide"],
   ["matchday", "Saisie par journée"],
   ["arena", "Arène & cotes"],
+  ["calendar", "Calendrier des pronostics"],
   ["coverage", "Suivi de couverture"],
   ["matches", "Matchs & brouillons"],
   ["teams", "Équipes"],
@@ -394,6 +396,20 @@ function Dashboard() {
           dataset={dataset}
           reload={reload}
           onBusyChange={setImportBusy}
+        />
+      )}
+      {tab === "calendar" && (
+        <CalendarManager
+          dataset={dataset}
+          reload={reload}
+          onPrepare={() => setTab("matchday")}
+          onEdit={(m) =>
+            openEntry(
+              "complete",
+              "",
+              enriched.find((r) => r.id === m.id),
+            )
+          }
         />
       )}
       {tab === "arena" && (
