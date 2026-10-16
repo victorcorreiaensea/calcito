@@ -61,7 +61,7 @@ const coachLessons = [
   ],
 ];
 export default function Arena() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const targetMatch = params.get("match");
   const auth = useAuth(),
     data = useFootball("dataset");
@@ -80,10 +80,13 @@ export default function Arena() {
     [fixtureCompetition, setFixtureCompetition] = useState(""),
     [fixturePage, setFixturePage] = useState(0),
     [tab, setTab] = useState(
-      params.get("tab") === "profile" ? "profile" : "play",
+      ["play", "coach", "profile"].includes(params.get("tab"))
+        ? params.get("tab")
+        : "play",
     );
   useEffect(() => {
-    if (params.get("tab") === "profile") setTab("profile");
+    if (["play", "coach", "profile"].includes(params.get("tab")))
+      setTab(params.get("tab"));
   }, [params.get("tab")]);
   const request = useRef(null),
     lock = useRef(false),
@@ -487,7 +490,12 @@ export default function Arena() {
           <button
             key={id}
             className={tab === id ? "active" : ""}
-            onClick={() => setTab(id)}
+            onClick={() => {
+              setTab(id);
+              const next = new URLSearchParams(params);
+              next.set("tab", id);
+              setParams(next, { replace: true });
+            }}
             disabled={busy}
           >
             {label}

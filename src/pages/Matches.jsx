@@ -145,7 +145,7 @@ export function FixtureCard({ match }) {
             ...(match.timeKnown === false ? {} : { timeStyle: "short" }),
           })}
         </span>
-        <Link to={`/matchs/${match.id}`}>
+        <Link className="fixture-analysis-link" to={`/matchs/${match.id}`}>
           Analyse
           <ArrowUpRight size={14} />
         </Link>
