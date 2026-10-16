@@ -33,7 +33,7 @@ import {
 } from "../domain/arena";
 import CalcitoMascot from "../components/CalcitoMascot";
 import Calcithune from "../components/Calcithune";
-import { TeamBadge, Notice } from "../components/FootballUI";
+import { TeamBadge, FormValue, Notice } from "../components/FootballUI";
 const coachLessons = [
   [
     "La bankroll",
@@ -79,7 +79,12 @@ export default function Arena() {
     [uncertain, setUncertain] = useState(false),
     [fixtureCompetition, setFixtureCompetition] = useState(""),
     [fixturePage, setFixturePage] = useState(0),
-    [tab, setTab] = useState("play");
+    [tab, setTab] = useState(
+      params.get("tab") === "profile" ? "profile" : "play",
+    );
+  useEffect(() => {
+    if (params.get("tab") === "profile") setTab("profile");
+  }, [params.get("tab")]);
   const request = useRef(null),
     lock = useRef(false),
     generation = useRef(0);
@@ -495,6 +500,7 @@ export default function Arena() {
             <div>
               <div className="arena-mode">
                 <button
+                  aria-label="Défie Calcito"
                   className={mode === "challenge" ? "active" : ""}
                   disabled={busy || uncertain}
                   onClick={() => {
@@ -505,9 +511,13 @@ export default function Arena() {
                     request.current = null;
                   }}
                 >
-                  Défie Calcito
+                  <b>01 / Défie Calcito</b>
+                  <span>
+                    Choisis une cote proposée par Calcito et compose ton ticket.
+                  </span>
                 </button>
                 <button
+                  aria-label="Deviens le bookmaker"
                   className={mode === "bookmaker" ? "active" : ""}
                   disabled={busy || uncertain}
                   onClick={() => {
@@ -518,11 +528,23 @@ export default function Arena() {
                     request.current = null;
                   }}
                 >
-                  Deviens le bookmaker
+                  <b>02 / Deviens le bookmaker</b>
+                  <span>
+                    Propose ta cote : Calcito décide et choisit sa propre mise.
+                  </span>
                 </button>
               </div>
               <CalcitoMascot
                 variant={reaction ? "success" : "analysis"}
+                emotion={
+                  bookDecision?.accepted === false
+                    ? "disappointed"
+                    : reaction
+                      ? "proud"
+                      : mode === "bookmaker"
+                        ? "curious"
+                        : "focused"
+                }
                 title={
                   reaction ||
                   (mode === "challenge"
@@ -913,6 +935,11 @@ function team(d, id) {
   return t ? { ...t, logo: t.logo_url } : null;
 }
 function ArenaFixture({ match, dataset, enabled, onSelect, locked }) {
+  const season = dataset.seasons.find(
+    (s) => s.id === match.season_id,
+  )?.start_year;
+  const home = useFootball("team", { teamId: match.home_team_id, season });
+  const away = useFootball("team", { teamId: match.away_team_id, season });
   const [quote, setQuote] = useState(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -956,6 +983,19 @@ function ArenaFixture({ match, dataset, enabled, onSelect, locked }) {
         </h3>
         <TeamBadge team={team(dataset, match.away_team_id)} small />
       </div>
+      <div className="arena-current-forms">
+        <div>
+          <span>Forme domicile</span>
+          <FormValue score={home.result?.data.score} />
+        </div>
+        <div>
+          <span>Forme extérieur</span>
+          <FormValue score={away.result?.data.score} />
+        </div>
+      </div>
+      <Link className="text-link" to={`/matchs/${match.id}`}>
+        Lire l’avant-match →
+      </Link>
       {!quote && (
         <button
           className="button button-secondary"

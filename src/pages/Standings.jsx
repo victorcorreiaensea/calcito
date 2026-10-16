@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useFootball } from "../hooks/useFootball";
 import {
   PageHeading,
@@ -86,8 +86,11 @@ function Table({ rows, group, season }) {
   );
 }
 export default function Standings() {
-  const [competition, setCompetition] = useState(""),
-    [year, setYear] = useState("");
+  const [params] = useSearchParams();
+  const [competition, setCompetition] = useState(
+      params.get("competition") || "",
+    ),
+    [year, setYear] = useState(params.get("season") || "");
   const comps = useFootball("competitions");
   const leagueComps = comps.result?.data.filter(isTrackedLeague) || [];
   const selectedId =

@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./styles.css";
 import "./arena.css";
+import "./discovery.css";
 import { consumeAuthCallback } from "./services/authCallback";
 
 consumeAuthCallback().then((error) =>

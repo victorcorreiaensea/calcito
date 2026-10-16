@@ -1,3 +1,4 @@
+import MethodJourney from "../components/MethodJourney";
 import SurpriseEducation from "../components/SurpriseEducation";
 import { FormFactors, MascotEditorial } from "../components/FormEducation";
 import FormCore from "../components/FormCore";
@@ -12,8 +13,9 @@ export default function Methodology() {
       <PageHeading
         label="UNE LECTURE TRANSPARENTE DU JEU"
         title="Méthodologie"
-        description="Les résultats vérifiés, les classements reconstruits et les futurs modèles ont chacun leur rôle. Les données manquantes restent visibles."
+        description="Les résultats vérifiés, les classements reconstruits et les modèles ont chacun leur rôle. Les données manquantes restent visibles."
       />
+      <MethodJourney />
       <section className="methodology-intro analysis-panel">
         <div>
           <span className="eyebrow">LA FORME, PAS LE HASARD</span>
@@ -229,14 +231,14 @@ export default function Methodology() {
       <section className="analysis-panel">
         <h2>Pronostics : un modèle à part entière</h2>
         <p className="muted-text">
-          Le futur modèle probabiliste devra être calibré. Ses trois
-          probabilités totaliseront 100 %, les cotes théoriques seront leurs
-          inverses et les calculs conserveront leur date, version et qualité des
-          données.
+          Le modèle Poisson de l’Arène est calibré sur des résultats historiques
+          et évalué sur une période distincte. Ses trois probabilités totalisent
+          100 %. Les cotes ne sont disponibles que si les critères de validation
+          et la couverture de la rencontre sont satisfaits.
         </p>
         <Notice>
-          Modèle de pronostics en développement. Aucun pari, paiement, bookmaker
-          ou lien d’affiliation.
+          L’Arène utilise uniquement des Calcithunes fictives : aucun achat,
+          retrait ou paiement d’argent réel.
         </Notice>
       </section>
       <Notice>

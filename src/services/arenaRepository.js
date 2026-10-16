@@ -9,7 +9,19 @@ async function rpc(name, args = {}) {
   return result.data;
 }
 export const arenaStatus = () => rpc("arena_status");
-export const arenaAccount = () => rpc("arena_account");
+export const arenaAccount = async () => {
+  const client = requireDatabase();
+  const {
+    data: { session },
+  } = await client.auth.getSession();
+  const account = await rpc("arena_account");
+  window.dispatchEvent(
+    new CustomEvent("calcito:wallet-changed", {
+      detail: { userId: session?.user.id, account },
+    }),
+  );
+  return account;
+};
 export const arenaQuote = (id) => rpc("arena_quote", { mid: id });
 export const arenaTicket = (selection, amount, mode, odds, nonce) =>
   rpc("arena_place_ticket", {

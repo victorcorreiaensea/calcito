@@ -1,26 +1,16 @@
-import { formDimensions } from "../domain/formPresentation";
-import FormCore from "../components/FormCore";
-import { FormFactors, MascotEditorial } from "../components/FormEducation";
 import { Link } from "react-router-dom";
-import {
-  ArrowUpRight,
-  ArrowRight,
-  ShieldCheck,
-  ScanLine,
-  ChartNoAxesCombined,
-  SlidersHorizontal,
-  Trophy,
-} from "lucide-react";
+import { ArrowUpRight, ArrowRight, ShieldCheck, Trophy } from "lucide-react";
 import { useFootball } from "../hooks/useFootball";
 import { databaseConfig } from "../services/supabaseClient";
 import { mascotUrl } from "../components/CalcitoMascot";
-import { TeamLink } from "../components/FootballUI";
+import CalcitoGuide from "../components/CalcitoGuide";
+import ClubSnapshot from "../components/ClubSnapshot";
+import { FixtureCard } from "./Matches";
 import { SourceCaption } from "../components/DataContext";
-
 export default function Home() {
   const state = useFootball(
     "matches",
-    {},
+    { view: "upcoming" },
     { enabled: databaseConfig.configured },
   );
   const teams = useFootball(
@@ -28,17 +18,19 @@ export default function Home() {
     {},
     { enabled: databaseConfig.configured },
   );
-  const featured = (teams.result?.data || []).find((t) =>
-    Number.isFinite(t.score),
+  const featured = teams.result?.data.find((t) =>
+    ["fc porto", "porto"].includes(t.name.toLowerCase()),
   );
-  const matches = state.result?.data.slice(0, 3) || [];
+  const matches =
+    state.result?.data.filter((m) => m.status === "scheduled").slice(0, 3) ||
+    [];
   return (
     <>
-      <section className="hero container v3-hero">
+      <section className="hero container v3-hero discovery-hero">
         <div className="hero-copy">
           <div className="hero-kicker">
             <span className="live-dot" />
-            FOOTBALL INTELLIGENCE, HUMAN POWERED
+            LE FOOTBALL A UN NOUVEAU COMPAGNON
           </div>
           <h1>
             Football is
@@ -48,140 +40,150 @@ export default function Home() {
             <span>a score.</span>
           </h1>
           <p>
-            Le score raconte un match.
+            Les chiffres ont une histoire.
             <br />
-            La forme raconte une dynamique.
+            Calcito te la raconte.
           </p>
           <p className="hero-description">
-            Des résultats vérifiés, des équipes à suivre, une nouvelle lecture
-            du football. Calcito rassemble les performances récentes pour les
-            rendre plus claires et comparables.
+            Lis la forme de tes clubs, prépare les prochaines affiches et défie
+            Calcito. Une autre façon de vivre le football, guidée par les faits.
           </p>
           <div className="hero-buttons">
             <Link className="button button-primary" to="/equipes">
-              Explorer les équipes
-              <ArrowUpRight size={19} />
+              Explorer les équipes <ArrowUpRight size={18} />
             </Link>
-            <Link className="button button-secondary" to="/classements">
-              Voir les classements
-              <ArrowRight size={16} />
-            </Link>
+            <a
+              className="button button-secondary"
+              href="#meet-calcito"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("meet-calcito")?.scrollIntoView({
+                  behavior: window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                  ).matches
+                    ? "instant"
+                    : "smooth",
+                });
+              }}
+            >
+              Rencontrer Calcito <ArrowRight size={17} />
+            </a>
           </div>
           <div className="hero-trust">
             <ShieldCheck size={15} />
-            <span>
-              Données manuelles · Sources vérifiées · Lecture publique
-            </span>
+            <span>Des données publiées. Des incertitudes assumées.</span>
           </div>
         </div>
         <div className="hero-robot">
           <div className="robot-caption">
-            <span>CALCITO / MATCHDAY COMPANION</span>
+            <span>CALCITO / TON COMPAGNON DE MATCH</span>
             <span className="live-dot" />
           </div>
           <div className="robot-orbit" aria-hidden="true" />
-          <img
-            src={mascotUrl}
-            alt="Calcito, robot footballistique en armure noire, bleue et blanche, avec son ballon et son cœur électrique"
-            fetchPriority="high"
-            width="1280"
-            height="1280"
-          />
+          <a
+            className="hero-mascot-invitation"
+            href="#meet-calcito"
+            aria-label="Faire connaissance avec Calcito"
+            onClick={(event) => {
+              event.preventDefault();
+              document.getElementById("meet-calcito")?.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                  .matches
+                  ? "instant"
+                  : "smooth",
+              });
+            }}
+          >
+            <img
+              src={mascotUrl}
+              alt="Calcito, notre robot sportif bleu et blanc, et son ballon de football"
+              fetchPriority="high"
+              width="1280"
+              height="1280"
+            />
+          </a>
           <div className="robot-nameplate">
             <span className="nameplate-icon">
               <Trophy size={19} />
             </span>
             <div>
-              <strong>Meet Calcito.</strong>
-              <span>Du terrain aux données.</span>
+              <strong>Le jeu commence ici.</strong>
+              <span>De la curiosité. Du ballon. Du contexte.</span>
             </div>
-            <span className="nameplate-status">V4</span>
+            <span className="nameplate-status">C.</span>
           </div>
         </div>
       </section>
-      <div className="facts-strip">
-        <div className="container facts-inner">
-          <div>
-            <strong>06</strong>
-            <span>
-              championnats européens
-              <br />à suivre, journée après journée
-            </span>
-          </div>
-          <div>
-            <strong>03</strong>
-            <span>
-              coupes européennes
-              <br />
-              pour prolonger la lecture
-            </span>
-          </div>
-          <div>
-            <strong>05</strong>
-            <span>
-              derniers matchs officiels
-              <br />
-              pour lire la forme actuelle
-            </span>
-          </div>
-          <span className="status-pill">INDICE DE FORME · PROVISOIRE</span>
-        </div>
+      <div className="container discovery-intro">
+        <span>ANALYSER.</span>
+        <span>COMPARER.</span>
+        <span>DÉFIER.</span>
       </div>
-      <section className="container home-form-signature">
-        <div className="home-form-copy">
-          <span className="eyebrow">LE NOYAU DE FORME CALCITO</span>
-          <h2>
-            Cinq matchs.
-            <br />
-            Une dynamique.
-          </h2>
-          <p>
-            Résultats, buts et terrain : une lecture de la forme sur 100,
-            expliquée par ce qui s’est passé sur le terrain.
-          </p>
-          <Link to="/methodologie" className="text-link">
-            Découvrir le fonctionnement <ArrowUpRight size={17} />
+      <section className="container discovery-porto">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">LE CLUB SOUS LES PROJECTEURS</span>
+            <h2>
+              Dans le bleu de Porto<span>.</span>
+            </h2>
+          </div>
+          <Link className="text-link" to="/equipes">
+            Tous les clubs <ArrowUpRight size={17} />
           </Link>
-          <p className="form-footnote">
-            Un indice de forme, jamais une probabilité de victoire.
-          </p>
         </div>
-        <div className="home-form-featured">
-          <FormCore
-            dimensions={formDimensions(
-              featured?.coverage?.breakdown,
-              featured?.coverage?.compatibilityGroup,
-            )}
-            score={featured?.score}
-            variant={featured?.coverage?.variant}
-            dataMode={featured?.coverage?.dataMode}
-          />
-          {featured ? (
-            <>
-              <TeamLink team={featured} />
-              <span className="form-footnote">
-                Équipe publiée · {featured.season}–{featured.season + 1}
-              </span>
-            </>
-          ) : (
-            <p className="form-footnote">
-              Le noyau s’allume lorsque cinq résultats sont disponibles.
-              {teams.error && " Données indisponibles pour le moment."}
+        {featured ? (
+          <ClubSnapshot team={featured} featured />
+        ) : (
+          <div className="analysis-panel">
+            <p role="status">
+              {teams.loading
+                ? "Chargement du FC Porto…"
+                : "La fiche du FC Porto n’est pas disponible pour le moment."}
             </p>
-          )}
-        </div>
+            {teams.error && <button onClick={teams.retry}>Réessayer</button>}
+          </div>
+        )}
         <SourceCaption result={teams.result} />
       </section>
       <div className="container">
-        <FormFactors />
-        <MascotEditorial />
+        <CalcitoGuide />
+        <div className="discovery-paths">
+          {[
+            [
+              "01",
+              "Analyser",
+              "La dynamique derrière les résultats.",
+              "/equipes",
+            ],
+            [
+              "02",
+              "Comparer",
+              "Deux clubs. Des faits. Ta lecture du jeu.",
+              "/comparateur",
+            ],
+            [
+              "03",
+              "Défier",
+              "Un duel avec Calcito. Des Calcithunes 100 % fictives.",
+              "/arene",
+            ],
+          ].map(([n, title, text, path]) => (
+            <Link key={n} to={path}>
+              <span className="eyebrow">{n} / LE JEU CONTINUE</span>
+              <h2>
+                {title} <ArrowUpRight size={24} aria-hidden="true" />
+              </h2>
+              <p>{text}</p>
+            </Link>
+          ))}
+        </div>
       </div>
       <section className="container matches-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">LES RENCONTRES PUBLIÉES</span>
+            <span className="eyebrow">AVANT LE COUP D’ENVOI</span>
             <h2>
-              Le football, en contexte<span>.</span>
+              Les prochains rendez-vous<span>.</span>
             </h2>
           </div>
           <Link className="text-link" to="/matchs">
@@ -191,111 +193,38 @@ export default function Home() {
         {matches.length ? (
           <div className="home-fixture-grid">
             {matches.map((match) => (
-              <article className="home-fixture" key={match.id}>
-                <div>
-                  <span>{match.competition.name}</span>
-                  <span>
-                    {match.status === "finished" ? "Terminé" : "À suivre"}
-                  </span>
-                </div>
-                <TeamLink team={match.home} />
-                <strong>
-                  {match.goalsHome ?? "—"} – {match.goalsAway ?? "—"}
-                </strong>
-                <TeamLink team={match.away} />
-                <small>
-                  {new Date(match.kickoff).toLocaleDateString("fr-FR")}
-                </small>
-              </article>
+              <FixtureCard match={match} key={match.id} />
             ))}
           </div>
         ) : (
-          <div className="home-data-preview">
-            <div>
-              <span className="eyebrow">LE PROCHAIN CHAPITRE</span>
-              <h3>
-                {state.loading
-                  ? "Chargement des matchs…"
-                  : "Chaque match compte."}
-              </h3>
-              <p>
-                {state.error
-                  ? "Les rencontres ne sont pas disponibles pour le moment."
-                  : "Les premières rencontres apparaîtront ici après leur publication. Aucun score ni statistique n’est inventé."}
-              </p>
-              <Link to="/methodologie">
-                Comprendre notre approche <ArrowRight size={15} />
-              </Link>
-            </div>
-            <div
-              className="preview-scorecard"
-              aria-label="Présentation du futur indice, sans valeur calculée"
-            >
-              <span>FORME CALCITO</span>
-              <strong>
-                —<small> / 100</small>
-              </strong>
-              <div className="preview-bars" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-              <p>Indice indisponible</p>
-              <small>
-                La formule propriétaire sera intégrée ultérieurement.
-              </small>
-            </div>
+          <div className="analysis-panel">
+            <p>
+              {state.loading
+                ? "Chargement du calendrier…"
+                : state.error
+                  ? "Calendrier indisponible pour le moment."
+                  : "Aucune rencontre future publiée pour le moment."}
+            </p>
+            {state.error && <button onClick={state.retry}>Réessayer</button>}
           </div>
         )}
         <SourceCaption result={state.result} />
       </section>
-      <section className="method-section v3-method">
-        <div className="container">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">LE TERRAIN RENCONTRE LES DONNÉES</span>
-              <h2>
-                Une méthode. Plus de perspective<span>.</span>
-              </h2>
-            </div>
-            <Link to="/methodologie" className="text-link">
-              La méthodologie <ArrowUpRight size={16} />
-            </Link>
-          </div>
-          <div className="method-grid">
-            {[
-              [
-                ScanLine,
-                "01",
-                "Observer",
-                "Les résultats et statistiques sont saisis une seule fois pour les deux équipes, puis vérifiés avant publication.",
-              ],
-              [
-                SlidersHorizontal,
-                "02",
-                "Contextualiser",
-                "Les cinq derniers matchs officiels expliquent l’indice provisoire. Une donnée manquante reste explicitement indisponible.",
-              ],
-              [
-                ChartNoAxesCombined,
-                "03",
-                "Comparer",
-                "Classements, résultats et indices ont chacun leur rôle. Les futurs pronostics utiliseront un modèle distinct.",
-              ],
-            ].map(([Icon, number, title, text]) => (
-              <article className="method-card" key={number}>
-                <div className="method-top">
-                  <Icon size={27} />
-                  <span>{number}</span>
-                </div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
+      <section className="container discovery-final">
+        <span className="eyebrow">LE PLAISIR DE COMPRENDRE</span>
+        <h2>
+          Plus de contexte.
+          <br />
+          Encore plus de football.
+        </h2>
+        <p>
+          Un indice sur 100 décrit la forme. Il ne prédit pas le prochain but.
+          <br />
+          Découvre le moteur et teste tes idées dans notre laboratoire.
+        </p>
+        <Link className="button button-secondary" to="/methodologie">
+          Comment ça marche ? <ArrowUpRight size={17} />
+        </Link>
       </section>
     </>
   );

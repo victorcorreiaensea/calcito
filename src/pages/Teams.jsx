@@ -1,7 +1,8 @@
+import RecentMetrics from "../components/RecentMetrics";
+import ClubSnapshot from "../components/ClubSnapshot";
 import FormEvolution from "../components/FormEvolution";
 import { formDimensions } from "../domain/formPresentation";
 import FormStory from "../components/FormStory";
-import { MascotEditorial } from "../components/FormEducation";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowUpRight, Search } from "lucide-react";
@@ -83,7 +84,7 @@ export default function Teams() {
         </p>
         <div className="team-grid">
           {rows.slice(page * 18, (page + 1) * 18).map((team) => (
-            <article className="team-card" key={team.id}>
+            <article className="team-card team-card-clickable" key={team.id}>
               <div className="team-card-top">
                 <TeamBadge team={team} />
                 <span className="status-pill">{team.country}</span>
@@ -99,7 +100,10 @@ export default function Teams() {
                 dataMode={team.coverage?.dataMode}
                 score={team.score}
               />
-              <Link className="text-link" to={`/equipes/${team.id}`}>
+              <Link
+                className="text-link team-card-cover"
+                to={`/equipes/${team.id}`}
+              >
                 Explorer l’équipe
                 <ArrowUpRight size={18} />
               </Link>
@@ -139,15 +143,7 @@ export function TeamDetail() {
     season: year,
     view: "upcoming",
   });
-  const standings = useFootball(
-    "standings",
-    { competition: state.result?.data.competitionId, season: year },
-    { enabled: Boolean(state.result?.data.competitionId) },
-  );
   const team = state.result?.data;
-  const position = standings.result?.data.rows.find(
-    (row) => row.id === teamId,
-  )?.position;
   const relevantHistory =
     history.result?.data.filter(
       (m) =>
@@ -189,10 +185,6 @@ export function TeamDetail() {
                   setPage(0);
                 }}
               />
-              <span className="status-pill">
-                Position : {position || "—"}
-                {standings.result?.data.partial ? " · classement partiel" : ""}
-              </span>
               <Link
                 className="button button-primary"
                 to={`/comparateur?team=${team.id}${year ? `&season=${year}` : ""}`}
@@ -201,10 +193,18 @@ export function TeamDetail() {
                 <ArrowUpRight size={16} />
               </Link>
             </div>
-            <FormStory analysis={analysis} />
-            <MascotEditorial />
+            <ClubSnapshot team={team} season={year} />
+            <details className="analysis-panel why-index">
+              <summary>Pourquoi cet indice ?</summary>
+              <p className="muted-text">
+                Modèle réel : cinq rencontres à poids égaux. La lecture des
+                trois derniers matchs est descriptive ; le modèle A + C sur huit
+                matchs n’est pas intégré.
+              </p>
+              <FormStory analysis={analysis} />
+            </details>
             <div className="detail-grid">
-              <CalculationTrace analysis={analysis} />
+              <RecentMetrics team={team} analysis={analysis} />
               <TeamStatistics state={analysis.statistics} />
             </div>
             <FormEvolution
@@ -237,7 +237,10 @@ export function TeamDetail() {
                     {relevantHistory
                       .slice(page * 10, (page + 1) * 10)
                       .map((match) => (
-                        <div key={match.id}>
+                        <Link
+                          to={`/matchs/${match.id}?team=${teamId}`}
+                          key={match.id}
+                        >
                           <span>
                             {new Date(match.kickoff).toLocaleDateString(
                               "fr-FR",
@@ -270,7 +273,7 @@ export function TeamDetail() {
                             {match.home.name} {match.goalsHome ?? "—"} –{" "}
                             {match.goalsAway ?? "—"} {match.away.name}
                           </strong>
-                        </div>
+                        </Link>
                       ))}
                   </div>
                   <div className="pagination">
@@ -291,6 +294,10 @@ export function TeamDetail() {
                 </>
               )}
             </section>
+            <details className="analysis-panel">
+              <summary>Sources et données des cinq matchs</summary>
+              <CalculationTrace analysis={analysis} />
+            </details>
             <SourceCaption result={state.result} />
             <section className="analysis-panel">
               <h2>Prochaines rencontres de championnat</h2>

@@ -19,6 +19,8 @@ const Arena = lazy(() => import("./pages/Arena"));
 import { AuthProvider } from "./admin/AuthProvider";
 import Teams, { TeamDetail } from "./pages/Teams";
 import Compare from "./pages/Compare";
+import { WalletProvider, WalletBalance } from "./components/WalletContext";
+import MatchPreview from "./pages/MatchPreview";
 import Predictions from "./pages/Predictions";
 import Methodology from "./pages/Methodology";
 
@@ -27,8 +29,7 @@ const navigation = [
   ["Matchs", "/matchs"],
   ["Classements", "/classements"],
   ["Équipes", "/equipes"],
-  ["Comparateur", "/comparateur"],
-  ["Pronostics", "/pronostics"],
+  ["Comparateur & Pronostics", "/comparateur"],
   ["L’Arène", "/arene"],
   ["Méthodologie", "/methodologie"],
 ];
@@ -92,7 +93,7 @@ function Navbar() {
         >
           <Search size={19} />
         </button>
-        <span className="version-badge">V5</span>
+        <WalletBalance />
         {searchOpen && (
           <form
             className="global-search-form"
@@ -204,62 +205,68 @@ export default function App() {
   return (
     <AuthProvider>
       <HashRouter>
-        <a
-          className="skip-link"
-          href="#main-content"
-          onClick={(event) => {
-            event.preventDefault();
-            document.getElementById("main-content")?.focus();
-          }}
-        >
-          Aller au contenu
-        </a>
-        <Navbar />
-        <DataBanner />
-        <main id="main-content" tabIndex={-1}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/matchs" element={<Matches />} />
-            <Route path="/classements" element={<Standings />} />
-            <Route path="/classement-europeen" element={<EuropeanRanking />} />
-            <Route
-              path="/admin"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="container state-panel" role="status">
-                      Chargement de l’espace privé…
-                    </div>
-                  }
-                >
-                  <Admin />
-                </Suspense>
-              }
-            />
-            <Route path="/equipes" element={<Teams />} />
-            <Route path="/equipes/:teamId" element={<TeamDetail />} />
-            <Route path="/comparateur" element={<Compare />} />
-            <Route path="/pronostics" element={<Predictions />} />
-            <Route
-              path="/arene"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="container state-panel" role="status">
-                      Chargement de l’Arène…
-                    </div>
-                  }
-                >
-                  <Arena />
-                </Suspense>
-              }
-            />
-            <Route path="/methodologie" element={<Methodology />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-        <RouteEffects />
+        <WalletProvider>
+          <a
+            className="skip-link"
+            href="#main-content"
+            onClick={(event) => {
+              event.preventDefault();
+              document.getElementById("main-content")?.focus();
+            }}
+          >
+            Aller au contenu
+          </a>
+          <Navbar />
+          <DataBanner />
+          <main id="main-content" tabIndex={-1}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/matchs" element={<Matches />} />
+              <Route path="/matchs/:matchId" element={<MatchPreview />} />
+              <Route path="/classements" element={<Standings />} />
+              <Route
+                path="/classement-europeen"
+                element={<EuropeanRanking />}
+              />
+              <Route
+                path="/admin"
+                element={
+                  <Suspense
+                    fallback={
+                      <div className="container state-panel" role="status">
+                        Chargement de l’espace privé…
+                      </div>
+                    }
+                  >
+                    <Admin />
+                  </Suspense>
+                }
+              />
+              <Route path="/equipes" element={<Teams />} />
+              <Route path="/equipes/:teamId" element={<TeamDetail />} />
+              <Route path="/comparateur" element={<Compare />} />
+              <Route path="/pronostics" element={<Predictions />} />
+              <Route
+                path="/arene"
+                element={
+                  <Suspense
+                    fallback={
+                      <div className="container state-panel" role="status">
+                        Chargement de l’Arène…
+                      </div>
+                    }
+                  >
+                    <Arena />
+                  </Suspense>
+                }
+              />
+              <Route path="/methodologie" element={<Methodology />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          <Footer />
+          <RouteEffects />
+        </WalletProvider>
       </HashRouter>
     </AuthProvider>
   );

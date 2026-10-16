@@ -1,3 +1,4 @@
+import UpcomingFormDetails from "../components/UpcomingFormDetails";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
@@ -23,6 +24,8 @@ const labels = {
   cancelled: "Annulé",
 };
 export function FixtureCard({ match }) {
+  const upcoming =
+    match.status === "scheduled" && Date.parse(match.kickoff) > Date.now();
   return (
     <article className="fixture-card">
       <div className="fixture-meta">
@@ -34,7 +37,7 @@ export function FixtureCard({ match }) {
       {match.status === "scheduled" &&
         Date.parse(match.kickoff) > Date.now() && (
           <Link className="text-link" to={`/arene?match=${match.id}`}>
-            Voir les pronostics →
+            Défier Calcito →
           </Link>
         )}
       <div className="fixture-versus">
@@ -48,7 +51,9 @@ export function FixtureCard({ match }) {
       </div>
       <div className="fixture-forms">
         <div>
-          <span>Avant match · domicile</span>
+          <span>
+            {upcoming ? "Forme actuelle · domicile" : "Avant match · domicile"}
+          </span>
           <FormValue
             initialized={
               match.dynamic?.sides.find((r) => r.teamId === match.home.id)
@@ -56,13 +61,22 @@ export function FixtureCard({ match }) {
             }
             variant={match.home.coverage?.variant}
             score={
-              match.dynamic?.sides.find((r) => r.teamId === match.home.id)
-                ?.before ?? null
+              upcoming
+                ? match.home.score
+                : (match.dynamic?.sides.find((r) => r.teamId === match.home.id)
+                    ?.before ?? null)
             }
           />
+          {upcoming && (
+            <UpcomingFormDetails team={match.home} season={match.season} />
+          )}
         </div>
         <div>
-          <span>Avant match · extérieur</span>
+          <span>
+            {upcoming
+              ? "Forme actuelle · extérieur"
+              : "Avant match · extérieur"}
+          </span>
           <FormValue
             initialized={
               match.dynamic?.sides.find((r) => r.teamId === match.away.id)
@@ -70,10 +84,15 @@ export function FixtureCard({ match }) {
             }
             variant={match.away.coverage?.variant}
             score={
-              match.dynamic?.sides.find((r) => r.teamId === match.away.id)
-                ?.before ?? null
+              upcoming
+                ? match.away.score
+                : (match.dynamic?.sides.find((r) => r.teamId === match.away.id)
+                    ?.before ?? null)
             }
           />
+          {upcoming && (
+            <UpcomingFormDetails team={match.away} season={match.season} />
+          )}
         </div>
       </div>
       {match.dynamic?.sides.length === 2 && (
@@ -126,9 +145,7 @@ export function FixtureCard({ match }) {
             ...(match.timeKnown === false ? {} : { timeStyle: "short" }),
           })}
         </span>
-        <Link
-          to={`/pronostics?home=${match.home.id}&away=${match.away.id}&match=${match.id}&season=${match.season}`}
-        >
+        <Link to={`/matchs/${match.id}`}>
           Analyse
           <ArrowUpRight size={14} />
         </Link>

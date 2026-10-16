@@ -1,3 +1,9 @@
+import { recentInsight, compareInsights } from "../domain/teamInsight";
+import { PredictionHistory } from "./Predictions";
+import RecentMetrics from "../components/RecentMetrics";
+import ClubSnapshot from "../components/ClubSnapshot";
+import MatchForecast from "../components/MatchForecast";
+import { Link } from "react-router-dom";
 import FormEvolution from "../components/FormEvolution";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -8,14 +14,7 @@ import {
   metricLabels,
   CalculationTrace,
 } from "../components/TeamAnalysis";
-import {
-  PageHeading,
-  DataState,
-  TeamBadge,
-  FormValue,
-  Results,
-  Notice,
-} from "../components/FootballUI";
+import { PageHeading, DataState, Notice } from "../components/FootballUI";
 import { SourceCaption, SeasonSelect } from "../components/DataContext";
 import CalcitoMascot from "../components/CalcitoMascot";
 
@@ -65,35 +64,29 @@ export function TeamPicker({ label, value, onChange, excluded, season }) {
     </div>
   );
 }
-function TeamSummary({ team, analysis, season }) {
-  return (
-    <article className="comparison-team">
-      <TeamBadge team={team} />
-      <h2>{team.name}</h2>
-      <p>{team.competitionName || team.country}</p>
-      <span className="eyebrow">FORME CALCITO</span>
-      <FormValue
-        variant={team.coverage?.variant || analysis.coverage?.variant}
-        score={
-          season && Number(season) !== team.season
-            ? null
-            : (team.score ?? analysis.engine.score)
-        }
-      />
-      <p className="muted-text">
-        {analysis.results.length} résultats publiés · ancien → récent
-      </p>
-      {analysis.recent.loading ? (
-        <p role="status">Chargement…</p>
-      ) : (
-        <Results results={analysis.results} demo={false} />
-      )}
-    </article>
-  );
+function TeamSummary({ team, season }) {
+  return <ClubSnapshot team={team} season={season} comparison />;
 }
 export function ComparativeStatistics({ left, right, leftTeam, rightTeam }) {
   const a = left.statistics.result?.data,
     b = right.statistics.result?.data;
+  const ai = recentInsight(left.recent.result?.data, leftTeam.id),
+    bi = recentInsight(right.recent.result?.data, rightTeam.id);
+  const labels = {
+    goalsForRecent: "Buts marqués · cinq derniers résultats",
+    goalsAgainstRecent: "Buts encaissés · cinq derniers résultats",
+    ...metricLabels,
+  };
+  const metric = (stats, insight, key) =>
+    key === "goalsForRecent"
+      ? insight.rows.length
+        ? insight.goalsFor
+        : null
+      : key === "goalsAgainstRecent"
+        ? insight.rows.length
+          ? insight.goalsAgainst
+          : null
+        : stats?.metrics.find((item) => item.key === key)?.value;
   return (
     <section className="analysis-panel">
       <h2>Statistiques comparatives</h2>
@@ -102,9 +95,10 @@ export function ComparativeStatistics({ left, right, leftTeam, rightTeam }) {
         {b?.sampleSize || 0} matchs. Les fenêtres de dates sont propres à chaque
         équipe.
       </p>
-      {Object.entries(metricLabels).map(([key, label]) => {
-        const av = a?.metrics.find((item) => item.key === key)?.value,
-          bv = b?.metrics.find((item) => item.key === key)?.value;
+      {Object.entries(labels).map(([key, label]) => {
+        const av = metric(a, ai, key),
+          bv = metric(b, bi, key);
+        if (av == null && bv == null) return null;
         const available = av != null && bv != null;
         return (
           <div className="comparison-metric" key={key}>
@@ -130,11 +124,7 @@ export function ComparativeStatistics({ left, right, leftTeam, rightTeam }) {
         statistiques descriptives ; elles ne représentent pas des probabilités
         de victoire.
       </Notice>
-      <h3>Forces et faiblesses</h3>
-      <p className="muted-text">
-        L’analyse qualitative attend des critères validés. Aucun diagnostic ni
-        statistique n’est inventé.
-      </p>
+
       <SourceCaption result={left.statistics.result} />
       <SourceCaption result={right.statistics.result} />
     </section>
@@ -155,10 +145,20 @@ export default function Compare() {
       { teamId: rightId, season: year },
       { enabled: Boolean(rightId) },
     );
+  const fixtures = useFootball("matches", { season: year, view: "upcoming" });
+  const actualMatch = fixtures.result?.data.find(
+    (m) =>
+      m.status === "scheduled" &&
+      Date.parse(m.kickoff) > Date.now() &&
+      ((m.home.id === leftId && m.away.id === rightId) ||
+        (m.home.id === rightId && m.away.id === leftId)) &&
+      (!params.get("match") || params.get("match") === m.id),
+  );
   const a = useTeamAnalysis(left.result?.data.id, year),
     b = useTeamAnalysis(right.result?.data.id, year);
   function set(key, value) {
     const next = new URLSearchParams(params);
+    if (["team", "against", "season"].includes(key)) next.delete("match");
     if (value) next.set(key, value);
     else next.delete(key);
     setParams(next, { replace: true });
@@ -167,7 +167,7 @@ export default function Compare() {
     <section className="container page-content">
       <PageHeading
         label="DEUX ÉQUIPES. UNE LECTURE PLUS CLAIRE."
-        title="Comparateur"
+        title="Comparateur & Pronostics"
         description="Comparez les résultats et statistiques publiés, même entre deux championnats. Les saisons restent séparées et les données manquantes visibles."
       />
       <div className="filter-bar">
@@ -244,6 +244,45 @@ export default function Compare() {
                   season={year}
                 />
               </div>
+              <div className="detail-grid">
+                <RecentMetrics team={left.result.data} analysis={a} />
+                <RecentMetrics team={right.result.data} analysis={b} />
+              </div>
+              <CalcitoMascot
+                variant="compare"
+                emotion="curious"
+                title="Deux trajectoires, un contexte à garder"
+                message={
+                  left.result.data.coverage?.compatibilityGroup &&
+                  right.result.data.coverage?.compatibilityGroup &&
+                  left.result.data.coverage.compatibilityGroup !==
+                    right.result.data.coverage.compatibilityGroup
+                    ? "Ces indices appartiennent à des méthodes distinctes : je ne les classe pas l’un face à l’autre. Les résultats publiés restent comparables avec leur contexte."
+                    : compareInsights(
+                        left.result.data,
+                        right.result.data,
+                        recentInsight(a.recent.result?.data, leftId),
+                        recentInsight(b.recent.result?.data, rightId),
+                      )
+                }
+              />
+              {actualMatch ? (
+                <>
+                  <Link className="text-link" to={`/matchs/${actualMatch.id}`}>
+                    Avant-match : {actualMatch.home.name} —{" "}
+                    {actualMatch.away.name} →
+                  </Link>
+                  <MatchForecast match={actualMatch} />
+                </>
+              ) : (
+                <Notice>
+                  {fixtures.loading
+                    ? "Recherche d’une rencontre programmée…"
+                    : fixtures.error
+                      ? "Le calendrier n’a pas pu être vérifié."
+                      : "Comparaison statistique uniquement : aucune rencontre future publiée ne correspond à cette sélection. Aucune probabilité hypothétique n’est affichée."}
+                </Notice>
+              )}
               <FormEvolution
                 title="Deux équipes, une même ligne du temps"
                 loading={a.timeline.loading || b.timeline.loading}
@@ -273,14 +312,18 @@ export default function Compare() {
                 leftTeam={left.result.data}
                 rightTeam={right.result.data}
               />
-              <div className="detail-grid">
-                <CalculationTrace analysis={a} />
-                <CalculationTrace analysis={b} />
-              </div>
+              <details className="analysis-panel">
+                <summary>Consulter les sources et les contributions</summary>
+                <div className="detail-grid">
+                  <CalculationTrace analysis={a} />
+                  <CalculationTrace analysis={b} />
+                </div>
+              </details>
             </>
           )}
         </DataState>
       )}
+      <PredictionHistory />
     </section>
   );
 }
