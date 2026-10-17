@@ -173,6 +173,14 @@ export const metricLabels = {
   woodworkPerMatch: "Poteaux / match",
   bigChancesPerMatch: "Grosses occasions / match",
   teamRating: "Note d’équipe",
+  xgPerMatch: "xG / match",
+  possessionAverage: "Possession moyenne %",
+  cornersPerMatch: "Corners / match",
+  passesCompletedPerMatch: "Passes réussies / match",
+  passesAttemptedPerMatch: "Passes tentées / match",
+  passAccuracyAverage: "Précision des passes moyenne %",
+  yellowCardsPerMatch: "Cartons jaunes / match",
+  redCardsPerMatch: "Cartons rouges / match",
 };
 export function TeamStatistics({ state }) {
   return (

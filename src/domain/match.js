@@ -6,6 +6,12 @@ export const statFields = [
   ["team_rating", "Note / 10", "rating"],
   ["possession", "Possession %", "possession"],
   ["xg", "xG", "decimal"],
+  ["corners", "Corners", "integer"],
+  ["passes_completed", "Passes réussies", "integer"],
+  ["passes_attempted", "Passes tentées", "integer"],
+  ["pass_accuracy", "Précision des passes %", "possession"],
+  ["yellow_cards", "Cartons jaunes", "integer"],
+  ["red_cards", "Cartons rouges", "integer"],
 ];
 export function nullableNumber(value) {
   if (value === "" || value == null) return null;
@@ -65,6 +71,14 @@ export function validateMatch(input, published = input.is_published) {
       )
         errors[`${side}_${field}`] = "Valeur invalide.";
     }
+    if (
+      nullableNumber(stats.passes_completed) !== null &&
+      nullableNumber(stats.passes_attempted) !== null &&
+      nullableNumber(stats.passes_completed) >
+        nullableNumber(stats.passes_attempted)
+    )
+      errors[`${side}_passes_completed`] =
+        "Les passes réussies ne peuvent pas dépasser les passes tentées.";
     const shots = nullableNumber(stats.shots),
       onTarget = nullableNumber(stats.shots_on_target);
     if (shots !== null && onTarget !== null && onTarget > shots)
@@ -88,10 +102,12 @@ export function matchPayload(form, published) {
     result[field] = nullableNumber(form[field]);
   for (const side of ["home", "away"])
     result[`${side}_stats`] = Object.fromEntries(
-      statFields.map(([key]) => [
-        key,
-        nullableNumber(form[`${side}_stats`]?.[key]),
-      ]),
+      statFields
+        .filter(
+          ([key], index) =>
+            index < 7 || Object.hasOwn(form[`${side}_stats`] || {}, key),
+        )
+        .map(([key]) => [key, nullableNumber(form[`${side}_stats`]?.[key])]),
     );
   return result;
 }

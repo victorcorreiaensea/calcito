@@ -114,6 +114,16 @@ export function manualMatch(match, dataset) {
     kickoff: match.kickoff,
     status: match.status,
     timeKnown: !(match.comment || "").includes(DATE_ONLY_MARKER),
+    teamStatistics: {
+      home:
+        (dataset.stats || []).find(
+          (s) => s.match_id === match.id && s.team_id === match.home_team_id,
+        ) || null,
+      away:
+        (dataset.stats || []).find(
+          (s) => s.match_id === match.id && s.team_id === match.away_team_id,
+        ) || null,
+    },
     goalsHome: match.goals_home,
     goalsAway: match.goals_away,
     source: "manual",
@@ -428,6 +438,14 @@ export const manualAdapter = {
         ["woodworkPerMatch", "woodwork"],
         ["bigChancesPerMatch", "big_chances"],
         ["teamRating", "team_rating"],
+        ["xgPerMatch", "xg"],
+        ["possessionAverage", "possession"],
+        ["cornersPerMatch", "corners"],
+        ["passesCompletedPerMatch", "passes_completed"],
+        ["passesAttemptedPerMatch", "passes_attempted"],
+        ["passAccuracyAverage", "pass_accuracy"],
+        ["yellowCardsPerMatch", "yellow_cards"],
+        ["redCardsPerMatch", "red_cards"],
       ].map(([key, field]) => {
         const values = matches.map((m) => m.stats?.[field]);
         return {

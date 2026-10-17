@@ -6,6 +6,7 @@ import ClubSnapshot from "../components/ClubSnapshot";
 import RecentMetrics from "../components/RecentMetrics";
 import { useTeamAnalysis } from "../components/TeamAnalysis";
 import MatchForecast from "../components/MatchForecast";
+import MatchStatistics from "../components/MatchStatistics";
 export default function MatchPreview() {
   const { matchId } = useParams();
   const [params] = useSearchParams();
@@ -41,6 +42,7 @@ export default function MatchPreview() {
         {match && (
           <>
             <FixtureCard match={match} />
+            {match.status === "finished" && <MatchStatistics match={match} />}
             {match.home.id && match.away.id && (
               <Link
                 className="button button-secondary"

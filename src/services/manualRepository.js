@@ -110,6 +110,24 @@ export async function requireOwner() {
 }
 export async function saveMatch(payload, { timeoutMs } = {}) {
   const client = await requireOwner();
+  if (
+    ["home_stats", "away_stats"].some((side) =>
+      [
+        "corners",
+        "passes_completed",
+        "passes_attempted",
+        "pass_accuracy",
+        "yellow_cards",
+        "red_cards",
+      ].some((key) => payload[side]?.[key] != null),
+    )
+  ) {
+    const readiness = await client.rpc("photo_import_status");
+    if (readiness.error)
+      throw new Error(
+        "Installez la mise à jour SQL 006 pour conserver les nouvelles statistiques.",
+      );
+  }
   let request = client.rpc("save_match", { payload });
   if (timeoutMs) request = request.abortSignal(AbortSignal.timeout(timeoutMs));
   const { data, error } = await request;
