@@ -19,7 +19,7 @@ import {
   europePreparationStatus,
   prepareEuropeanDrafts,
 } from "../services/europeRepository";
-import { saveMatch } from "../services/manualRepository";
+import { saveMatch, publishDraft } from "../services/manualRepository";
 import { saveEuropeanEdits } from "../domain/europeDraftSave";
 export default function EuropePreparation({
   dataset,
@@ -289,15 +289,15 @@ export default function EuropePreparation({
       const ready = publishReview.filter((r) => !r.errors.length);
       setPublishProgress({ done: 0, total: ready.length });
       for (const row of ready) {
-        const payload = matchPayload(
-          {
-            ...row.form,
-            expected_updated_at: row.form.updated_at,
-            verified_at: new Date().toISOString(),
-          },
-          true,
-        );
-        await saveMatch(payload, { timeoutMs: 20000 });
+        const publishedIds = await publishDraft({
+          table: "matches",
+          id: row.form.id,
+          expectedUpdatedAt: row.form.updated_at,
+        });
+        if (!publishedIds.includes(row.form.id))
+          throw new Error(
+            "Ce brouillon a changé depuis la vérification. Rechargez les statuts.",
+          );
         count++;
         setPublishProgress({ done: count, total: ready.length });
       }

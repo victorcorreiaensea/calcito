@@ -201,8 +201,20 @@ export function translateError(error) {
     return new Error(
       "Une donnée ne respecte pas les contraintes : champs requis, valeurs numériques, équipes ou publication.",
     );
+  if (
+    error.code === "57014" ||
+    /abort|timeout|fetch/i.test(error.message || "")
+  )
+    return new Error(
+      "La connexion ou le délai de réponse a interrompu la demande. Rechargez les statuts pour vérifier si elle a abouti.",
+    );
+  const diagnostic = [error.code, error.message].filter(Boolean).join(" : ");
   return new Error(
-    "L’enregistrement a échoué. Vos données restent dans le formulaire. Réessayez après vérification.",
+    "Supabase a refusé l’opération" +
+      (diagnostic
+        ? ` (${diagnostic.slice(0, 600)})`
+        : ". Erreur sans détail renvoyé") +
+      ". Les données saisies sont conservées.",
   );
 }
 export async function mutate(table, action, payload, id) {
