@@ -11,6 +11,11 @@ test("Supabase errors retain actionable diagnostics and distinguish uncertain ne
     /42703.*column example/,
   );
   assert.match(
+    translateError({ code: "21000", message: "UPDATE requires a WHERE clause" })
+      .message,
+    /Correctif SQL de publication requis/,
+  );
+  assert.match(
     translateError({ code: "57014", message: "canceling statement" }).message,
     /vérifier si elle a abouti/,
   );
@@ -30,6 +35,48 @@ test("Authenticated owner publishes all 72 imported matches without rewriting th
           "utf8",
         ),
       );
+    const definition = (
+      await db.query(
+        "select pg_get_functiondef('public._arena_result_trigger()'::regprocedure) as body",
+      )
+    ).rows[0].body;
+    // Recreate the old installed function before applying the upgrade.
+    await db.exec(definition.replace(/WHERE singleton = TRUE;/i, ";"));
+    const rights = (
+      await db.query(
+        "select proacl::text as acl from pg_proc where oid='public._arena_result_trigger()'::regprocedure",
+      )
+    ).rows;
+    const fix = await readFile(
+      new URL(
+        "../supabase/migrations/008_safe_match_publication.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    await db.exec(fix);
+    await db.exec(fix);
+    assert.deepEqual(
+      (
+        await db.query(
+          "select proacl::text as acl from pg_proc where oid='public._arena_result_trigger()'::regprocedure",
+        )
+      ).rows,
+      rights,
+    );
+    const corrected = (
+      await db.query(
+        "select pg_get_functiondef('public._arena_result_trigger()'::regprocedure) as body",
+      )
+    ).rows[0].body;
+    const modelUpdate = corrected.match(/UPDATE\s+arena_model\b[^;]*;/i)?.[0];
+    assert.match(
+      modelUpdate,
+      /WHERE\s+singleton\s*=\s*TRUE/i,
+      "The singleton update must have an explicit WHERE for Supabase safeupdate",
+    );
+    assert.doesNotMatch(fix, /safeupdate\s*=|ALTER\s+ROLE|DISABLE\s+TRIGGER/i);
+    const bankBefore = (await db.query("select * from arena_bank")).rows;
     const bundle = JSON.parse(
       await readFile(
         new URL(
@@ -88,6 +135,16 @@ test("Authenticated owner publishes all 72 imported matches without rewriting th
         )
       ).rows.length,
       0,
+    );
+    await db.exec("reset role");
+    assert.equal(
+      (await db.query("select enabled from arena_model where singleton = TRUE"))
+        .rows[0].enabled,
+      false,
+    );
+    assert.deepEqual(
+      (await db.query("select * from arena_bank")).rows,
+      bankBefore,
     );
   } finally {
     await db.close();

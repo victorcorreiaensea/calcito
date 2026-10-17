@@ -45,3 +45,11 @@ L’en-tête conserve écussons, score, compétition, journée et date. Les stat
 ## Maintenance
 
 `node scripts/prepare-native-europe.mjs` régénère le script SQL à partir des relevés numériques. Les anciennes migrations restent dans l’historique pour les bases qui les ont appliquées ; 007 désactive les anciens points d’entrée d’import d’images et conserve seulement d’éventuelles archives privées existantes, sans les utiliser dans le site.
+
+## Erreur 21000 à la publication
+
+`UPDATE requires a WHERE clause` provient de la mise à jour de `arena_model` dans le déclencheur `_arena_result_trigger`. Certains projets Supabase protègent les mises à jour sans filtre ; la publication du match est alors annulée dans la même transaction.
+
+Exécuter **uniquement** `public/downloads/calcito-correctif-publication.sql` dans Supabase → SQL Editor → New query → Run. Ce correctif 008 remplace la fonction en ajoutant `WHERE singleton = TRUE` à la mise à jour du modèle. Il conserve les droits existants, la désactivation des cotes périmées, les règlements, les protections de la base, les scores et les statistiques. Il est réexécutable et ne publie rien à lui seul. Recharger les statuts puis relancer la publication dans l’administration. Ne pas réimporter les 72 matchs.
+
+Les tests PostgreSQL locaux utilisent PGlite, sans l’extension Supabase de protection des requêtes : ils contrôlent explicitement le filtre de cette mise à jour, puis la publication des 72 matchs et l’intégrité de leurs statistiques.

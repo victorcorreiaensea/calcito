@@ -44,7 +44,8 @@ export default function EuropePreparation({
     [dirtyIds, setDirtyIds] = useState(new Set()),
     [saveProgress, setSaveProgress] = useState(null),
     [publicationScope, setPublicationScope] = useState("day"),
-    [publishProgress, setPublishProgress] = useState(null);
+    [publishProgress, setPublishProgress] = useState(null),
+    [publicationNeedsFix, setPublicationNeedsFix] = useState(false);
   const lock = useRef(false),
     batch = useRef(null),
     editedForms = useRef(new Map()),
@@ -244,6 +245,7 @@ export default function EuropePreparation({
     if (dirtyIds.size || lock.current || busy) return;
     lock.current = true;
     setPublicationScope(scope);
+    setPublicationNeedsFix(false);
     setPublishReview(null);
     setPublishConfirmed(false);
     setBusy(true);
@@ -323,6 +325,7 @@ export default function EuropePreparation({
       setPublishReview(null);
       await reload();
     } catch (e) {
+      setPublicationNeedsFix(e.code === "21000");
       setMessage(
         `${count} publications confirmées. Dernière demande à vérifier : publication interrompue : ${e.message}. Rechargez les statuts avant une nouvelle validation.`,
       );
@@ -675,6 +678,27 @@ export default function EuropePreparation({
               Enregistrer tous les matchs européens (
               {allEuropeanMatches.filter((m) => !m.is_published).length})
             </button>
+          </div>
+        )}
+        {publicationNeedsFix && (
+          <div className="info-notice" role="alert">
+            <p>
+              Une correction de fonction SQL est nécessaire dans Supabase. Elle
+              conserve les brouillons, les statistiques et la protection de la
+              base.
+            </p>
+            <a
+              className="button button-secondary"
+              href={`${import.meta.env.BASE_URL}downloads/calcito-correctif-publication.sql`}
+              download
+            >
+              Télécharger le correctif SQL de publication
+            </a>
+            <p>
+              Supabase → SQL Editor → New query : collez le contenu du fichier
+              puis cliquez sur Run. Rechargez ensuite les statuts dans Calcito
+              et relancez la publication. Aucun import à refaire.
+            </p>
           </div>
         )}
         {publishProgress && (

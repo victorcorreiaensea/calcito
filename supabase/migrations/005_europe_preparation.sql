@@ -199,7 +199,8 @@ OLD.season_id)) THEN
             arena_model
         SET
             enabled = FALSE,
-            report = report || jsonb_build_object('enabled', FALSE, 'reason', 'Résultats modifiés : recalibration requise pour les nouvelles cotes.');
+            report = report || jsonb_build_object('enabled', FALSE, 'reason', 'Résultats modifiés : recalibration requise pour les nouvelles cotes.')
+        WHERE singleton = TRUE;
     END IF;
     FOR tid IN SELECT DISTINCT
         ticket_id

@@ -178,6 +178,13 @@ export async function publishDraft(item) {
 }
 export function translateError(error) {
   if (
+    error.code === "21000" &&
+    /UPDATE requires a WHERE clause/i.test(error.message || "")
+  )
+    return new Error(
+      "Correctif SQL de publication requis (21000). La protection de la base bloque une mise à jour interne sans filtre. Installez le correctif de publication, puis rechargez les statuts.",
+    );
+  if (
     error.code === "P0001" &&
     error.message === "La date ne correspond pas à la saison sélectionnée."
   )
