@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../services/supabaseClient";
+import { databaseRequest } from "../services/databaseRequest.js";
 import { invalidateManualData } from "../services/manualRepository";
 
 const AuthContext = createContext(null);
@@ -11,21 +12,38 @@ export function AuthProvider({ children }) {
     error: null,
   });
   const generation = useRef(0);
+  const currentUser = useRef(null);
   useEffect(() => {
     if (!supabase) return;
     let alive = true;
+    let checkedAdmin = null;
     async function check(session) {
       const current = ++generation.current;
+      const sameUser = session?.user.id === currentUser.current;
+      currentUser.current = session?.user.id || null;
       if (!session) {
+        checkedAdmin = null;
         if (alive)
           setAuth({ loading: false, user: null, admin: false, error: null });
         invalidateManualData();
         return;
       }
-      setAuth({ loading: true, user: session.user, admin: false, error: null });
-      const { data, error } = await supabase.rpc("is_calcito_admin");
+      // A token refresh or tab refocus must not unmount an active admin operation.
+      if (!sameUser)
+        setAuth({
+          loading: true,
+          user: session.user,
+          admin: false,
+          error: null,
+        });
+      const { data, error } = await databaseRequest(
+        supabase.rpc("is_calcito_admin"),
+        15000,
+      );
       if (alive && current === generation.current) {
-        invalidateManualData();
+        const nextAdmin = data === true && !error;
+        if (!sameUser || checkedAdmin !== nextAdmin) invalidateManualData();
+        checkedAdmin = nextAdmin;
         setAuth({
           loading: false,
           user: session.user,
@@ -47,9 +65,10 @@ export function AuthProvider({ children }) {
       else if (alive) check(data.session);
     });
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      queueMicrotask(() => {
+      // Leave the auth callback and release its lock before calling another RPC.
+      setTimeout(() => {
         if (alive) check(session);
-      });
+      }, 0);
     });
     return () => {
       alive = false;

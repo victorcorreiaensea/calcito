@@ -101,7 +101,9 @@ export default function EuropePreparation({
     if (lock.current) return;
     setBusy(true);
     onBusyChange(true);
-    setMessage("");
+    setMessage(
+      "Vérification des brouillons en cours… Aucun match publié à cette étape.",
+    );
     try {
       const fresh = await reload();
       if (!fresh) throw Error("Rechargement impossible.");
@@ -246,7 +248,9 @@ export default function EuropePreparation({
     setPublishConfirmed(false);
     setBusy(true);
     onBusyChange(true);
-    setMessage("");
+    setMessage(
+      "Vérification des brouillons en cours… Aucun match publié à cette étape.",
+    );
     try {
       const fresh = await reload();
       if (!fresh) throw Error("Rechargement impossible.");
@@ -264,6 +268,11 @@ export default function EuropePreparation({
         }));
       setPublishReview(rows);
       setPublishConfirmed(false);
+      setMessage(
+        rows.length
+          ? "Vérification terminée. Cochez la confirmation ci-dessous puis cliquez sur le bouton de publication."
+          : "Aucun brouillon à publier dans cette sélection. Les statuts ont été rechargés.",
+      );
     } catch (e) {
       setMessage(e.message);
     } finally {
@@ -285,6 +294,9 @@ export default function EuropePreparation({
     setBusy(true);
     onBusyChange(true);
     let count = 0;
+    setMessage(
+      "Publication démarrée : vérification de la session administrateur…",
+    );
     try {
       const ready = publishReview.filter((r) => !r.errors.length);
       setPublishProgress({ done: 0, total: ready.length });
@@ -299,6 +311,7 @@ export default function EuropePreparation({
             "Ce brouillon a changé depuis la vérification. Rechargez les statuts.",
           );
         count++;
+        setMessage(`${count} / ${ready.length} publications confirmées.`);
         setPublishProgress({ done: count, total: ready.length });
       }
       setMessage(
@@ -613,7 +626,6 @@ export default function EuropePreparation({
           disabled={
             busy ||
             dirtyIds.size > 0 ||
-            status?.installed !== true ||
             !allEuropeanMatches.some((m) => !m.is_published)
           }
           onClick={() => preparePublish(allEuropeanMatches, "all")}
@@ -621,6 +633,22 @@ export default function EuropePreparation({
           Publier tous les matchs européens (
           {allEuropeanMatches.filter((m) => !m.is_published).length})
         </button>
+        {!busy && dirtyIds.size > 0 && (
+          <p role="status">
+            Publication indisponible : enregistrez d’abord les {dirtyIds.size}{" "}
+            modification(s) en attente.
+          </p>
+        )}
+        {!busy && !allEuropeanMatches.some((m) => !m.is_published) && (
+          <p role="status">
+            Aucun match européen en brouillon dans les journées 1 et 2 de
+            2026–2027.
+          </p>
+        )}
+        <p>
+          Deux étapes : vérifier les brouillons, puis cocher la confirmation et
+          publier dans le panneau ci-dessous.
+        </p>
         {dirtyIds.size > 0 && (
           <div>
             <button
@@ -665,6 +693,77 @@ export default function EuropePreparation({
           </p>
         )}
       </div>
+      {publishReview && (
+        <div className="analysis-panel europe-publish-review" ref={reviewPanel}>
+          <h3>
+            {publicationScope === "all"
+              ? "Validation de tous les matchs européens"
+              : "Validation explicite de la journée"}
+          </h3>
+          <p>
+            {publishReview.filter((r) => !r.errors.length).length} match(s)
+            prêt(s) à publier ·{" "}
+            {publishReview.filter((r) => r.errors.length).length} bloqué(s). Les
+            matchs bloqués restent en brouillon.
+          </p>
+          {publishProgress && (
+            <p role="status">
+              Publication : {publishProgress.done} / {publishProgress.total}
+            </p>
+          )}
+          {!publishReview.some((r) => !r.errors.length) && (
+            <p role="alert">
+              Aucun match prêt à publier. Ouvrez le détail ci-dessous pour
+              corriger les blocages.
+            </p>
+          )}
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={publishConfirmed}
+              onChange={(e) => setPublishConfirmed(e.target.checked)}
+            />
+            {publicationScope === "all"
+              ? "Je valide les rencontres prêtes et confirme leur publication pour les deux compétitions et les deux journées."
+              : "Je confirme la publication de cette journée et son intégration aux indices et règlements des pronostics concernés."}
+          </label>
+          <button
+            className="button button-primary"
+            disabled={
+              busy ||
+              !publishConfirmed ||
+              !publishReview.length ||
+              !publishReview.some((r) => !r.errors.length)
+            }
+            onClick={publishDay}
+          >
+            {publicationScope === "all"
+              ? `Confirmer la publication des ${publishReview.filter((r) => !r.errors.length).length} matchs européens`
+              : `Publier les ${publishReview.filter((r) => !r.errors.length).length} rencontres de la journée`}
+          </button>
+          <details className="europe-publication-details">
+            <summary>Voir les rencontres et les raisons de blocage</summary>
+            {publishReview.map((row) => (
+              <p key={row.form.id}>
+                {
+                  dataset.teams.find((t) => t.id === row.form.home_team_id)
+                    ?.name
+                }{" "}
+                —{" "}
+                {
+                  dataset.teams.find((t) => t.id === row.form.away_team_id)
+                    ?.name
+                }{" "}
+                : {row.form.goals_home ?? "—"} – {row.form.goals_away ?? "—"} ·{" "}
+                {new Date(row.form.kickoff).toLocaleString("fr-FR")} ·{" "}
+                {row.form.status} · Source : {row.form.source || "Manquante"}.{" "}
+                {row.errors.join(" ") ||
+                  "Résultat prêt, statistiques facultatives."}
+              </p>
+            ))}
+          </details>
+        </div>
+      )}
       <div className="europe-draft-list">
         {selected.map((match) => (
           <EuropeanDraft
@@ -708,70 +807,11 @@ export default function EuropePreparation({
         className="button button-secondary"
         onClick={() => preparePublish(selected, "day")}
         disabled={
-          busy ||
-          dirtyIds.size > 0 ||
-          !selected.some((m) => !m.is_published) ||
-          status?.installed !== true
+          busy || dirtyIds.size > 0 || !selected.some((m) => !m.is_published)
         }
       >
         Préparer la validation de cette journée
       </button>
-      {publishReview && (
-        <div className="analysis-panel europe-publish-review" ref={reviewPanel}>
-          <h3>
-            {publicationScope === "all"
-              ? "Validation de tous les matchs européens"
-              : "Validation explicite de la journée"}
-          </h3>
-          <p>
-            {publishReview.filter((r) => !r.errors.length).length} match(s)
-            prêt(s) à publier ·{" "}
-            {publishReview.filter((r) => r.errors.length).length} bloqué(s). Les
-            matchs bloqués restent en brouillon.
-          </p>
-          {publishProgress && (
-            <p role="status">
-              Publication : {publishProgress.done} / {publishProgress.total}
-            </p>
-          )}
-          {publishReview.map((row) => (
-            <p key={row.form.id}>
-              {dataset.teams.find((t) => t.id === row.form.home_team_id)?.name}{" "}
-              —{" "}
-              {dataset.teams.find((t) => t.id === row.form.away_team_id)?.name}{" "}
-              : {row.form.goals_home ?? "—"} – {row.form.goals_away ?? "—"} ·{" "}
-              {new Date(row.form.kickoff).toLocaleString("fr-FR")} ·{" "}
-              {row.form.status} · Source : {row.form.source || "Manquante"}.{" "}
-              {row.errors.join(" ") ||
-                "Résultat prêt, statistiques facultatives."}
-            </p>
-          ))}
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={publishConfirmed}
-              onChange={(e) => setPublishConfirmed(e.target.checked)}
-            />
-            {publicationScope === "all"
-              ? "Je valide les rencontres prêtes et confirme leur publication pour les deux compétitions et les deux journées."
-              : "Je confirme la publication de cette journée et son intégration aux indices et règlements des pronostics concernés."}
-          </label>
-          <button
-            className="button button-primary"
-            disabled={
-              busy ||
-              !publishConfirmed ||
-              !publishReview.length ||
-              !publishReview.some((r) => !r.errors.length)
-            }
-            onClick={publishDay}
-          >
-            {publicationScope === "all"
-              ? `Confirmer la publication des ${publishReview.filter((r) => !r.errors.length).length} matchs européens`
-              : `Publier les ${publishReview.filter((r) => !r.errors.length).length} rencontres de la journée`}
-          </button>
-        </div>
-      )}
       {message && (
         <p role="status" className="info-notice">
           {message}

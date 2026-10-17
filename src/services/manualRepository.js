@@ -1,3 +1,4 @@
+import { databaseRequest } from "./databaseRequest.js";
 import { supabase, requireDatabase } from "./supabaseClient.js";
 
 export async function readAll(
@@ -8,9 +9,8 @@ export async function readAll(
   const client = requireDatabase();
   const data = [];
   for (let offset = 0; offset < 100000; offset += 1000) {
-    const result = await decorate(client.from(table).select(columns)).range(
-      offset,
-      offset + 999,
+    const result = await databaseRequest(
+      decorate(client.from(table).select(columns)).range(offset, offset + 999),
     );
     if (result.error) {
       const error = new Error(
@@ -100,8 +100,16 @@ export async function getDataset() {
 }
 export async function requireOwner() {
   const client = requireDatabase();
-  const { data, error } = await client.rpc("is_calcito_admin");
-  if (error || data !== true) {
+  const { data, error } = await databaseRequest(
+    client.rpc("is_calcito_admin"),
+    15000,
+  );
+  if (error) {
+    const failure = translateError(error);
+    failure.code = error.code;
+    throw failure;
+  }
+  if (data !== true) {
     const denied = new Error("Accès réservé au compte administrateur.");
     denied.code = "42501";
     throw denied;
@@ -159,9 +167,7 @@ export async function publishDraft(item) {
     .eq("updated_at", item.expectedUpdatedAt);
   if (item.table === "simplified_results")
     query = query.is("converted_at", null);
-  const { data, error } = await query
-    .select("id")
-    .abortSignal(AbortSignal.timeout(20000));
+  const { data, error } = await databaseRequest(query.select("id"));
   if (error) {
     const translated = translateError(error);
     translated.code = error.code;
