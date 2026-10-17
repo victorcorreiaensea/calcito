@@ -41,3 +41,9 @@ La migration corrige l’invalidation des instantanés pour les brouillons priv�
 Les fiches européennes utilisent les mêmes composants que les autres clubs. Les filtres de compétition et de pays permettent de les retrouver. Un championnat d’origine indiqué comme texte ne crée pas de classement national : sans championnat suivi, la position reste indisponible. Les prochaines rencontres européennes sont visibles pour ces clubs lorsqu’elles sont publiées.
 
 La préparation et la publication nécessitent une session administrateur réelle. Les essais automatiques utilisent uniquement des fixtures synthétiques dans une base PostgreSQL locale isolée et des requêtes interceptées en navigateur ; aucun de ces scores n’est distribué dans les données du site.
+
+## Publication des quatre journées en lot
+
+Dans **Préparation européenne**, le bouton **Publier tous les matchs européens** couvre les journées 1 et 2 de Champions League et d’Europa League 2026–2027, même si une seule journée est affichée. Il recharge les données, présente un récapitulatif des rencontres prêtes et bloquées, puis demande la validation de cette sélection. Les rencontres déjà publiques sont exclues. Une rencontre invalide est laissée en brouillon et n’empêche plus les autres rencontres validées d’être publiées. L’exécution suit l’ordre chronologique et affiche sa progression. En cas d’interruption réseau, les publications déjà confirmées sont comptées ; les statuts sont rechargés avant toute nouvelle tentative.
+
+Si plusieurs fiches ont été modifiées, les boutons d’enregistrement en lot apparaissent pour conserver leurs modifications privées avant publication. Les valeurs zéro restent distinctes des champs vides. Les révisions du match sont conservées pour détecter un changement concurrent. Une sauvegarde individuelle ne supprime pas les changements non enregistrés dans les autres fiches. Un échec d’enregistrement est signalé par rencontre et ne supprime pas les valeurs saisies.

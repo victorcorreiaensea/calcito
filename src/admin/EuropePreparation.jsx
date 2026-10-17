@@ -20,6 +20,7 @@ import {
   prepareEuropeanDrafts,
 } from "../services/europeRepository";
 import { saveMatch } from "../services/manualRepository";
+import { saveEuropeanEdits } from "../domain/europeDraftSave";
 export default function EuropePreparation({
   dataset,
   reload,
@@ -40,9 +41,14 @@ export default function EuropePreparation({
     [publishReview, setPublishReview] = useState(null),
     [publishConfirmed, setPublishConfirmed] = useState(false),
     [pending, setPending] = useState(null),
-    [dirtyIds, setDirtyIds] = useState(new Set());
+    [dirtyIds, setDirtyIds] = useState(new Set()),
+    [saveProgress, setSaveProgress] = useState(null),
+    [publicationScope, setPublicationScope] = useState("day"),
+    [publishProgress, setPublishProgress] = useState(null);
   const lock = useRef(false),
-    batch = useRef(null);
+    batch = useRef(null),
+    editedForms = useRef(new Map()),
+    reviewPanel = useRef(null);
   useEffect(() => {
     let alive = true;
     europePreparationStatus()
@@ -160,7 +166,9 @@ export default function EuropePreparation({
       onBusyChange(false);
     }
   }
-  function markDirty(id, dirty) {
+  function markDirty(id, dirty, form) {
+    if (dirty && form) editedForms.current.set(id, form);
+    if (!dirty) editedForms.current.delete(id);
     setDirtyIds((previous) => {
       const next = new Set(previous);
       if (dirty) next.add(id);
@@ -170,18 +178,86 @@ export default function EuropePreparation({
     setPublishReview(null);
     setPublishConfirmed(false);
   }
-  async function preparePublish() {
-    if (dirtyIds.size) return;
+  const allEuropeanMatches = dataset.matches.filter((m) => {
+    const season = dataset.seasons.find((s) => s.id === m.season_id);
+    return (
+      Boolean(europeanRound(m.round.replace(/.*journ[eé]e\s*/i, ""))) &&
+      season?.start_year === 2026 &&
+      season?.end_year === 2027 &&
+      europeanCompetitions.some(
+        (c) =>
+          c.slug ===
+          dataset.competitions.find((c) => c.id === season.competition_id)
+            ?.slug,
+      )
+    );
+  });
+  async function saveAll(matches) {
+    if (lock.current || busy || status?.installed !== true) return;
+    lock.current = true;
+    setBusy(true);
+    onBusyChange(true);
+    setMessage("");
+    setPublishReview(null);
+    setPublishConfirmed(false);
+    try {
+      const result = await saveEuropeanEdits(
+        matches,
+        new Map(editedForms.current),
+        {
+          save: (payload) => saveMatch(payload, { timeoutMs: 20000 }),
+          onSaved: (id) => markDirty(id, false),
+          onProgress: (done, total) => setSaveProgress({ done, total }),
+        },
+      );
+      const label = (id) => {
+        const m = dataset.matches.find((m) => m.id === id);
+        return `${dataset.teams.find((t) => t.id === m?.home_team_id)?.name || "Domicile"} — ${dataset.teams.find((t) => t.id === m?.away_team_id)?.name || "Extérieur"}`;
+      };
+      setMessage(
+        `${result.saved} modification(s) enregistrée(s). ${result.unchanged} match(s) déjà enregistrés sans modification. ${result.failed.length} erreur(s). Aucune publication.` +
+          (result.failed.length
+            ? " Modifications conservées : " +
+              result.failed
+                .map((e) => label(e.id) + " : " + e.message)
+                .join(" | ")
+            : ""),
+      );
+      if (result.saved) await reload();
+    } finally {
+      setSaveProgress(null);
+      setBusy(false);
+      onBusyChange(false);
+      lock.current = false;
+    }
+  }
+  useEffect(() => {
+    if (publishReview)
+      reviewPanel.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+  }, [publishReview]);
+  async function preparePublish(matches = selected, scope = "day") {
+    if (dirtyIds.size || lock.current || busy) return;
+    lock.current = true;
+    setPublicationScope(scope);
+    setPublishReview(null);
+    setPublishConfirmed(false);
     setBusy(true);
     onBusyChange(true);
     setMessage("");
     try {
       const fresh = await reload();
       if (!fresh) throw Error("Rechargement impossible.");
-      const rows = selected
-        .filter((m) => !m.is_published)
+      const rows = matches
         .map((m) => fresh.matches.find((r) => r.id === m.id))
-        .filter(Boolean)
+        .filter((m) => m && !m.is_published)
+        .sort(
+          (a, b) =>
+            Date.parse(a.kickoff) - Date.parse(b.kickoff) ||
+            a.id.localeCompare(b.id),
+        )
         .map((m) => ({
           form: europeanMatchForm(m, fresh),
           errors: publicationErrors(europeanMatchForm(m, fresh), fresh),
@@ -191,6 +267,7 @@ export default function EuropePreparation({
     } catch (e) {
       setMessage(e.message);
     } finally {
+      lock.current = false;
       setBusy(false);
       onBusyChange(false);
     }
@@ -201,7 +278,7 @@ export default function EuropePreparation({
       dirtyIds.size > 0 ||
       !publishConfirmed ||
       !publishReview?.length ||
-      publishReview.some((r) => r.errors.length)
+      !publishReview.some((r) => !r.errors.length)
     )
       return;
     lock.current = true;
@@ -209,7 +286,9 @@ export default function EuropePreparation({
     onBusyChange(true);
     let count = 0;
     try {
-      for (const row of publishReview) {
+      const ready = publishReview.filter((r) => !r.errors.length);
+      setPublishProgress({ done: 0, total: ready.length });
+      for (const row of ready) {
         const payload = matchPayload(
           {
             ...row.form,
@@ -218,11 +297,15 @@ export default function EuropePreparation({
           },
           true,
         );
-        await saveMatch(payload);
+        await saveMatch(payload, { timeoutMs: 20000 });
         count++;
+        setPublishProgress({ done: count, total: ready.length });
       }
       setMessage(
-        `${count} rencontres publiées après votre validation explicite.`,
+        `${count} rencontres publiées après votre validation explicite.` +
+          (publishReview.some((r) => r.errors.length)
+            ? ` ${publishReview.filter((r) => r.errors.length).length} rencontre(s) bloquée(s), laissée(s) en brouillon.`
+            : ""),
       );
       setPublishReview(null);
       await reload();
@@ -233,6 +316,7 @@ export default function EuropePreparation({
       setPublishReview(null);
       await reload();
     } finally {
+      setPublishProgress(null);
       lock.current = false;
       setBusy(false);
       onBusyChange(false);
@@ -518,11 +602,75 @@ export default function EuropePreparation({
           </>
         )}
       </details>
+      <div className="europe-save-toolbar">
+        <p>
+          Les rencontres sont déjà enregistrées en brouillon. Pour les rendre
+          visibles sur le site, préparez leur publication en lot. Les
+          modifications doivent d’abord être enregistrées.
+        </p>
+        <button
+          className="button button-primary"
+          disabled={
+            busy ||
+            dirtyIds.size > 0 ||
+            status?.installed !== true ||
+            !allEuropeanMatches.some((m) => !m.is_published)
+          }
+          onClick={() => preparePublish(allEuropeanMatches, "all")}
+        >
+          Publier tous les matchs européens (
+          {allEuropeanMatches.filter((m) => !m.is_published).length})
+        </button>
+        {dirtyIds.size > 0 && (
+          <div>
+            <button
+              className="button button-primary"
+              disabled={
+                busy ||
+                status?.installed !== true ||
+                !selected.some((m) => !m.is_published)
+              }
+              onClick={() => saveAll(selected)}
+            >
+              Enregistrer tous les matchs de la journée (
+              {selected.filter((m) => !m.is_published).length})
+            </button>
+            <button
+              className="button button-secondary"
+              disabled={
+                busy ||
+                status?.installed !== true ||
+                !allEuropeanMatches.some((m) => !m.is_published)
+              }
+              onClick={() => saveAll(allEuropeanMatches)}
+            >
+              Enregistrer tous les matchs européens (
+              {allEuropeanMatches.filter((m) => !m.is_published).length})
+            </button>
+          </div>
+        )}
+        {publishProgress && (
+          <p role="status">
+            Publication : {publishProgress.done} / {publishProgress.total}
+          </p>
+        )}
+        {saveProgress && (
+          <p role="status">
+            Enregistrement : {saveProgress.done} / {saveProgress.total}
+          </p>
+        )}
+        {message && (
+          <p role="status" className="info-notice">
+            {message}
+          </p>
+        )}
+      </div>
       <div className="europe-draft-list">
         {selected.map((match) => (
           <EuropeanDraft
             key={`${match.id}:${match.updated_at}`}
             match={match}
+            initialForm={editedForms.current.get(match.id)}
             dataset={dataset}
             reload={reload}
             enabled={status?.installed === true}
@@ -558,7 +706,7 @@ export default function EuropePreparation({
       </p>
       <button
         className="button button-secondary"
-        onClick={preparePublish}
+        onClick={() => preparePublish(selected, "day")}
         disabled={
           busy ||
           dirtyIds.size > 0 ||
@@ -569,8 +717,23 @@ export default function EuropePreparation({
         Préparer la validation de cette journée
       </button>
       {publishReview && (
-        <div className="analysis-panel">
-          <h3>Validation explicite de la journée</h3>
+        <div className="analysis-panel europe-publish-review" ref={reviewPanel}>
+          <h3>
+            {publicationScope === "all"
+              ? "Validation de tous les matchs européens"
+              : "Validation explicite de la journée"}
+          </h3>
+          <p>
+            {publishReview.filter((r) => !r.errors.length).length} match(s)
+            prêt(s) à publier ·{" "}
+            {publishReview.filter((r) => r.errors.length).length} bloqué(s). Les
+            matchs bloqués restent en brouillon.
+          </p>
+          {publishProgress && (
+            <p role="status">
+              Publication : {publishProgress.done} / {publishProgress.total}
+            </p>
+          )}
           {publishReview.map((row) => (
             <p key={row.form.id}>
               {dataset.teams.find((t) => t.id === row.form.home_team_id)?.name}{" "}
@@ -589,8 +752,9 @@ export default function EuropePreparation({
               checked={publishConfirmed}
               onChange={(e) => setPublishConfirmed(e.target.checked)}
             />
-            Je confirme la publication de cette journée et son intégration aux
-            indices et règlements des pronostics concernés.
+            {publicationScope === "all"
+              ? "Je valide les rencontres prêtes et confirme leur publication pour les deux compétitions et les deux journées."
+              : "Je confirme la publication de cette journée et son intégration aux indices et règlements des pronostics concernés."}
           </label>
           <button
             className="button button-primary"
@@ -598,11 +762,13 @@ export default function EuropePreparation({
               busy ||
               !publishConfirmed ||
               !publishReview.length ||
-              publishReview.some((r) => r.errors.length)
+              !publishReview.some((r) => !r.errors.length)
             }
             onClick={publishDay}
           >
-            Publier les {publishReview.length} rencontres de la journée
+            {publicationScope === "all"
+              ? `Confirmer la publication des ${publishReview.filter((r) => !r.errors.length).length} matchs européens`
+              : `Publier les ${publishReview.filter((r) => !r.errors.length).length} rencontres de la journée`}
           </button>
         </div>
       )}
@@ -616,6 +782,7 @@ export default function EuropePreparation({
 }
 function EuropeanDraft({
   match,
+  initialForm,
   dataset,
   reload,
   enabled,
@@ -624,7 +791,9 @@ function EuropeanDraft({
   onMessage,
   onDirty,
 }) {
-  const [form, setForm] = useState(() => europeanMatchForm(match, dataset)),
+  const [form, setForm] = useState(
+      () => initialForm || europeanMatchForm(match, dataset),
+    ),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
     [confirmed, setConfirmed] = useState(false);
@@ -684,8 +853,9 @@ function EuropeanDraft({
     }
   }
   function set(key, value) {
-    onDirty(match.id, true);
-    setForm({ ...form, [key]: value });
+    const next = { ...form, [key]: value };
+    onDirty(match.id, true, next);
+    setForm(next);
     setConfirmed(false);
   }
   return (

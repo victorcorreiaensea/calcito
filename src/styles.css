@@ -5579,3 +5579,36 @@ input[type="checkbox"] {
 .native-match-coach .eyebrow {
   color: #b4ff39;
 }
+.europe-save-toolbar {
+  padding: 20px;
+  border: 1px solid #263b53;
+  background: #0d1725;
+  border-radius: 14px;
+  margin-block: 24px;
+}
+.europe-save-toolbar > p {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: #aec1d8;
+}
+.europe-save-toolbar > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 14px;
+}
+.europe-save-toolbar .info-notice {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .europe-save-toolbar {
+    padding: 16px;
+  }
+  .europe-save-toolbar .button {
+    width: 100%;
+    font-size: 0.72rem;
+  }
+}
+.europe-publish-review p {
+  overflow-wrap: anywhere;
+}
