@@ -122,10 +122,10 @@ export async function saveMatch(payload, { timeoutMs } = {}) {
       ].some((key) => payload[side]?.[key] != null),
     )
   ) {
-    const readiness = await client.rpc("photo_import_status");
+    const readiness = await client.rpc("statistics_storage_status");
     if (readiness.error)
       throw new Error(
-        "Installez la mise à jour SQL 006 pour conserver les nouvelles statistiques.",
+        "Installez la mise à jour SQL des statistiques pour conserver les nouvelles statistiques.",
       );
   }
   let request = client.rpc("save_match", { payload });

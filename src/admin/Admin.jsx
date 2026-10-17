@@ -31,7 +31,6 @@ import MatchdayEntry from "./MatchdayEntry";
 import ArenaOps from "./ArenaOps";
 import EuropePreparation from "./EuropePreparation";
 import CalendarManager from "./CalendarManager";
-import PhotoImport from "./PhotoImport";
 import { DATE_ONLY_MARKER } from "../domain/matchImport";
 
 function Login() {
@@ -133,7 +132,6 @@ const tabs = [
   ["entry", "Saisie rapide"],
   ["matchday", "Saisie par journée"],
   ["europe", "Préparation européenne"],
-  ["photos", "Statistiques par images"],
   ["arena", "Arène & cotes"],
   ["calendar", "Calendrier des pronostics"],
   ["coverage", "Suivi de couverture"],
@@ -399,13 +397,6 @@ function Dashboard() {
         <MatchdayEntry
           dataset={dataset}
           reload={reload}
-          onBusyChange={setImportBusy}
-        />
-      )}
-      {tab === "photos" && (
-        <PhotoImport
-          dataset={dataset}
-          onReload={reload}
           onBusyChange={setImportBusy}
         />
       )}

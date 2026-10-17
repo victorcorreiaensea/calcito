@@ -1,0 +1,578 @@
+{
+  "AC Milan": {
+    "file": "images/clubs/europe-2026/ac-milan.png",
+    "sha": "e6209230efa5637278c47ba989f57c60e7fc0b66",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Italy - Serie A/AC Milan.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Italy%20-%20Serie%20A/AC%20Milan.png",
+    "upstream_name": "AC Milan"
+  },
+  "AEK": {
+    "file": "images/clubs/europe-2026/aek.png",
+    "sha": "3fe7958ca179b78065fcdca8ff1d1e920d739294",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Greece - Super League 1/AEK Athens.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Greece%20-%20Super%20League%201/AEK%20Athens.png",
+    "upstream_name": "AEK Athens"
+  },
+  "AS Rome": {
+    "file": "images/clubs/europe-2026/as-rome.png",
+    "sha": "29eb52986c5a31579b6b73ba16ebb6f3d3597554",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Italy - Serie A/AS Roma.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Italy%20-%20Serie%20A/AS%20Roma.png",
+    "upstream_name": "AS Roma"
+  },
+  "Alkmaar": {
+    "file": "images/clubs/europe-2026/alkmaar.png",
+    "sha": "81a59c1bee5c84ad56677a49df03f8fc9343e135",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Netherlands - Eredivisie/AZ Alkmaar.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Netherlands%20-%20Eredivisie/AZ%20Alkmaar.png",
+    "upstream_name": "AZ Alkmaar"
+  },
+  "Anderlecht": {
+    "file": "images/clubs/europe-2026/anderlecht.png",
+    "sha": "ab618379b511cd81ce1058716c8ac95b404d3422",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Belgium - Jupiler Pro League/RSC Anderlecht.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Belgium%20-%20Jupiler%20Pro%20League/RSC%20Anderlecht.png",
+    "upstream_name": "RSC Anderlecht"
+  },
+  "Ararat-Armenia": {
+    "file": "images/clubs/europe-2026/ararat-armenia.svg",
+    "sha": "81676284a494b149e4d5417e8ec218da8ef27a12",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/FC_Ararat-Armenia_logo.svg",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/FC_Ararat-Armenia_logo.svg",
+    "upstream_name": "Ararat-Armenia"
+  },
+  "Arsenal": {
+    "file": "images/clubs/europe-2026/arsenal.png",
+    "sha": "24f24c15aa0e0094cbb54fab4c7fc82407b6a0ff",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Arsenal FC.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Arsenal%20FC.png",
+    "upstream_name": "Arsenal FC"
+  },
+  "Aston Villa": {
+    "file": "images/clubs/europe-2026/aston-villa.png",
+    "sha": "f1081b911ae6592533eeb92f0f1cddd661b8e03b",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Aston Villa.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Aston%20Villa.png",
+    "upstream_name": "Aston Villa"
+  },
+  "Atl. Madrid": {
+    "file": "images/clubs/europe-2026/atl-madrid.png",
+    "sha": "7398c88ac9e34f7bb7df9207802bffe07db5d560",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/Atlético de Madrid.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/Atl%C3%A9tico%20de%20Madrid.png",
+    "upstream_name": "Atlético de Madrid"
+  },
+  "Barcelone": {
+    "file": "images/clubs/europe-2026/barcelone.png",
+    "sha": "bfaffd03668480678408bc5021e592de8f2b8d4e",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/FC Barcelona.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/FC%20Barcelona.png",
+    "upstream_name": "FC Barcelona"
+  },
+  "Bayer Leverkusen": {
+    "file": "images/clubs/europe-2026/bayer-leverkusen.png",
+    "sha": "22cef703c4bb657a60d874d4b62f0a6b35ce3e93",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Germany - Bundesliga/Bayer 04 Leverkusen.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Germany%20-%20Bundesliga/Bayer%2004%20Leverkusen.png",
+    "upstream_name": "Bayer 04 Leverkusen"
+  },
+  "Bayern Munich": {
+    "file": "images/clubs/europe-2026/bayern-munich.png",
+    "sha": "499ce6f97c63f974b5b439eb977377e127f71a34",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Germany - Bundesliga/Bayern Munich.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Germany%20-%20Bundesliga/Bayern%20Munich.png",
+    "upstream_name": "Bayern Munich"
+  },
+  "Benfica": {
+    "file": "images/clubs/europe-2026/benfica.png",
+    "sha": "8b41b56ef8737217701fdb29b1bdae07b111a4a7",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Portugal - Liga Portugal/SL Benfica.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Portugal%20-%20Liga%20Portugal/SL%20Benfica.png",
+    "upstream_name": "SL Benfica"
+  },
+  "Besiktas": {
+    "file": "images/clubs/europe-2026/besiktas.png",
+    "sha": "114a7809a45417c149bc70376014475d677fcca8",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Türkiye - Süper Lig/Besiktas JK.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/T%C3%BCrkiye%20-%20S%C3%BCper%20Lig/Besiktas%20JK.png",
+    "upstream_name": "Besiktas JK"
+  },
+  "Betis": {
+    "file": "images/clubs/europe-2026/betis.png",
+    "sha": "8e3808a0788aa8f7ae7915265544774c9317518d",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/Real Betis Balompié.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/Real%20Betis%20Balompi%C3%A9.png",
+    "upstream_name": "Real Betis Balompié"
+  },
+  "Bodo/Glimt": {
+    "file": "images/clubs/europe-2026/bodo-glimt.png",
+    "sha": "bfe2c86a333e2556dc5a6dbf7876f63cfa1f517e",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Norway - Eliteserien/FK BodøGlimt.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Norway%20-%20Eliteserien/FK%20Bod%C3%B8Glimt.png",
+    "upstream_name": "FK BodøGlimt"
+  },
+  "Bournemouth": {
+    "file": "images/clubs/europe-2026/bournemouth.png",
+    "sha": "14810679717c6be956912126c4ab8bd6341971c4",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/AFC Bournemouth.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/AFC%20Bournemouth.png",
+    "upstream_name": "AFC Bournemouth"
+  },
+  "Celje": {
+    "file": "images/clubs/europe-2026/celje.png",
+    "sha": "300627b2a0a23546ecade6f6ae34661fd8acbfdc",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/NK_Celje.png",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/NK_Celje.png",
+    "upstream_name": "Celje"
+  },
+  "Celta Vigo": {
+    "file": "images/clubs/europe-2026/celta-vigo.png",
+    "sha": "323bf79463695cde7b996fa4dd3cefa6c0ba1dd0",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/Celta de Vigo.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/Celta%20de%20Vigo.png",
+    "upstream_name": "Celta de Vigo"
+  },
+  "Celtic": {
+    "file": "images/clubs/europe-2026/celtic.png",
+    "sha": "ef0cadb69e70e950482a58dc230061295f27f20b",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Scotland - Scottish Premiership/Celtic FC.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Scotland%20-%20Scottish%20Premiership/Celtic%20FC.png",
+    "upstream_name": "Celtic FC"
+  },
+  "Club Brugge": {
+    "file": "images/clubs/europe-2026/club-brugge.png",
+    "sha": "0a85af7d0dabccc1713b929cec01542dd6dd49dc",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Belgium - Jupiler Pro League/Club Brugge KV.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Belgium%20-%20Jupiler%20Pro%20League/Club%20Brugge%20KV.png",
+    "upstream_name": "Club Brugge KV"
+  },
+  "Crystal Palace": {
+    "file": "images/clubs/europe-2026/crystal-palace.png",
+    "sha": "2653b2a05078e9d0c21a26a449e0ff469e67f5b1",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Crystal Palace.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Crystal%20Palace.png",
+    "upstream_name": "Crystal Palace"
+  },
+  "Côme": {
+    "file": "images/clubs/europe-2026/come.png",
+    "sha": "e2e17a77263e709c88215a02a170b31ac10457bc",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Italy - Serie A/Como 1907.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Italy%20-%20Serie%20A/Como%201907.png",
+    "upstream_name": "Como 1907"
+  },
+  "Din. Zagreb": {
+    "file": "images/clubs/europe-2026/din-zagreb.png",
+    "sha": "00540ee78b21d953553d06d16e5adc1f8003e494",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Croatia - SuperSport HNL/GNK Dinamo Zagreb.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Croatia%20-%20SuperSport%20HNL/GNK%20Dinamo%20Zagreb.png",
+    "upstream_name": "GNK Dinamo Zagreb"
+  },
+  "Dortmund": {
+    "file": "images/clubs/europe-2026/dortmund.png",
+    "sha": "2dc4b0289782930c6b81b40309e81039928225fc",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Germany - Bundesliga/Borussia Dortmund.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Germany%20-%20Bundesliga/Borussia%20Dortmund.png",
+    "upstream_name": "Borussia Dortmund"
+  },
+  "FC Porto": {
+    "file": "images/clubs/europe-2026/fc-porto.png",
+    "sha": "9cdf906e1870ba57bd97aba929a084f1742f663b",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Portugal - Liga Portugal/FC Porto.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Portugal%20-%20Liga%20Portugal/FC%20Porto.png",
+    "upstream_name": "FC Porto"
+  },
+  "Fenerbahce": {
+    "file": "images/clubs/europe-2026/fenerbahce.png",
+    "sha": "028d2942488922fc78ea6e0f336c1400eee198bc",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Türkiye - Süper Lig/Fenerbahce.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/T%C3%BCrkiye%20-%20S%C3%BCper%20Lig/Fenerbahce.png",
+    "upstream_name": "Fenerbahce"
+  },
+  "Ferencvaros": {
+    "file": "images/clubs/europe-2026/ferencvaros.png",
+    "sha": "fa04410797b88f88d5c2651644de76c1eed13cd2",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/960px-Ferencvarosi_TC.svg.png",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/960px-Ferencvarosi_TC.svg.png",
+    "upstream_name": "Ferencvaros"
+  },
+  "Feyenoord": {
+    "file": "images/clubs/europe-2026/feyenoord.png",
+    "sha": "7ba0886fc814f4c57e560c3320fdc1f99bed9fec",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Netherlands - Eredivisie/Feyenoord Rotterdam.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Netherlands%20-%20Eredivisie/Feyenoord%20Rotterdam.png",
+    "upstream_name": "Feyenoord Rotterdam"
+  },
+  "Galatasaray": {
+    "file": "images/clubs/europe-2026/galatasaray.png",
+    "sha": "56b20744bc010770258cc64d08235aaede51fd67",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Türkiye - Süper Lig/Galatasaray.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/T%C3%BCrkiye%20-%20S%C3%BCper%20Lig/Galatasaray.png",
+    "upstream_name": "Galatasaray"
+  },
+  "H. Beer Sheva": {
+    "file": "images/clubs/europe-2026/h-beer-sheva.png",
+    "sha": "52c936838b0f957d3af34dbbfa5bf0a40f1eda72",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Israel - Ligat ha'Al/Hapoel Beer Sheva.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Israel%20-%20Ligat%20ha%27Al/Hapoel%20Beer%20Sheva.png",
+    "upstream_name": "Hapoel Beer Sheva"
+  },
+  "Hoffenheim": {
+    "file": "images/clubs/europe-2026/hoffenheim.png",
+    "sha": "dc5fe98029eededad6268a654625eff99a8a364d",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Germany - Bundesliga/TSG 1899 Hoffenheim.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Germany%20-%20Bundesliga/TSG%201899%20Hoffenheim.png",
+    "upstream_name": "TSG 1899 Hoffenheim"
+  },
+  "Inter": {
+    "file": "images/clubs/europe-2026/inter.png",
+    "sha": "3749aa06618e3946683484d069a9ef9a87e52341",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Italy - Serie A/Inter Milan.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Italy%20-%20Serie%20A/Inter%20Milan.png",
+    "upstream_name": "Inter Milan"
+  },
+  "Jagiellonia": {
+    "file": "images/clubs/europe-2026/jagiellonia.png",
+    "sha": "618cff2f06846e0e7beb564167eb7e3f957a1222",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Poland - PKO BP Ekstraklasa/Jagiellonia Bialystok.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Poland%20-%20PKO%20BP%20Ekstraklasa/Jagiellonia%20Bialystok.png",
+    "upstream_name": "Jagiellonia Bialystok"
+  },
+  "Juventus": {
+    "file": "images/clubs/europe-2026/juventus.png",
+    "sha": "89d23971e016e5ffc61c6bf86d0b2c1bce887b4a",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Italy - Serie A/Juventus FC.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Italy%20-%20Serie%20A/Juventus%20FC.png",
+    "upstream_name": "Juventus FC"
+  },
+  "LASK": {
+    "file": "images/clubs/europe-2026/lask.png",
+    "sha": "44ca0eb54b5f820a6a7f294f3f7230e038bcdc80",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Austria - Bundesliga/LASK.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Austria%20-%20Bundesliga/LASK.png",
+    "upstream_name": "LASK"
+  },
+  "Lech": {
+    "file": "images/clubs/europe-2026/lech.png",
+    "sha": "2bcab10ccd6ac974db36ffe0ce30516d4c20cec9",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Poland - PKO BP Ekstraklasa/Lech Poznan.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Poland%20-%20PKO%20BP%20Ekstraklasa/Lech%20Poznan.png",
+    "upstream_name": "Lech Poznan"
+  },
+  "Lens": {
+    "file": "images/clubs/europe-2026/lens.png",
+    "sha": "eea54b4f024c3c3cf0baee558823579e6f7df612",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/France - Ligue 1/RC Lens.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/France%20-%20Ligue%201/RC%20Lens.png",
+    "upstream_name": "RC Lens"
+  },
+  "Levski": {
+    "file": "images/clubs/europe-2026/levski.png",
+    "sha": "84ba744ff0e13e50fa635950a7a2c7ab6c7b9ca9",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Bulgaria - efbet Liga/Levski Sofia.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Bulgaria%20-%20efbet%20Liga/Levski%20Sofia.png",
+    "upstream_name": "Levski Sofia"
+  },
+  "Lille": {
+    "file": "images/clubs/europe-2026/lille.png",
+    "sha": "318a01561441fae398ba9c90775fe05a60903a1f",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/France - Ligue 1/LOSC Lille.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/France%20-%20Ligue%201/LOSC%20Lille.png",
+    "upstream_name": "LOSC Lille"
+  },
+  "Lillestrom": {
+    "file": "images/clubs/europe-2026/lillestrom.png",
+    "sha": "00be5ee373417bac89bb7242e1a66ccd9ab6ab14",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Norway - Eliteserien/Lillestrøm SK.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Norway%20-%20Eliteserien/Lillestr%C3%B8m%20SK.png",
+    "upstream_name": "Lillestrøm SK"
+  },
+  "Liverpool": {
+    "file": "images/clubs/europe-2026/liverpool.png",
+    "sha": "654691d267680a6683fe58c55619de0684185404",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Liverpool FC.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Liverpool%20FC.png",
+    "upstream_name": "Liverpool FC"
+  },
+  "Lyon": {
+    "file": "images/clubs/europe-2026/lyon.png",
+    "sha": "7390f0bd833cb2a7072cae62a1fe2f59276682a6",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/France - Ligue 1/Olympique Lyon.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/France%20-%20Ligue%201/Olympique%20Lyon.png",
+    "upstream_name": "Olympique Lyon"
+  },
+  "Manchester City": {
+    "file": "images/clubs/europe-2026/manchester-city.png",
+    "sha": "b55d4568ad21f2c3bd09805a666b3252eda0595a",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Manchester City.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Manchester%20City.png",
+    "upstream_name": "Manchester City"
+  },
+  "Manchester Utd": {
+    "file": "images/clubs/europe-2026/manchester-utd.png",
+    "sha": "4e2a112b088c67916aaf973d4eb1a6dfbdb38b88",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Manchester United.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Manchester%20United.png",
+    "upstream_name": "Manchester United"
+  },
+  "Marseille": {
+    "file": "images/clubs/europe-2026/marseille.png",
+    "sha": "499c1c14e743ccda34191faa42c536b5f89228fb",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/France - Ligue 1/Olympique Marseille.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/France%20-%20Ligue%201/Olympique%20Marseille.png",
+    "upstream_name": "Olympique Marseille"
+  },
+  "Naples": {
+    "file": "images/clubs/europe-2026/naples.png",
+    "sha": "31c5cd81086c54d5150b4b767e7d2761dfa4d7c8",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Italy - Serie A/SSC Napoli.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Italy%20-%20Serie%20A/SSC%20Napoli.png",
+    "upstream_name": "SSC Napoli"
+  },
+  "Nijmegen": {
+    "file": "images/clubs/europe-2026/nijmegen.png",
+    "sha": "095802d08b20c08447839ff9ad6183205bb152c9",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Netherlands - Eredivisie/NEC Nijmegen.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Netherlands%20-%20Eredivisie/NEC%20Nijmegen.png",
+    "upstream_name": "NEC Nijmegen"
+  },
+  "OFI Crète": {
+    "file": "images/clubs/europe-2026/ofi-crete.png",
+    "sha": "0a7e49ae0529aa01618f309d57665dad85f71c97",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Greece - Super League 1/OFI Crete.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Greece%20-%20Super%20League%201/OFI%20Crete.png",
+    "upstream_name": "OFI Crete"
+  },
+  "Olympiakos": {
+    "file": "images/clubs/europe-2026/olympiakos.png",
+    "sha": "8db40026e792ce1610ef2565ac5c6725ae1fbb39",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Greece - Super League 1/Olympiacos Piraeus.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Greece%20-%20Super%20League%201/Olympiacos%20Piraeus.png",
+    "upstream_name": "Olympiacos Piraeus"
+  },
+  "Omonia": {
+    "file": "images/clubs/europe-2026/omonia.png",
+    "sha": "631b911e0f9ff6e6615a8ed055e5b31cf5b7c863",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/250px-AC_Omonia_logo.svg.png",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/250px-AC_Omonia_logo.svg.png",
+    "upstream_name": "Omonia"
+  },
+  "PSG": {
+    "file": "images/clubs/europe-2026/psg.png",
+    "sha": "823a6035ccfc9a6f120d6fa8c91e0b86a68c0793",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/France - Ligue 1/Paris Saint-Germain.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/France%20-%20Ligue%201/Paris%20Saint-Germain.png",
+    "upstream_name": "Paris Saint-Germain"
+  },
+  "PSV": {
+    "file": "images/clubs/europe-2026/psv.png",
+    "sha": "b398db001e288d7261d647188b91782f7ee85f00",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Netherlands - Eredivisie/PSV Eindhoven.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Netherlands%20-%20Eredivisie/PSV%20Eindhoven.png",
+    "upstream_name": "PSV Eindhoven"
+  },
+  "Plzen": {
+    "file": "images/clubs/europe-2026/plzen.png",
+    "sha": "e5da09b87feac80e5da28e73d59b795361991d62",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Czech Republic - Chance Liga/FC Viktoria Plzen.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Czech%20Republic%20-%20Chance%20Liga/FC%20Viktoria%20Plzen.png",
+    "upstream_name": "FC Viktoria Plzen"
+  },
+  "RB Leipzig": {
+    "file": "images/clubs/europe-2026/rb-leipzig.png",
+    "sha": "06a031c8920a0f0dcd3df6b2e95629fa8b99ced9",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Germany - Bundesliga/RB Leipzig.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Germany%20-%20Bundesliga/RB%20Leipzig.png",
+    "upstream_name": "RB Leipzig"
+  },
+  "Real Madrid": {
+    "file": "images/clubs/europe-2026/real-madrid.png",
+    "sha": "e713ce0470f9673294c374596889a659b2624dcf",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/Real Madrid.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/Real%20Madrid.png",
+    "upstream_name": "Real Madrid"
+  },
+  "Real Sociedad": {
+    "file": "images/clubs/europe-2026/real-sociedad.png",
+    "sha": "b1d8bcdf54803231b466a3b698549eecd55270d2",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/Real Sociedad.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/Real%20Sociedad.png",
+    "upstream_name": "Real Sociedad"
+  },
+  "Red Bull Salzbourg": {
+    "file": "images/clubs/europe-2026/red-bull-salzbourg.png",
+    "sha": "31e95f49ed5da7a789c454a9c3aaef3928ef9b06",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Austria - Bundesliga/Red Bull Salzburg.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Austria%20-%20Bundesliga/Red%20Bull%20Salzburg.png",
+    "upstream_name": "Red Bull Salzburg"
+  },
+  "Rennes": {
+    "file": "images/clubs/europe-2026/rennes.png",
+    "sha": "8d8f6dc72967d38b80ae257380e0cf13fd270028",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/France - Ligue 1/Stade Rennais FC.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/France%20-%20Ligue%201/Stade%20Rennais%20FC.png",
+    "upstream_name": "Stade Rennais FC"
+  },
+  "Royale Union SG": {
+    "file": "images/clubs/europe-2026/royale-union-sg.png",
+    "sha": "b0ad43b8b7d116319ded137e1f6d64b64a8c5388",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Belgium - Jupiler Pro League/Union Saint-Gilloise.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Belgium%20-%20Jupiler%20Pro%20League/Union%20Saint-Gilloise.png",
+    "upstream_name": "Union Saint-Gilloise"
+  },
+  "Sabah FC": {
+    "file": "images/clubs/europe-2026/sabah-fc.png",
+    "sha": "39d257ebd6c686ccc651812c44976a2f8ba8cbc8",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/Sabah_FC__Azerbaijan_.png",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/Sabah_FC__Azerbaijan_.png",
+    "upstream_name": "Sabah FC"
+  },
+  "Shakhtar": {
+    "file": "images/clubs/europe-2026/shakhtar.png",
+    "sha": "f564222a059023f10ee9e58cbf79bd50de543915",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Ukraine - Premier Liga/Shakhtar Donetsk.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Ukraine%20-%20Premier%20Liga/Shakhtar%20Donetsk.png",
+    "upstream_name": "Shakhtar Donetsk"
+  },
+  "Slavia Prague": {
+    "file": "images/clubs/europe-2026/slavia-prague.png",
+    "sha": "844813da06ba270677d8fffafcc2b304fe0c8e99",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Czech Republic - Chance Liga/SK Slavia Prague.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Czech%20Republic%20-%20Chance%20Liga/SK%20Slavia%20Prague.png",
+    "upstream_name": "SK Slavia Prague"
+  },
+  "Slovan Bratislava": {
+    "file": "images/clubs/europe-2026/slovan-bratislava.png",
+    "sha": "be3a21e9fbdfe8e6f468d7f2284d6a96ed11c53c",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/250px-SK_Slovan_Bratislava_logo.svg.png",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/250px-SK_Slovan_Bratislava_logo.svg.png",
+    "upstream_name": "Slovan Bratislava"
+  },
+  "Sparta Prague": {
+    "file": "images/clubs/europe-2026/sparta-prague.png",
+    "sha": "74eeb7b6e8fa0715da0cb1fdc881c20b7f82afea",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Czech Republic - Chance Liga/AC Sparta Prague.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Czech%20Republic%20-%20Chance%20Liga/AC%20Sparta%20Prague.png",
+    "upstream_name": "AC Sparta Prague"
+  },
+  "Sporting": {
+    "file": "images/clubs/europe-2026/sporting.png",
+    "sha": "75ec4ab8971a86ca3f327197f0fd3374cf016e75",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Portugal - Liga Portugal/Sporting CP.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Portugal%20-%20Liga%20Portugal/Sporting%20CP.png",
+    "upstream_name": "Sporting CP"
+  },
+  "Sturm Graz": {
+    "file": "images/clubs/europe-2026/sturm-graz.png",
+    "sha": "e1cac8a3d9045d1953df624b247019c4a6080f0f",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Austria - Bundesliga/SK Sturm Graz.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Austria%20-%20Bundesliga/SK%20Sturm%20Graz.png",
+    "upstream_name": "SK Sturm Graz"
+  },
+  "Stuttgart": {
+    "file": "images/clubs/europe-2026/stuttgart.png",
+    "sha": "c42c4eccbc2c63925567801ce896ef659e143881",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Germany - Bundesliga/VfB Stuttgart.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Germany%20-%20Bundesliga/VfB%20Stuttgart.png",
+    "upstream_name": "VfB Stuttgart"
+  },
+  "Sunderland": {
+    "file": "images/clubs/europe-2026/sunderland.png",
+    "sha": "af221f2cd30474564b0b4c9690e397fc1aaf03e9",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/England - Premier League/Sunderland AFC.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/England%20-%20Premier%20League/Sunderland%20AFC.png",
+    "upstream_name": "Sunderland AFC"
+  },
+  "Torreense": {
+    "file": "images/clubs/europe-2026/torreense.svg",
+    "sha": "6651b462a16e1db8e20739fc66647b544b6e88b2",
+    "repo": "sariyuce/sariyuce.github.io",
+    "path": "assets/uefa-draws/logos/S.C.U._Torreense_logo.svg",
+    "source": "https://github.com/sariyuce/sariyuce.github.io/blob/0175b7cbd20b57f0ed8a71d95c4570752913e899/assets/uefa-draws/logos/S.C.U._Torreense_logo.svg",
+    "upstream_name": "Torreense"
+  },
+  "Viking": {
+    "file": "images/clubs/europe-2026/viking.png",
+    "sha": "8616d4ac676eabd94938492b9098b298fba34145",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Norway - Eliteserien/Viking FK.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Norway%20-%20Eliteserien/Viking%20FK.png",
+    "upstream_name": "Viking FK"
+  },
+  "Villarreal": {
+    "file": "images/clubs/europe-2026/villarreal.png",
+    "sha": "f750f3e8ceb5613d439ece556ad6a0edf7a187d0",
+    "repo": "luukhopman/football-logos",
+    "path": "logos/Spain - LaLiga/Villarreal CF.png",
+    "source": "https://github.com/luukhopman/football-logos/blob/2a3978f0b4730645c205d855a4bda54c161183e9/logos/Spain%20-%20LaLiga/Villarreal%20CF.png",
+    "upstream_name": "Villarreal CF"
+  }
+}

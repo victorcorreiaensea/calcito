@@ -5388,435 +5388,194 @@ input[type="checkbox"] {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
-/* Private image review workspace */
-.photo-import {
-  min-width: 0;
+.native-match-statistics {
+  margin-block: 32px;
+  padding: 32px;
+  border: 1px solid #233447;
+  border-radius: 20px;
+  background: #0c1119;
 }
-.photo-import h2 {
+.native-stats-heading {
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.photo-import .admin-card {
-  padding: 24px;
-  border: 1px solid var(--border, #24303e);
-  border-radius: 16px;
-  background: #0d131e;
-  margin-block: 16px;
-}
-.photo-import label {
-  display: grid;
-  gap: 7px;
-  font-size: 0.8rem;
-  color: #aebfd2;
-}
-.photo-import input:not([type="checkbox"]),
-.photo-import select {
-  width: 100%;
-  min-width: 0;
-  background: #070b12;
-  color: #fff;
-  border: 1px solid #2b3b53;
-  border-radius: 8px;
-  padding: 11px;
-  font: inherit;
-}
-.photo-import input:focus-visible,
-.photo-import select:focus-visible {
-  outline: 2px solid #398bff;
-  outline-offset: 2px;
-}
-.photo-upload {
-  display: grid;
-  grid-template-columns: 1fr 260px;
+  justify-content: space-between;
   gap: 16px;
-  align-items: end;
-}
-.photo-upload > div {
-  grid-row: span 3;
-}
-.photo-upload h3 {
-  margin-block: 10px;
-}
-.photo-file {
-  font-size: 0.72rem;
-}
-.photo-file input {
-  font-size: 0.7rem !important;
-}
-.photo-progress {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-.photo-progress .admin-card {
-  padding: 18px;
-  display: grid;
-  gap: 12px;
-}
-.photo-progress strong {
-  font-size: 2rem;
-}
-.photo-progress strong small {
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: #9badc7;
-}
-.photo-progress span:last-child {
-  font-size: 0.72rem;
-  color: #aebfd2;
-}
-.photo-progress progress {
-  width: 100%;
-  height: 6px;
-  accent-color: #398bff;
-}
-.photo-workspace {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-.photo-list {
-  max-height: 85vh;
-  overflow: auto;
-  border: 1px solid #24303e;
-  border-radius: 12px;
-  margin-top: 16px;
-  position: sticky;
-  top: 90px;
-}
-.photo-list-item {
-  display: flex;
-  gap: 9px;
   align-items: center;
-  padding: 14px;
-  border-bottom: 1px solid #1e2c40;
 }
-.photo-list-item.is-active {
-  background: #12284a;
-  border-left: 3px solid #398bff;
+.native-stats-heading h2 {
+  margin-top: 10px;
+  font-size: 1.7rem;
 }
-.photo-list-item button {
-  display: grid;
-  gap: 6px;
-  text-align: left;
-  background: none;
-  border: 0;
-  color: #fff;
-  cursor: pointer;
-  width: 100%;
-  min-width: 0;
+.native-stats-period {
+  border: 1px solid #263c50;
+  border-radius: 30px;
+  padding: 9px 14px;
+  font-size: 0.7rem;
+  color: #91a7bf;
+  white-space: nowrap;
 }
-.photo-list-item span,
-.photo-list-item small {
-  font-size: 0.65rem;
-  color: #9ab2d3;
-}
-.photo-list-item strong {
-  font-size: 0.82rem;
-}
-.photo-toolbar {
-  display: flex;
-  align-items: end;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.photo-toolbar label {
-  flex: 1;
-  min-width: 160px;
-}
-.photo-editor {
-  min-width: 0;
-}
-.photo-editor > header {
+.native-stats-teams {
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  margin-block: 28px;
+  color: #fff;
 }
-.photo-editor > header h3 {
-  font-size: 1.5rem;
-  margin-block: 10px;
+.native-stats-teams strong {
+  max-width: 46%;
+  font-size: 0.95rem;
 }
-.photo-editor > header p {
-  font-size: 0.75rem;
-  color: #aebfd2;
+.native-stats-teams strong:last-child {
+  text-align: right;
 }
-.photo-thumbnail {
-  width: 100px;
-  flex-shrink: 0;
-  text-align: center;
-  font-size: 0.68rem;
-  color: #9fc5ff;
-}
-.photo-thumbnail img {
-  height: 140px;
-  width: 90px;
-  object-fit: cover;
-  object-position: top;
-  border-radius: 8px;
-}
-.photo-thumbnail span {
+.native-stats-teams small {
   display: block;
-  margin: 5px;
+  color: #91a7bf;
+  font-size: 0.65rem;
+  font-weight: 400;
+  margin-top: 6px;
 }
-.photo-editor fieldset {
-  border: 0;
-  padding: 0;
-  margin: 16px 0;
+.native-stats-teams i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #398bff;
+  margin-right: 8px;
+  border-radius: 50%;
 }
-.photo-fields {
+.native-stats-teams strong:last-child i {
+  background: #37dfc5;
+}
+.native-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-block: 16px;
+  gap: 22px 36px;
 }
-.photo-club {
-  padding-block: 14px;
-  border-bottom: 1px solid #24303e;
+.native-stat {
+  padding: 14px 0;
+  min-width: 0;
 }
-.photo-club summary {
-  font-size: 0.8rem;
-  color: #9fc5ff;
-  cursor: pointer;
-  margin-block: 12px;
-}
-.photo-club details p {
-  font-size: 0.75rem;
-}
-.photo-stat-table {
-  margin-block: 20px;
-}
-.photo-stat-row {
+.native-stat-values {
   display: grid;
-  grid-template-columns: minmax(110px, 1.4fr) minmax(70px, 1fr) minmax(
-      70px,
-      1fr
-    );
+  grid-template-columns: minmax(50px, 1fr) 1.8fr minmax(50px, 1fr);
   gap: 10px;
   align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px solid #1c2738;
-  font-size: 0.8rem;
 }
-.photo-stat-heading {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #9badc7;
-  padding-block: 15px;
-}
-.photo-stat-row input {
+.native-stat dt {
   text-align: center;
+  font-size: 0.75rem;
+  color: #b3c4d8;
 }
-.photo-confirm {
-  display: flex !important;
-  align-items: flex-start;
-  gap: 10px !important;
-  line-height: 1.6;
-  padding-block: 16px;
+.native-stat dd {
+  font-size: 1.7rem;
+  font-weight: 600;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: #90beff;
 }
-.photo-confirm input {
-  margin-top: 5px;
-  flex-shrink: 0;
+.native-stat dd:last-child {
+  text-align: right;
+  color: #7be9d8;
 }
-.photo-warning {
-  font-size: 0.78rem;
-  color: #edc88b;
-  line-height: 1.6;
-}
-.photo-message {
-  color: #a5d4ff;
-  padding: 14px 18px;
-  background: #10213b;
-  border-radius: 10px;
-}
-.photo-import .admin-actions {
+.native-stat-track {
+  height: 7px;
+  background: #1d2937;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 3px;
+  overflow: hidden;
+  border-radius: 5px;
+  margin-top: 13px;
 }
-.photo-import .muted-text {
-  font-size: 0.78rem;
-  line-height: 1.7;
+.native-stat-track span {
+  display: block;
+  height: 100%;
+  animation: native-bar-enter 0.65s ease-out both;
+  min-width: 0;
 }
-.photo-import button:disabled {
-  cursor: default;
-  opacity: 0.45;
+.native-stat-home {
+  background: #398bff;
+  transform-origin: left;
 }
-@media (max-width: 1050px) {
-  .photo-workspace {
-    grid-template-columns: 220px minmax(0, 1fr);
+.native-stat-away {
+  background: #37dfc5;
+  transform-origin: right;
+}
+.native-stat-incomplete .native-stat-track {
+  background: #1c2631;
+}
+.native-stat > small {
+  display: block;
+  font-size: 0.62rem;
+  color: #7c90a8;
+  margin-top: 7px;
+}
+.native-stats-note {
+  font-size: 0.72rem;
+  color: #8da2ba;
+  line-height: 1.6;
+  margin-top: 24px;
+}
+.native-match-coach {
+  border-top: 1px solid #24374b;
+  margin-top: 28px;
+  padding-top: 24px;
+}
+.native-match-coach .mascot-block {
+  margin: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  grid-template-columns: 140px 1fr;
+}
+.native-match-coach .mascot-art {
+  width: 140px;
+  max-width: 100%;
+}
+.native-match-coach > p {
+  font-size: 0.68rem;
+  color: #8196b0;
+  margin-top: 12px;
+}
+@keyframes native-bar-enter {
+  from {
+    transform: scaleX(0);
   }
-  .photo-progress {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  to {
+    transform: scaleX(1);
   }
-  .photo-upload {
-    grid-template-columns: 1fr;
-  }
-  .photo-upload > div {
-    grid-row: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .native-stat-track span {
+    animation: none;
   }
 }
 @media (max-width: 700px) {
-  .photo-workspace {
+  .native-match-statistics {
+    padding: 20px 16px;
+  }
+  .native-stats-grid {
     grid-template-columns: 1fr;
-  }
-  .photo-list {
-    position: static;
-    max-height: 280px;
-  }
-  .photo-fields {
-    grid-template-columns: 1fr;
-  }
-  .photo-import .admin-card {
-    padding: 16px;
-  }
-  .photo-stat-row {
     gap: 6px;
-    font-size: 0.7rem;
-    grid-template-columns: minmax(95px, 1.3fr) minmax(60px, 1fr) minmax(
-        60px,
-        1fr
-      );
   }
-  .photo-stat-row input {
-    padding: 10px 4px !important;
-  }
-  .photo-editor > header h3 {
-    font-size: 1.2rem;
-  }
-  .photo-thumbnail {
-    width: 70px;
-  }
-  .photo-thumbnail img {
-    width: 65px;
-    height: 110px;
-  }
-  .photo-import h2 {
+  .native-stat dd {
     font-size: 1.5rem;
   }
-  .photo-progress .eyebrow {
-    font-size: 0.54rem;
+  .native-stats-heading h2 {
+    font-size: 1.3rem;
   }
-  .photo-progress .admin-card {
-    padding: 12px;
+  .native-stats-period {
+    font-size: 0.6rem;
+    padding: 7px 10px;
   }
-  .photo-toolbar .button {
-    font-size: 0.7rem;
-    padding: 12px;
+  .native-stats-teams strong {
+    font-size: 0.8rem;
   }
-  .photo-import .section-heading {
-    flex-wrap: wrap;
+  .native-match-coach .mascot-block {
+    grid-template-columns: 1fr;
   }
-  .photo-import .admin-actions .button {
-    width: 100%;
-  }
-}
-.photo-history {
-  margin-top: 20px;
-  font-size: 0.76rem;
-  color: #aebfd2;
-}
-.photo-history summary {
-  cursor: pointer;
-  padding: 8px 0;
-}
-.photo-history pre {
-  max-width: 100%;
-  overflow: auto;
-  font-size: 0.7rem;
-  padding: 12px;
-  background: #070b12;
-}
-.photo-history > div {
-  border-top: 1px solid #24303e;
-  padding: 10px 0;
-}
-.match-statistics {
-  margin-block: 24px;
-}
-.match-stat-heading,
-.match-stat-line {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-  align-items: center;
-  text-align: center;
-}
-.match-stat-heading {
-  margin-block: 22px;
-  color: #fff;
-  font-size: 0.85rem;
-}
-.match-stat-heading strong small {
-  display: block;
-  color: #8496b0;
-  font-weight: 400;
-  font-size: 0.65rem;
-  margin-top: 7px;
-}
-.match-stat-heading > span {
-  color: #8496b0;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.match-stat-line {
-  padding: 13px 8px;
-  border-bottom: 1px solid #223048;
-}
-.match-stat-line dt {
-  font-size: 0.75rem;
-  color: #9caec7;
-}
-.match-stat-line dd {
-  margin: 0;
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-}
-.match-statistics > p {
-  font-size: 0.75rem;
-  margin-top: 18px;
-}
-@media (max-width: 500px) {
-  .match-stat-line {
-    grid-template-columns: 1fr 1.5fr 1fr;
-    gap: 6px;
-  }
-  .match-stat-heading {
-    gap: 8px;
-    font-size: 0.72rem;
-  }
-  .match-stat-line dt {
-    font-size: 0.65rem;
+  .native-match-coach .mascot-art {
+    width: 110px;
   }
 }
-button.photo-thumbnail {
-  background: none;
-  border: 0;
-  cursor: zoom-in;
-  padding: 0;
-}
-.photo-original {
-  background: #080d15;
-  border: 1px solid #398bff;
-  border-radius: 14px;
-  color: white;
-  max-width: min(600px, 94vw);
-  max-height: 92vh;
-  padding: 12px;
-}
-.photo-original::backdrop {
-  background: #000c;
-}
-.photo-original > button {
-  position: sticky;
-  top: 0;
-  margin-bottom: 10px;
-}
-.photo-original > img {
-  display: block;
-  width: 100%;
-  height: auto;
+.native-match-coach .eyebrow {
+  color: #b4ff39;
 }
