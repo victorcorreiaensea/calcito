@@ -1,0 +1,438 @@
+/* Home only: shared fixtures and club statistics keep their behavior elsewhere. */
+.home-page .home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  padding-block: 24px 36px;
+}
+.home-page .home-hero-copy {
+  min-width: 0;
+}
+.home-page .home-hero h1 {
+  font-size: clamp(54px, 6.3vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -1px;
+  margin: 0 0 18px;
+}
+.home-page .home-hero-copy > p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 390px;
+  margin: 0 0 24px;
+}
+.home-page .home-mascot {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  max-width: 350px;
+  justify-self: center;
+}
+.home-page .home-mascot img {
+  max-height: 350px;
+  margin: 0;
+  animation: home-calcito-float 5s ease-in-out infinite;
+}
+.home-page .home-mascot:hover img {
+  animation-play-state: paused;
+}
+.home-page .home-section-heading {
+  margin-bottom: 20px;
+  align-items: center;
+  flex-direction: row;
+  text-align: left;
+  gap: 16px;
+}
+.home-page .home-section-heading h2 {
+  font-size: clamp(28px, 3vw, 38px);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+.home-page .home-section-heading .text-link {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.home-page .home-fixture-grid {
+  gap: 16px;
+}
+.home-page .home-match {
+  min-width: 0;
+  border-top: 2px solid #2f8cff55;
+  border-radius: 0 0 10px 10px;
+  padding: 20px;
+  background: #0c1520;
+  transition: border-color 0.2s ease;
+}
+.home-page .home-match:hover {
+  border-color: var(--accent);
+}
+.home-page .home-match-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.home-page .home-match-status {
+  color: #9bc7ff;
+  white-space: nowrap;
+}
+.home-page .home-match-versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-block: 26px;
+}
+.home-page .home-match-versus .team-link {
+  flex-direction: column;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.home-page .home-match-versus > strong {
+  font:
+    600 22px "Barlow Condensed",
+    sans-serif;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.home-page .home-match-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+.home-page .home-match-date time {
+  color: var(--muted);
+}
+.home-page .home-match-date a,
+.home-page .home-match-actions > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.home-page .home-match-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+}
+.home-page .home-match-actions details {
+  flex: 1;
+}
+.home-page .home-match-actions summary {
+  cursor: pointer;
+  padding-block: 4px;
+}
+.home-page .home-match-actions > a {
+  color: #9bc7ff;
+}
+.home-page .home-match-actions details[open] {
+  flex-basis: 100%;
+}
+.home-page .home-match-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 12px;
+}
+.home-page .home-match-form-grid > div > span {
+  color: white;
+}
+.home-page .source-caption {
+  font-size: 10px;
+  margin-block: 12px 0;
+}
+.home-page .home-data-state {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 24px;
+  border-block: 1px solid var(--border);
+}
+.home-page .home-data-state p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+.home-page .home-data-state button {
+  background: transparent;
+  border: 0;
+}
+.home-page .home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-block: 32px 40px;
+  border-block: 1px solid var(--border);
+}
+.home-page .home-shortcuts a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 22px 14px;
+  font-size: 13px;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.home-page .home-shortcuts a + a {
+  border-left: 1px solid var(--border);
+}
+.home-page .home-shortcuts a > svg:first-child {
+  color: var(--accent);
+}
+.home-page .home-shortcuts a > svg:last-child {
+  margin-left: 12px;
+  color: var(--muted);
+}
+.home-page .home-shortcuts a:hover {
+  color: var(--accent);
+  background: #2f8cff08;
+}
+.home-page .home-spotlight {
+  padding-bottom: 42px;
+}
+.home-page .club-snapshot {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 4px 0 0;
+  margin: 0;
+}
+.home-page .club-snapshot-heading {
+  gap: 16px;
+}
+.home-page .club-snapshot-heading h2 {
+  font-size: 30px;
+  margin: 4px 0;
+}
+.home-page .club-snapshot-heading p {
+  font-size: 11px;
+}
+.home-page .club-snapshot-heading .eyebrow {
+  display: none;
+}
+.home-page .insight-tiles {
+  gap: 20px;
+  margin-top: 20px;
+  padding-block: 18px;
+}
+.home-page .insight-tiles > div {
+  gap: 7px;
+}
+.home-page .insight-tiles strong {
+  font-size: 28px;
+}
+.home-page .insight-tiles small,
+.home-page .insight-tiles > div > span {
+  font-size: 10px;
+}
+.home-page .featured-next {
+  margin-top: 16px;
+  padding-top: 0;
+  border: 0;
+}
+.home-page .featured-next .eyebrow {
+  font-size: 9px;
+}
+.home-page .featured-next a {
+  font-size: 14px;
+}
+.home-page .featured-next p,
+.home-page .featured-next small {
+  font-size: 11px;
+}
+.home-guide-dialog {
+  width: min(960px, calc(100% - 32px));
+  max-height: 88dvh;
+  padding: 36px;
+  color: #fff;
+  background: #0b111b;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overscroll-behavior: contain;
+}
+.home-guide-dialog::backdrop {
+  background: #000b;
+  backdrop-filter: blur(5px);
+}
+.home-guide-dialog .calcito-conversation {
+  margin: 0;
+  padding: 20px 0 0;
+  background: transparent;
+  border: 0;
+}
+.home-guide-close {
+  display: grid;
+  place-items: center;
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: #142034;
+  color: white;
+  z-index: 2;
+}
+@keyframes home-calcito-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@media (max-width: 900px) {
+  .home-page .home-hero {
+    gap: 16px;
+    padding-block: 30px;
+  }
+  .home-page .home-hero h1 {
+    font-size: clamp(45px, 7vw, 64px);
+  }
+  .home-page .home-mascot {
+    max-width: 270px;
+  }
+  .home-page .home-fixture-grid {
+    grid-template-columns: 1fr;
+  }
+  .home-page .home-match-versus {
+    margin-block: 16px;
+  }
+}
+@media (max-width: 600px) {
+  .home-page .home-hero {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 12px;
+    padding-block: 28px;
+  }
+  .home-page .home-hero h1 {
+    font-size: clamp(32px, 7.5vw, 44px);
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+  }
+  .home-page .home-hero-copy > p {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .home-page .home-hero .button {
+    font-size: 10px;
+    padding: 12px;
+    gap: 8px;
+  }
+  .home-page .home-mascot {
+    width: 100%;
+    max-width: 180px;
+    margin-left: 0;
+  }
+  .home-page .home-section-heading {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .home-page .home-section-heading h2 {
+    font-size: 28px;
+  }
+  .home-page .home-section-heading .text-link {
+    font-size: 10px;
+    gap: 5px;
+  }
+  .home-page .home-match {
+    padding: 16px;
+  }
+  .home-page .home-shortcuts {
+    margin-block: 24px 30px;
+  }
+  .home-page .home-shortcuts a {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 18px 6px;
+    font-size: 11px;
+  }
+  .home-page .home-shortcuts a > svg:last-child {
+    display: none;
+  }
+  .home-page .club-snapshot-heading {
+    gap: 12px;
+  }
+  .home-page .club-snapshot-heading h2 {
+    font-size: 25px;
+  }
+  .home-page .insight-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .home-page .insight-tiles > div:last-child {
+    grid-column: 1 / -1;
+  }
+  .home-page .home-spotlight {
+    padding-bottom: 28px;
+  }
+  .home-guide-dialog {
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page .home-mascot img {
+    animation: none;
+    transition: none;
+  }
+  .home-page .home-shortcuts a {
+    transition: none;
+  }
+}
+
+.home-page .home-porto-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 8px 14px;
+}
+.home-page .home-porto-header > .team-link {
+  font:
+    600 28px "Barlow Condensed",
+    sans-serif;
+  gap: 16px;
+}
+.home-page .home-porto-header > .form-value {
+  margin: 0;
+}
+.home-page .home-porto-details {
+  border-top: 1px solid var(--border);
+}
+.home-page .home-porto-details > summary {
+  padding-block: 16px;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.home-page .home-porto-details .club-snapshot-heading {
+  display: none;
+}
+@media (max-width: 600px) {
+  .home-page .home-porto-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .home-page .home-porto-header > .team-link {
+    font-size: 24px;
+  }
+}

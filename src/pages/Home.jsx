@@ -1,13 +1,78 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ArrowRight, ShieldCheck, Trophy } from "lucide-react";
+import {
+  ArrowUpRight,
+  GitCompareArrows,
+  Shield,
+  Swords,
+  X,
+} from "lucide-react";
 import { useFootball } from "../hooks/useFootball";
 import { databaseConfig } from "../services/supabaseClient";
 import { mascotUrl } from "../components/CalcitoMascot";
 import CalcitoGuide from "../components/CalcitoGuide";
 import ClubSnapshot from "../components/ClubSnapshot";
-import { FixtureCard } from "./Matches";
+import { TeamLink, FormValue } from "../components/FootballUI";
 import { SourceCaption } from "../components/DataContext";
+import "./Home.css";
+
+function HomeFixture({ match }) {
+  return (
+    <article className="home-match">
+      <div className="home-match-meta">
+        <span>
+          {match.competition.name} · {match.round}
+        </span>
+        <span className="home-match-status">À venir</span>
+      </div>
+      <div className="home-match-versus">
+        <TeamLink team={match.home} />
+        <strong>
+          {match.goalsHome != null && match.goalsAway != null
+            ? `${match.goalsHome} – ${match.goalsAway}`
+            : "VS"}
+        </strong>
+        <TeamLink team={match.away} />
+      </div>
+      <div className="home-match-date">
+        <time dateTime={match.kickoff}>
+          {new Date(match.kickoff).toLocaleString("fr-FR", {
+            dateStyle: "medium",
+            ...(match.timeKnown === false ? {} : { timeStyle: "short" }),
+          })}
+        </time>
+        <Link to={`/matchs/${match.id}`}>
+          Analyse <ArrowUpRight size={14} aria-hidden="true" />
+        </Link>
+      </div>
+      <div className="home-match-actions">
+        <details>
+          <summary>Forme des équipes</summary>
+          <div className="home-match-form-grid">
+            {[match.home, match.away].map((team) => (
+              <div key={team.id}>
+                <span>{team.name}</span>
+                <FormValue
+                  score={team.score}
+                  variant={team.coverage?.variant}
+                  dataMode={team.coverage?.dataMode}
+                />
+              </div>
+            ))}
+          </div>
+        </details>
+        {Date.parse(match.kickoff) > Date.now() && (
+          <Link to={`/arene?match=${match.id}`}>
+            Défier Calcito <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+        )}
+      </div>
+    </article>
+  );
+}
+
 export default function Home() {
+  const guide = useRef(null);
   const state = useFootball(
     "matches",
     { view: "upcoming" },
@@ -24,180 +89,58 @@ export default function Home() {
   const matches =
     state.result?.data.filter((m) => m.status === "scheduled").slice(0, 3) ||
     [];
+
   return (
-    <>
-      <section className="hero container v3-hero discovery-hero">
-        <div className="hero-copy">
-          <div className="hero-kicker">
-            <span className="live-dot" />
-            LE FOOTBALL A UN NOUVEAU COMPAGNON
-          </div>
-          <h1>
-            Football is
+    <div className="home-page">
+      <section className="container home-hero" aria-labelledby="home-title">
+        <div className="home-hero-copy">
+          <h1 id="home-title">
+            Football is more
             <br />
-            more than
-            <br />
-            <span>a score.</span>
+            <span>than a score.</span>
           </h1>
-          <p>
-            Les chiffres ont une histoire.
-            <br />
-            Calcito te la raconte.
-          </p>
-          <p className="hero-description">
-            Lis la forme de tes clubs, prépare les prochaines affiches et défie
-            Calcito. Une autre façon de vivre le football, guidée par les faits.
-          </p>
-          <div className="hero-buttons">
-            <Link className="button button-primary" to="/equipes">
-              Explorer les équipes <ArrowUpRight size={18} />
-            </Link>
-            <a
-              className="button button-secondary"
-              href="#meet-calcito"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("meet-calcito")?.scrollIntoView({
-                  behavior: window.matchMedia(
-                    "(prefers-reduced-motion: reduce)",
-                  ).matches
-                    ? "instant"
-                    : "smooth",
-                });
-              }}
-            >
-              Rencontrer Calcito <ArrowRight size={17} />
-            </a>
-          </div>
-          <div className="hero-trust">
-            <ShieldCheck size={15} />
-            <span>Des données publiées. Des incertitudes assumées.</span>
-          </div>
-        </div>
-        <div className="hero-robot">
-          <div className="robot-caption">
-            <span>CALCITO / TON COMPAGNON DE MATCH</span>
-            <span className="live-dot" />
-          </div>
-          <div className="robot-orbit" aria-hidden="true" />
-          <a
-            className="hero-mascot-invitation"
-            href="#meet-calcito"
-            aria-label="Faire connaissance avec Calcito"
-            onClick={(event) => {
-              event.preventDefault();
-              document.getElementById("meet-calcito")?.scrollIntoView({
-                behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                  .matches
-                  ? "instant"
-                  : "smooth",
-              });
-            }}
-          >
-            <img
-              src={mascotUrl}
-              alt="Calcito, notre robot sportif bleu et blanc, et son ballon de football"
-              fetchPriority="high"
-              width="1280"
-              height="1280"
-            />
-          </a>
-          <div className="robot-nameplate">
-            <span className="nameplate-icon">
-              <Trophy size={19} />
-            </span>
-            <div>
-              <strong>Le jeu commence ici.</strong>
-              <span>De la curiosité. Du ballon. Du contexte.</span>
-            </div>
-            <span className="nameplate-status">C.</span>
-          </div>
-        </div>
-      </section>
-      <div className="container discovery-intro">
-        <span>ANALYSER.</span>
-        <span>COMPARER.</span>
-        <span>DÉFIER.</span>
-      </div>
-      <section className="container discovery-porto">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">LE CLUB SOUS LES PROJECTEURS</span>
-            <h2>
-              Dans le bleu de Porto<span>.</span>
-            </h2>
-          </div>
-          <Link className="text-link" to="/equipes">
-            Tous les clubs <ArrowUpRight size={17} />
+          <p>Suis la forme des clubs et prépare les prochaines affiches.</p>
+          <Link className="button button-primary" to="/matchs">
+            Explorer les matchs <ArrowUpRight size={18} aria-hidden="true" />
           </Link>
         </div>
-        {featured ? (
-          <ClubSnapshot team={featured} featured />
-        ) : (
-          <div className="analysis-panel">
-            <p role="status">
-              {teams.loading
-                ? "Chargement du FC Porto…"
-                : "La fiche du FC Porto n’est pas disponible pour le moment."}
-            </p>
-            {teams.error && <button onClick={teams.retry}>Réessayer</button>}
-          </div>
-        )}
-        <SourceCaption result={teams.result} />
+        <button
+          className="home-mascot hero-mascot-invitation"
+          type="button"
+          aria-label="Faire connaissance avec Calcito"
+          aria-haspopup="dialog"
+          onClick={() => guide.current?.showModal()}
+        >
+          <img
+            src={mascotUrl}
+            alt="Calcito, notre robot sportif bleu et blanc, et son ballon de football"
+            fetchPriority="high"
+            width="1280"
+            height="1280"
+          />
+        </button>
       </section>
-      <div className="container">
-        <CalcitoGuide />
-        <div className="discovery-paths">
-          {[
-            [
-              "01",
-              "Analyser",
-              "La dynamique derrière les résultats.",
-              "/equipes",
-            ],
-            [
-              "02",
-              "Comparer",
-              "Deux clubs. Des faits. Ta lecture du jeu.",
-              "/comparateur",
-            ],
-            [
-              "03",
-              "Défier",
-              "Un duel avec Calcito. Des Calcithunes 100 % fictives.",
-              "/arene",
-            ],
-          ].map(([n, title, text, path]) => (
-            <Link key={n} to={path}>
-              <span className="eyebrow">{n} / LE JEU CONTINUE</span>
-              <h2>
-                {title} <ArrowUpRight size={24} aria-hidden="true" />
-              </h2>
-              <p>{text}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-      <section className="container matches-section">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">AVANT LE COUP D’ENVOI</span>
-            <h2>
-              Les prochains rendez-vous<span>.</span>
-            </h2>
-          </div>
+
+      <section
+        className="container home-matches"
+        aria-labelledby="home-matches-title"
+      >
+        <div className="section-heading home-section-heading">
+          <h2 id="home-matches-title">
+            Prochains matchs<span>.</span>
+          </h2>
           <Link className="text-link" to="/matchs">
-            Tous les matchs <ArrowUpRight size={16} />
+            Tous les matchs <ArrowUpRight size={16} aria-hidden="true" />
           </Link>
         </div>
         {matches.length ? (
           <div className="home-fixture-grid">
             {matches.map((match) => (
-              <FixtureCard match={match} key={match.id} />
+              <HomeFixture match={match} key={match.id} />
             ))}
           </div>
         ) : (
-          <div className="analysis-panel">
+          <div className="home-data-state" role="status">
             <p>
               {state.loading
                 ? "Chargement du calendrier…"
@@ -205,27 +148,98 @@ export default function Home() {
                   ? "Calendrier indisponible pour le moment."
                   : "Aucune rencontre future publiée pour le moment."}
             </p>
-            {state.error && <button onClick={state.retry}>Réessayer</button>}
+            {state.error && (
+              <button className="text-link" onClick={state.retry}>
+                Réessayer
+              </button>
+            )}
           </div>
         )}
         <SourceCaption result={state.result} />
       </section>
-      <section className="container discovery-final">
-        <span className="eyebrow">LE PLAISIR DE COMPRENDRE</span>
-        <h2>
-          Plus de contexte.
-          <br />
-          Encore plus de football.
-        </h2>
-        <p>
-          Un indice sur 100 décrit la forme. Il ne prédit pas le prochain but.
-          <br />
-          Découvre le moteur et teste tes idées dans notre laboratoire.
-        </p>
-        <Link className="button button-secondary" to="/methodologie">
-          Comment ça marche ? <ArrowUpRight size={17} />
-        </Link>
+
+      <nav className="container home-shortcuts" aria-label="Accès rapides">
+        {[
+          [Shield, "Équipes", "/equipes"],
+          [GitCompareArrows, "Comparateur", "/comparateur"],
+          [Swords, "Arène", "/arene"],
+        ].map(([Icon, label, path]) => (
+          <Link key={path} to={path}>
+            <Icon size={19} strokeWidth={1.6} aria-hidden="true" />
+            <span>{label}</span>
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+        ))}
+      </nav>
+
+      <section
+        className="container home-spotlight"
+        aria-labelledby="home-spotlight-title"
+      >
+        <div className="section-heading home-section-heading">
+          <h2 id="home-spotlight-title">
+            Club à la une<span>.</span>
+          </h2>
+          <Link
+            className="text-link"
+            to={featured ? `/equipes/${featured.id}` : "/equipes"}
+          >
+            {featured ? "Voir la fiche" : "Tous les clubs"}{" "}
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+        </div>
+        {featured ? (
+          <>
+            <div className="home-porto-header">
+              <TeamLink team={featured} />
+              <FormValue
+                score={featured.score}
+                variant={featured.coverage?.variant}
+                dataMode={featured.coverage?.dataMode}
+              />
+            </div>
+            <details className="home-porto-details">
+              <summary>Forme récente et prochain match</summary>
+              <ClubSnapshot team={featured} featured comparison />
+            </details>
+          </>
+        ) : (
+          <div className="home-data-state" role="status">
+            <p>
+              {teams.loading
+                ? "Chargement du FC Porto…"
+                : teams.error
+                  ? "La fiche du FC Porto est indisponible pour le moment."
+                  : "La fiche du FC Porto n’est pas disponible pour le moment."}
+            </p>
+            {teams.error && (
+              <button className="text-link" onClick={teams.retry}>
+                Réessayer
+              </button>
+            )}
+          </div>
+        )}
+        <SourceCaption result={teams.result} />
       </section>
-    </>
+
+      <dialog
+        className="home-guide-dialog"
+        ref={guide}
+        aria-labelledby="meet-calcito"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) guide.current?.close();
+        }}
+      >
+        <button
+          className="home-guide-close"
+          type="button"
+          aria-label="Fermer le dialogue avec Calcito"
+          onClick={() => guide.current?.close()}
+        >
+          <X size={22} aria-hidden="true" />
+        </button>
+        <CalcitoGuide />
+      </dialog>
+    </div>
   );
 }
