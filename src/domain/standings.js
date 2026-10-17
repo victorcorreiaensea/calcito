@@ -1,3 +1,10 @@
+import { isTrackedLeague } from "./simplified.js";
+
+export const isStandingsCompetition = (competition) =>
+  isTrackedLeague(competition) ||
+  (competition?.type === "european-cup" &&
+    ["champions-league", "europa-league"].includes(competition.slug));
+
 const knownRules = new Set([
   "points",
   "goalDifference",
@@ -6,7 +13,13 @@ const knownRules = new Set([
   "headToHeadPoints",
   "headToHeadGoalDifference",
 ]);
-export function buildStandings({ season, teams, members, matches }) {
+export function buildStandings({
+  season,
+  teams,
+  members,
+  matches,
+  competition,
+}) {
   const table = new Map(
     members
       .filter((member) => member.season_id === season.id)
@@ -34,6 +47,8 @@ export function buildStandings({ season, teams, members, matches }) {
     .filter(
       (m) =>
         m.season_id === season.id &&
+        (competition?.type !== "european-cup" ||
+          /phase de ligue|league phase/i.test(m.round || "")) &&
         m.is_published &&
         m.status === "finished" &&
         Number.isInteger(m.goals_home) &&

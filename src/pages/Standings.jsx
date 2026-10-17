@@ -9,6 +9,7 @@ import {
   Results,
   FormValue,
 } from "../components/FootballUI";
+import { isStandingsCompetition } from "../domain/standings";
 import { isTrackedLeague } from "../domain/simplified";
 import { europeanRows, compatibleRankingGroups } from "../domain/european";
 import { SourceCaption } from "../components/DataContext";
@@ -92,12 +93,15 @@ export default function Standings() {
     ),
     [year, setYear] = useState(params.get("season") || "");
   const comps = useFootball("competitions");
-  const leagueComps = comps.result?.data.filter(isTrackedLeague) || [];
+  const standingsComps =
+    comps.result?.data.filter(isStandingsCompetition) || [];
   const selectedId =
-    competition ||
-    leagueComps.find((comp) => comp.slug === "ligue-1")?.id ||
-    leagueComps[0]?.id;
-  const selected = leagueComps.find((comp) => comp.id === selectedId);
+    standingsComps.find(
+      (comp) => comp.id === competition || comp.slug === competition,
+    )?.id ||
+    standingsComps.find((comp) => comp.slug === "ligue-1")?.id ||
+    standingsComps[0]?.id;
+  const selected = standingsComps.find((comp) => comp.id === selectedId);
   const state = useFootball(
     "standings",
     { competition: selectedId, season: year },
@@ -108,13 +112,13 @@ export default function Standings() {
   return (
     <section className="container page-content">
       <PageHeading
-        label="TOUTES LES ÉQUIPES, CHAMPIONNAT PAR CHAMPIONNAT"
+        label="CHAMPIONNATS · CHAMPIONS LEAGUE · EUROPA LEAGUE"
         title="Classements"
-        description="Un classement reconstruit à partir des matchs publiés. La couverture, les règles de départage et les éventuelles sanctions restent visibles."
+        description="Retrouvez les six championnats suivis et les phases de ligue de Champions League et d’Europa League, à partir des matchs publiés."
       />
-      <DataState {...comps} empty={leagueComps.length === 0}>
+      <DataState {...comps} empty={standingsComps.length === 0}>
         <div className="league-shortcuts">
-          {leagueComps.map((comp) => (
+          {standingsComps.map((comp) => (
             <button
               key={comp.id}
               aria-pressed={comp.id === selectedId}
@@ -124,7 +128,9 @@ export default function Standings() {
               }}
             >
               {comp.name}
-              <small>{comp.country}</small>
+              <small>
+                {comp.type === "european-cup" ? "Phase de ligue" : comp.country}
+              </small>
             </button>
           ))}
         </div>
@@ -139,7 +145,7 @@ export default function Standings() {
                 setYear("");
               }}
             >
-              {leagueComps.map((comp) => (
+              {standingsComps.map((comp) => (
                 <option key={comp.id} value={comp.id}>
                   {comp.name}
                 </option>
@@ -182,6 +188,13 @@ export default function Standings() {
                   · {table.season.label}
                 </p>
               </div>
+              {selected?.type === "european-cup" && (
+                <Notice>
+                  Phase de ligue uniquement : les points et les buts concernent
+                  cette compétition, sans inclure les championnats nationaux. Ce
+                  tableau est distinct du classement de forme Calcito.
+                </Notice>
+              )}
               {table.partial && (
                 <Notice>
                   Ce tableau reflète uniquement les rencontres enregistrées et

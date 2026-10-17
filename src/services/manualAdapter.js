@@ -2,12 +2,8 @@ import { dynamicCoverage, dynamicForms } from "../engines/dynamicFormEngine.js";
 import { DATE_ONLY_MARKER } from "../domain/matchImport.js";
 import { databaseConfig } from "./supabaseClient.js";
 import { getDataset } from "./manualRepository.js";
-import {
-  teamHistory,
-  formCoverage,
-  isTrackedLeague,
-} from "../domain/simplified.js";
-import { buildStandings } from "../domain/standings.js";
+import { teamHistory, formCoverage } from "../domain/simplified.js";
+import { buildStandings, isStandingsCompetition } from "../domain/standings.js";
 
 function latestYear(dataset) {
   return dataset.seasons.reduce(
@@ -322,7 +318,7 @@ export const manualAdapter = {
         typeof params === "string" ? { competition: params } : params;
       const season = selectedSeason(d, competition, year);
       const comp = d.competitions.find((c) => c.id === season?.competition_id);
-      if (!isTrackedLeague(comp))
+      if (!isStandingsCompetition(comp))
         return {
           rows: [],
           partial: true,
@@ -340,6 +336,7 @@ export const manualAdapter = {
           season: null,
         };
       const table = buildStandings({
+        competition: comp,
         season,
         teams: d.teams,
         members: d.members,
