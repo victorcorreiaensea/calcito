@@ -54,6 +54,15 @@ export function manualTeam(raw, dataset, year = latestYear(dataset)) {
     short: raw.short,
     logo: raw.logo_url,
     color: "#2F8CFF",
+    europeanCompetitions: dataset.seasons
+      .filter(
+        (s) =>
+          s.start_year === year &&
+          memberships.some((m) => m.season_id === s.id),
+      )
+      .map((s) => dataset.competitions.find((c) => c.id === s.competition_id))
+      .filter((c) => c?.type === "european-cup")
+      .map((c) => ({ id: c.id, name: c.name })),
     competitionId: comp?.id || null,
     competitionName: comp?.name || raw.domestic_league || null,
     season:

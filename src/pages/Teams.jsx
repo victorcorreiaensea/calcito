@@ -32,11 +32,14 @@ export default function Teams() {
   function setSearch(value) {
     setParams(value ? { search: value } : {}, { replace: true });
   }
+  const [country, setCountry] = useState("");
   const [competition, setCompetition] = useState(""),
     [year, setYear] = useState(""),
     [page, setPage] = useState(0);
   const state = useFootball("teams", { search, competition, season: year });
-  const rows = state.result?.data || [];
+  const rows = (state.result?.data || []).filter(
+    (t) => !country || t.country === country,
+  );
   return (
     <section className="container page-content">
       <PageHeading
@@ -45,6 +48,31 @@ export default function Teams() {
         description="Retrouvez les fiches publiées, leurs résultats et les statistiques réellement renseignées. Les données absentes restent indisponibles."
       />
       <div className="filter-bar">
+        <label className="filter-field">
+          Pays
+          <select
+            aria-label="Pays"
+            value={country}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setPage(0);
+            }}
+          >
+            <option value="">Tous les pays</option>
+            {[
+              ...new Set(
+                [
+                  country,
+                  ...(state.result?.data || []).map((t) => t.country),
+                ].filter(Boolean),
+              ),
+            ]
+              .sort()
+              .map((name) => (
+                <option key={name}>{name}</option>
+              ))}
+          </select>
+        </label>
         <div className="filter-field search-field">
           <label htmlFor="team-search">Rechercher une équipe</label>
           <div>
@@ -93,6 +121,9 @@ export default function Teams() {
               <p>
                 {team.competitionName || "Fiche publiée"}
                 {team.season ? ` · ${team.season}–${team.season + 1}` : ""}
+              </p>
+              <p className="muted-text">
+                {team.europeanCompetitions?.map((c) => c.name).join(" · ")}
               </p>
               <span className="eyebrow">FORME CALCITO</span>
               <FormValue
@@ -193,6 +224,19 @@ export function TeamDetail() {
                 <ArrowUpRight size={16} />
               </Link>
             </div>
+            {team.europeanCompetitions?.length > 0 && (
+              <p className="muted-text">
+                Participation européenne :{" "}
+                {team.europeanCompetitions.map((c) => c.name).join(" · ")}
+              </p>
+            )}
+            {team.score == null && !analysis.recent.loading && (
+              <Notice>
+                Données insuffisantes pour l’indice : cinq résultats publiés et
+                exploitables sont nécessaires. Aucun indice n’est attribué
+                artificiellement.
+              </Notice>
+            )}
             <ClubSnapshot team={team} season={year} />
             <details className="analysis-panel why-index">
               <summary>Pourquoi cet indice ?</summary>
@@ -300,7 +344,11 @@ export function TeamDetail() {
             </details>
             <SourceCaption result={state.result} />
             <section className="analysis-panel">
-              <h2>Prochaines rencontres de championnat</h2>
+              <h2>
+                {team.competitionId
+                  ? "Prochaines rencontres de championnat"
+                  : "Prochaines rencontres européennes"}
+              </h2>
               {nextMatches.loading ? (
                 <p role="status">Chargement du calendrier…</p>
               ) : nextMatches.error ? (
@@ -312,7 +360,8 @@ export function TeamDetail() {
                       (m) =>
                         (m.home.id === teamId || m.away.id === teamId) &&
                         m.status === "scheduled" &&
-                        m.competition.type === "league",
+                        m.competition.type ===
+                          (team.competitionId ? "league" : "european-cup"),
                     )
                     .slice(0, 2)
                     .map((m) => (
@@ -325,7 +374,8 @@ export function TeamDetail() {
                   (m) =>
                     (m.home.id === teamId || m.away.id === teamId) &&
                     m.status === "scheduled" &&
-                    m.competition.type === "league",
+                    m.competition.type ===
+                      (team.competitionId ? "league" : "european-cup"),
                 ) && (
                   <p className="muted-text">
                     Aucune rencontre future vérifiée pour cette équipe.
