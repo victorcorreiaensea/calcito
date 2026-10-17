@@ -39,7 +39,8 @@ export default function EuropePreparation({
     [busy, setBusy] = useState(false),
     [publishReview, setPublishReview] = useState(null),
     [publishConfirmed, setPublishConfirmed] = useState(false),
-    [pending, setPending] = useState(null);
+    [pending, setPending] = useState(null),
+    [dirtyIds, setDirtyIds] = useState(new Set());
   const lock = useRef(false),
     batch = useRef(null);
   useEffect(() => {
@@ -159,7 +160,18 @@ export default function EuropePreparation({
       onBusyChange(false);
     }
   }
+  function markDirty(id, dirty) {
+    setDirtyIds((previous) => {
+      const next = new Set(previous);
+      if (dirty) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+    setPublishReview(null);
+    setPublishConfirmed(false);
+  }
   async function preparePublish() {
+    if (dirtyIds.size) return;
     setBusy(true);
     onBusyChange(true);
     setMessage("");
@@ -186,6 +198,7 @@ export default function EuropePreparation({
   async function publishDay() {
     if (
       lock.current ||
+      dirtyIds.size > 0 ||
       !publishConfirmed ||
       !publishReview?.length ||
       publishReview.some((r) => r.errors.length)
@@ -215,7 +228,7 @@ export default function EuropePreparation({
       await reload();
     } catch (e) {
       setMessage(
-        `${count} publiées. Publication interrompue : ${e.message}. Rechargez les statuts avant une nouvelle validation.`,
+        `${count} publications confirmées. Dernière demande à vérifier : publication interrompue : ${e.message}. Rechargez les statuts avant une nouvelle validation.`,
       );
       setPublishReview(null);
       await reload();
@@ -241,7 +254,7 @@ export default function EuropePreparation({
           Compétition
           <select
             value={competition}
-            disabled={busy}
+            disabled={busy || dirtyIds.size > 0}
             onChange={(e) => {
               setCompetition(e.target.value);
               setPublishReview(null);
@@ -265,7 +278,7 @@ export default function EuropePreparation({
           <select
             aria-label="Journée"
             value={round}
-            disabled={busy}
+            disabled={busy || dirtyIds.size > 0}
             onChange={(e) => {
               setRound(e.target.value);
               setPublishReview(null);
@@ -514,6 +527,7 @@ export default function EuropePreparation({
             reload={reload}
             enabled={status?.installed === true}
             parentBusy={busy}
+            onDirty={markDirty}
             onMessage={setMessage}
             onBusyChange={(value) => {
               setBusy(value);
@@ -532,6 +546,12 @@ export default function EuropePreparation({
           </p>
         </div>
       )}
+      {dirtyIds.size > 0 && (
+        <p role="status" className="info-notice">
+          {dirtyIds.size} rencontre(s) avec des modifications non enregistrées.
+          Enregistrez ou annulez ces changements avant de valider la journée.
+        </p>
+      )}
       <p className="muted-text">
         Enregistrez les brouillons avant de valider une journée : seule leur
         version enregistrée sera publiée.
@@ -541,6 +561,7 @@ export default function EuropePreparation({
         onClick={preparePublish}
         disabled={
           busy ||
+          dirtyIds.size > 0 ||
           !selected.some((m) => !m.is_published) ||
           status?.installed !== true
         }
@@ -555,7 +576,9 @@ export default function EuropePreparation({
               {dataset.teams.find((t) => t.id === row.form.home_team_id)?.name}{" "}
               —{" "}
               {dataset.teams.find((t) => t.id === row.form.away_team_id)?.name}{" "}
-              :{" "}
+              : {row.form.goals_home ?? "—"} – {row.form.goals_away ?? "—"} ·{" "}
+              {new Date(row.form.kickoff).toLocaleString("fr-FR")} ·{" "}
+              {row.form.status} · Source : {row.form.source || "Manquante"}.{" "}
               {row.errors.join(" ") ||
                 "Résultat prêt, statistiques facultatives."}
             </p>
@@ -599,6 +622,7 @@ function EuropeanDraft({
   parentBusy,
   onBusyChange,
   onMessage,
+  onDirty,
 }) {
   const [form, setForm] = useState(() => europeanMatchForm(match, dataset)),
     [busy, setBusy] = useState(false),
@@ -642,6 +666,7 @@ function EuropeanDraft({
           ? "Rencontre publiée après validation."
           : "Brouillon enregistré. Aucune publication.",
       );
+      onDirty(match.id, false);
       onMessage(
         published
           ? "Rencontre publiée après votre validation."
@@ -659,6 +684,7 @@ function EuropeanDraft({
     }
   }
   function set(key, value) {
+    onDirty(match.id, true);
     setForm({ ...form, [key]: value });
     setConfirmed(false);
   }
@@ -776,6 +802,16 @@ function EuropeanDraft({
               onClick={() => save(false)}
             >
               Enregistrer le brouillon
+            </button>
+            <button
+              className="button button-secondary"
+              onClick={() => {
+                setForm(europeanMatchForm(match, dataset));
+                setConfirmed(false);
+                onDirty(match.id, false);
+              }}
+            >
+              Annuler les modifications
             </button>
             <label className="checkbox-label">
               <input
