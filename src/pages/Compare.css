@@ -366,3 +366,98 @@
     gap: 14px;
   }
 }
+
+/* Structural V1 slots, using the current comparator theme. */
+.comparator-page .comparator-identity {
+  border-top: 1px solid var(--border);
+  padding-block: 22px;
+}
+.comparator-identity h2 {
+  font-size: 24px;
+  margin: 0;
+}
+.comparator-page .comparator-identity .mascot-block {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-block: 20px;
+}
+.comparator-page .comparator-identity .mascot-art {
+  width: 100px;
+  min-width: 100px;
+}
+.comparator-negotiation-fields {
+  min-inline-size: 0;
+  max-width: 100%;
+  border: 0;
+  padding: 0;
+  margin: 20px 0;
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  flex-wrap: wrap;
+  opacity: 0.6;
+}
+.comparator-negotiation-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 0;
+}
+.comparator-negotiation-fields select,
+.comparator-negotiation-fields input {
+  font: inherit;
+  font-size: 12px;
+  padding: 12px;
+  color: var(--muted);
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  max-width: 100%;
+}
+.comparator-negotiation-fields input {
+  width: 120px;
+}
+.comparator-negotiation-fields button {
+  font-size: 11px;
+  cursor: not-allowed;
+}
+.comparator-identity-facts {
+  margin: 18px 0;
+  display: grid;
+  gap: 12px;
+  font-size: 12px;
+}
+.comparator-identity-facts > div {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 16px;
+}
+.comparator-identity-facts dt {
+  color: var(--muted);
+}
+.comparator-identity-facts dd {
+  margin: 0;
+  line-height: 1.7;
+}
+.comparator-identity > .text-link {
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .comparator-negotiation-fields {
+    align-items: stretch;
+  }
+  .comparator-negotiation-fields > label:first-child {
+    flex-basis: 100%;
+  }
+  .comparator-identity-facts > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .comparator-page .comparator-identity .mascot-art {
+    width: 80px;
+    min-width: 80px;
+  }
+}

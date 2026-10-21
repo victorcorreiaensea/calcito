@@ -1,10 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  estimateGoals,
-  evaluateGoals,
-  fairOdd,
-  displayProbabilities,
-} from "../engines/goalPredictionEngine";
+import { useEffect, useState } from "react";
+import { fairOdd, displayProbabilities } from "../engines/goalPredictionEngine";
 import { externalOdds, compareOdds } from "../services/externalOdds";
 
 const percent = (p) =>
@@ -14,67 +9,29 @@ const odd = (p) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }) || "—";
-function marketGroups(home, away) {
-  return [
-    {
-      label: "Les deux équipes marquent",
-      keys: [
-        ["btts_yes", "Oui"],
-        ["btts_no", "Non"],
-      ],
-    },
-    {
-      label: `${home} marque`,
-      keys: [
-        ["home_scores", "Oui"],
-        ["home_blank", "Non"],
-      ],
-    },
-    {
-      label: `${away} marque`,
-      keys: [
-        ["away_scores", "Oui"],
-        ["away_blank", "Non"],
-      ],
-    },
-    ...[1, 2, 3].map((n) => ({
-      label: `Total de buts · ${n},5`,
-      keys: [
-        [`over_${n}_5`, `Plus de ${n},5`],
-        [`under_${n}_5`, `Moins de ${n},5`],
-      ],
-    })),
-  ];
+function OddsGapPlaceholder() {
+  return (
+    <details className="comparator-validation">
+      <summary>Top 3 des meilleurs écarts de cote · En développement</summary>
+      <p className="comparator-note">
+        Emplacement prévu pour les cotes comparables et leurs écarts, sans prix
+        inventé.
+      </p>
+    </details>
+  );
 }
 export default function ComparatorForecast({
-  dataset,
+  report,
   home,
   away,
-  year,
-  venue,
   match,
   cutoff,
   mode,
 }) {
   const [all, setAll] = useState(false),
     [odds, setOdds] = useState(null);
-  const result = useMemo(
-    () =>
-      estimateGoals({
-        dataset,
-        homeId: home.id,
-        awayId: away.id,
-        year,
-        venue,
-        cutoff,
-        competitionId: match?.competition.id,
-      }),
-    [dataset, home.id, away.id, year, venue, cutoff, match?.competition.id],
-  );
-  const validation = useMemo(
-    () => evaluateGoals(dataset, { cutoff, year }),
-    [dataset, cutoff, year],
-  );
+  const result = report.forecast,
+    validation = report.validation;
   const identity = match?.id;
   useEffect(() => {
     setAll(false);
@@ -127,6 +84,7 @@ export default function ComparatorForecast({
             </p>
           </div>
         )}
+        <OddsGapPlaceholder />
         <p className="muted-text">
           Seuls les résultats publiés, identifiés et disponibles avant la date
           d’analyse sont utilisés.
@@ -134,29 +92,8 @@ export default function ComparatorForecast({
       </section>
     );
   const shown = displayProbabilities(result.probabilities),
-    groups = marketGroups(home.name, away.name);
-  const highlights = groups
-    .map((g) => {
-      const [key, label] = [...g.keys].sort(
-        (a, b) => result.markets[b[0]] - result.markets[a[0]],
-      )[0];
-      return {
-        group: g.label,
-        key,
-        label,
-        p: result.markets[key],
-        family:
-          key.startsWith("over_") || key.startsWith("under_")
-            ? "total"
-            : g.label,
-      };
-    })
-    .sort((a, b) => b.p - a.p)
-    .filter(
-      (item, index, items) =>
-        items.findIndex((other) => other.family === item.family) === index,
-    )
-    .slice(0, 3);
+    groups = report.groups,
+    highlights = report.topProbabilities;
   return (
     <section className="comparator-forecast" aria-labelledby="forecast-title">
       <header className="comparator-forecast-heading">
@@ -194,7 +131,7 @@ export default function ComparatorForecast({
           </div>
         ))}
       </div>
-      <h3>À retenir</h3>
+      <h3>Événements les plus probables · top 3</h3>
       <div className="comparator-highlights">
         {highlights.map((h) => (
           <div key={h.key}>
@@ -206,6 +143,7 @@ export default function ComparatorForecast({
           </div>
         ))}
       </div>
+      <OddsGapPlaceholder />
       <button
         type="button"
         className="text-link comparator-disclosure"

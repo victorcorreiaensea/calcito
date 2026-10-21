@@ -19,7 +19,8 @@ import {
 } from "../components/TeamAnalysis";
 import { PageHeading, DataState, Notice } from "../components/FootballUI";
 import { SourceCaption, SeasonSelect } from "../components/DataContext";
-import CalcitoMascot from "../components/CalcitoMascot";
+import CalcitoIdentityPanel from "../components/CalcitoIdentityPanel";
+import { createStatisticalReport } from "../services/predictionService";
 
 export function TeamPicker({ label, value, onChange, excluded, season }) {
   const [search, setSearch] = useState("");
@@ -215,6 +216,34 @@ export default function Compare() {
       ).toISOString(),
     [clock, actualMatch?.kickoff],
   );
+  const statisticalReport = useMemo(() => {
+    if (
+      !dataset.result?.data ||
+      !left.result?.data ||
+      !right.result?.data ||
+      leftId === rightId
+    )
+      return null;
+    return createStatisticalReport({
+      dataset: dataset.result.data,
+      home: left.result.data,
+      away: right.result.data,
+      year: selectedYear,
+      venue,
+      cutoff,
+      match: actualMatch,
+    });
+  }, [
+    dataset.result?.data,
+    left.result?.data,
+    right.result?.data,
+    leftId,
+    rightId,
+    selectedYear,
+    venue,
+    cutoff,
+    actualMatch?.competition.id,
+  ]);
   function set(key, value) {
     const next = new URLSearchParams(params);
     if (["team", "against", "season", "mode"].includes(key))
@@ -442,27 +471,10 @@ export default function Compare() {
                   </small>
                 </Link>
               </div>
-              <ComparatorForecast
-                key={[
-                  mode,
-                  leftId,
-                  rightId,
-                  selectedYear,
-                  venue,
-                  actualMatch?.id,
-                ].join(":")}
-                dataset={dataset.result.data}
-                home={left.result.data}
-                away={right.result.data}
-                year={selectedYear}
-                venue={venue}
-                cutoff={cutoff}
-                mode={mode}
-                match={actualMatch}
-              />
-              <SourceCaption result={dataset.result} />
               <details className="comparator-details">
-                <summary>Statistiques, forme et historique des équipes</summary>
+                <summary>
+                  Analyse des équipes · statistiques, forme et historique
+                </summary>
                 {incompatible && (
                   <Notice>
                     Les indices utilisent des méthodes distinctes ; les
@@ -478,21 +490,16 @@ export default function Compare() {
                   <RecentMetrics team={left.result.data} analysis={a} />
                   <RecentMetrics team={right.result.data} analysis={b} />
                 </div>
-                <CalcitoMascot
-                  variant="compare"
-                  emotion="curious"
-                  title="La lecture de Calcito"
-                  message={
-                    incompatible
-                      ? "Ces indices appartiennent à des méthodes distinctes ; les résultats publiés restent consultables avec leur contexte."
-                      : compareInsights(
-                          left.result.data,
-                          right.result.data,
-                          recentInsight(a.recent.result?.data, leftId),
-                          recentInsight(b.recent.result?.data, rightId),
-                        )
-                  }
-                />
+                <p className="muted-text">
+                  {incompatible
+                    ? "Ces indices appartiennent à des méthodes distinctes ; les résultats publiés restent consultables avec leur contexte."
+                    : compareInsights(
+                        left.result.data,
+                        right.result.data,
+                        recentInsight(a.recent.result?.data, leftId),
+                        recentInsight(b.recent.result?.data, rightId),
+                      )}
+                </p>
                 <FormEvolution
                   title="Deux équipes, une même ligne du temps"
                   loading={a.timeline.loading || b.timeline.loading}
@@ -530,6 +537,27 @@ export default function Compare() {
                   </div>
                 </details>
               </details>
+              <ComparatorForecast
+                key={[
+                  mode,
+                  leftId,
+                  rightId,
+                  selectedYear,
+                  venue,
+                  actualMatch?.id,
+                ].join(":")}
+                report={statisticalReport}
+                home={left.result.data}
+                away={right.result.data}
+                cutoff={cutoff}
+                mode={mode}
+                match={actualMatch}
+              />
+              <SourceCaption result={dataset.result} />
+              <CalcitoIdentityPanel
+                report={statisticalReport}
+                match={actualMatch}
+              />
               {actualMatch && (
                 <details className="comparator-details">
                   <summary>Prévisions serveur et accès à l’Arène</summary>
