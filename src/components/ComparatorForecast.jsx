@@ -14,8 +14,7 @@ function OddsGapPlaceholder() {
     <details className="comparator-validation">
       <summary>Top 3 des meilleurs écarts de cote · En développement</summary>
       <p className="comparator-note">
-        Emplacement prévu pour les cotes comparables et leurs écarts, sans prix
-        inventé.
+        Les comparaisons de cotes seront disponibles dans une prochaine version.
       </p>
     </details>
   );

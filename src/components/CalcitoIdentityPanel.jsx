@@ -19,16 +19,13 @@ export default function CalcitoIdentityPanel({ report, match }) {
           <span className="status-pill">En développement</span>
         </div>
         <p className="comparator-note">
-          La négociation en trois propositions attend son contrôle et sa
-          persistance côté serveur.
+          La négociation en trois propositions est en préparation.
         </p>
         <fieldset disabled className="comparator-negotiation-fields">
           <label>
             Événement à négocier
             <select defaultValue="" aria-label="Événement à négocier">
-              <option value="">
-                Sélection disponible après intégration serveur
-              </option>
+              <option value="">Sélection de l’événement à venir</option>
             </select>
           </label>
           <label>
