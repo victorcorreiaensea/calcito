@@ -1,26 +1,13 @@
+import PredictionRankings from "./PredictionRankings";
 import { useEffect, useState } from "react";
-import { fairOdd, displayProbabilities } from "../engines/goalPredictionEngine";
-import { externalOdds, compareOdds } from "../services/externalOdds";
+import { displayProbabilities } from "../engines/goalPredictionEngine";
+import { externalOdds } from "../services/externalOdds";
 
 const percent = (p) =>
   `${(p * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
-const odd = (p) =>
-  fairOdd(p)?.toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }) || "—";
-function OddsGapPlaceholder() {
-  return (
-    <details className="comparator-validation">
-      <summary>Top 3 des meilleurs écarts de cote · En développement</summary>
-      <p className="comparator-note">
-        Les comparaisons de cotes seront disponibles dans une prochaine version.
-      </p>
-    </details>
-  );
-}
 export default function ComparatorForecast({
   report,
+  officialController,
   home,
   away,
   match,
@@ -67,6 +54,23 @@ export default function ComparatorForecast({
     match?.timeKnown,
   ]);
   const currentOdds = odds?.id === identity ? odds : null;
+  const rankings = (
+    <PredictionRankings
+      key={JSON.stringify([
+        mode,
+        report.contextId,
+        match?.id,
+        match?.updated_at,
+        match?.kickoff,
+        officialController?.user?.id,
+      ])}
+      report={report}
+      match={match}
+      mode={mode}
+      controller={officialController}
+      external={currentOdds}
+    />
+  );
   if (result.status !== "estimated")
     return (
       <section className="comparator-forecast" aria-labelledby="forecast-title">
@@ -83,7 +87,7 @@ export default function ComparatorForecast({
             </p>
           </div>
         )}
-        <OddsGapPlaceholder />
+        {rankings}
         <p className="muted-text">
           Seuls les résultats publiés, identifiés et disponibles avant la date
           d’analyse sont utilisés.
@@ -91,8 +95,7 @@ export default function ComparatorForecast({
       </section>
     );
   const shown = displayProbabilities(result.probabilities),
-    groups = report.groups,
-    highlights = report.topProbabilities;
+    groups = report.groups;
   return (
     <section className="comparator-forecast" aria-labelledby="forecast-title">
       <header className="comparator-forecast-heading">
@@ -126,23 +129,11 @@ export default function ComparatorForecast({
             >
               <span style={{ width: `${shown[key]}%` }} />
             </div>
-            <small>Cote théorique {odd(result.probabilities[key])}</small>
+            <small>Estimation expérimentale</small>
           </div>
         ))}
       </div>
-      <h3>Événements les plus probables · top 3</h3>
-      <div className="comparator-highlights">
-        {highlights.map((h) => (
-          <div key={h.key}>
-            <span>{h.group}</span>
-            <strong>
-              {h.label} <b>{percent(h.p)}</b>
-            </strong>
-            <small>Cote théorique {odd(h.p)}</small>
-          </div>
-        ))}
-      </div>
-      <OddsGapPlaceholder />
+      {rankings}
       <button
         type="button"
         className="text-link comparator-disclosure"
@@ -162,7 +153,7 @@ export default function ComparatorForecast({
                 <div className="comparator-market-row" key={key}>
                   <span>{label}</span>
                   <strong>{percent(result.markets[key])}</strong>
-                  <small>Cote théorique {odd(result.markets[key])}</small>
+                  <small>Estimation expérimentale</small>
                 </div>
               ))}
             </div>
@@ -178,21 +169,6 @@ export default function ComparatorForecast({
                 ? "Cotes externes actualisées."
                 : "Vérification des cotes externes…")}
           </p>
-          {currentOdds?.quotes?.map((q, i) => {
-            const values = compareOdds(result.markets[q.selection], q.decimal);
-            return (
-              <div className="comparator-market-row" key={i}>
-                <span>
-                  {q.bookmaker} · {q.selection}
-                </span>
-                <strong>{q.decimal.toFixed(2)}</strong>
-                <small>
-                  Implicite brute {percent(values.impliedProbability)} · écart
-                  estimé {percent(values.theoreticalValue)}
-                </small>
-              </div>
-            );
-          })}
         </div>
       )}
       <details className="comparator-validation">

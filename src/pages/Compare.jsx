@@ -1,3 +1,4 @@
+import { useOfficialForecast } from "../hooks/useOfficialForecast";
 import StatisticalResearch from "../components/StatisticalResearch";
 import { recentInsight, compareInsights } from "../domain/teamInsight";
 import { PredictionHistory } from "./Predictions";
@@ -209,6 +210,9 @@ export default function Compare() {
     right.result?.data.coverage?.compatibilityGroup &&
     left.result.data.coverage.compatibilityGroup !==
       right.result.data.coverage.compatibilityGroup,
+  );
+  const officialForecast = useOfficialForecast(
+    mode === "real" ? actualMatch : null,
   );
   const cutoff = useMemo(
     () =>
@@ -547,6 +551,7 @@ export default function Compare() {
                   venue,
                   actualMatch?.id,
                 ].join(":")}
+                officialController={officialForecast}
                 report={statisticalReport}
                 home={left.result.data}
                 away={right.result.data}
@@ -567,7 +572,10 @@ export default function Compare() {
               {actualMatch && (
                 <details className="comparator-details">
                   <summary>Prévisions serveur et accès à l’Arène</summary>
-                  <MatchForecast match={actualMatch} />
+                  <MatchForecast
+                    match={actualMatch}
+                    controller={officialForecast}
+                  />
                 </details>
               )}
             </>

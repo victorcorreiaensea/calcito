@@ -1,3 +1,7 @@
+import {
+  comparisonRankings,
+  comparisonContextId,
+} from "./predictionRankings.js";
 import { createResearchReport } from "./statisticalResearchService.js";
 import {
   estimateGoals,
@@ -110,6 +114,13 @@ export function createStatisticalReport({
   return {
     forecast,
     validation,
+    contextId: comparisonContextId({
+      match,
+      homeId: home.id,
+      awayId: away.id,
+      year,
+      venue,
+    }),
     research: createResearchReport({
       dataset,
       home,
@@ -143,3 +154,6 @@ export function statisticalVerdict(report) {
     .sort((a, b) => b.probability - a.probability)[0];
   return `Issue la plus probable selon le modèle expérimental : ${result.selection} (${(result.probability * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %).`;
 }
+
+// Stage 3 rankings consume only the admissible official source, never report.research.
+export const createComparisonRankings = comparisonRankings;

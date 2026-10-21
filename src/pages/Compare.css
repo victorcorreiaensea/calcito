@@ -461,3 +461,71 @@
     min-width: 80px;
   }
 }
+
+.comparison-rankings {
+  border-block: 1px solid var(--border);
+  padding-block: 18px;
+  display: grid;
+  gap: 20px;
+}
+.comparison-rankings h3 {
+  margin-bottom: 4px;
+}
+.comparison-ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.comparison-ranking-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.comparison-ranking-list strong {
+  margin-left: auto;
+  color: #93c5ff;
+  white-space: nowrap;
+}
+.comparison-ranking-list small {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 11px;
+}
+.comparison-odds-form {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block: 14px;
+}
+.comparison-odds-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  min-width: 0;
+  flex: 1 1 150px;
+}
+.comparison-odds-form label:first-child {
+  flex-basis: 260px;
+}
+.comparison-odds-form select,
+.comparison-odds-form input {
+  width: 100%;
+  min-width: 0;
+}
+.comparison-rankings section {
+  min-width: 0;
+}
+
+.comparison-ranking-list li {
+  overflow-wrap: anywhere;
+}
+.comparison-ranking-list strong {
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

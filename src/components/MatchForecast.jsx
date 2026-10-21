@@ -1,36 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../admin/AuthProvider";
-import { arenaQuote } from "../services/arenaRepository";
-export default function MatchForecast({ match }) {
-  const { user } = useAuth();
-  const [state, setState] = useState(null);
-  const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    setState(null);
-    setBusy(false);
-  }, [match.id, user?.id]);
-  async function load() {
-    setBusy(true);
-    try {
-      setState({
-        id: match.id,
-        user: user?.id,
-        data: await arenaQuote(match.id),
-      });
-    } catch {
-      setState({
-        id: match.id,
-        user: user?.id,
-        error:
-          "Les prévisions sont indisponibles : modèle validé, historique suffisant et rencontre future à heure précise nécessaires.",
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
-  const current =
-    state?.id === match.id && state?.user === user?.id ? state : null;
+import { useOfficialForecast } from "../hooks/useOfficialForecast";
+export default function MatchForecast({ match, controller }) {
+  const fallback = useOfficialForecast(match);
+  const { user, busy, current, load } = controller || fallback;
   return (
     <section className="analysis-panel forecast-panel">
       <span className="eyebrow">LE MODÈLE DE BUTS · DISTINCT DE L’INDICE</span>
