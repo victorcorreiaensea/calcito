@@ -1,0 +1,810 @@
+{
+  "nationalCsv": {
+    "source": "public/downloads/calcito_resultats_2026_2027.csv",
+    "matches": 348,
+    "competitions": [
+      {
+        "competition": "Liga Portugal",
+        "matches": 62,
+        "advancedObservations": 0
+      },
+      {
+        "competition": "LaLiga",
+        "matches": 74,
+        "advancedObservations": 0
+      },
+      {
+        "competition": "Ligue 1",
+        "matches": 49,
+        "advancedObservations": 0
+      },
+      {
+        "competition": "Premier League",
+        "matches": 60,
+        "advancedObservations": 0
+      },
+      {
+        "competition": "Serie A",
+        "matches": 58,
+        "advancedObservations": 0
+      },
+      {
+        "competition": "Bundesliga",
+        "matches": 45,
+        "advancedObservations": 0
+      }
+    ],
+    "note": "Fichier local uniquement : aucune preuve de publication ou de disponibilité historique dans Supabase."
+  },
+  "source": "data/imports/europe-2026-match-statistics.json — relevé local fourni, pas un export Supabase",
+  "sourceDescription": "Lecture visuelle des 72 captures transmises par le propriétaire. Pas de vérification indépendante des résultats.",
+  "coverage": {
+    "matches": 72,
+    "clubs": 72,
+    "fields": {
+      "shots": {
+        "n": 144,
+        "denominator": 144
+      },
+      "shots_on_target": {
+        "n": 144,
+        "denominator": 144
+      },
+      "corners": {
+        "n": 144,
+        "denominator": 144
+      },
+      "possession": {
+        "n": 144,
+        "denominator": 144
+      },
+      "xg": {
+        "n": 144,
+        "denominator": 144
+      },
+      "big_chances": {
+        "n": 144,
+        "denominator": 144
+      },
+      "woodwork": {
+        "n": 0,
+        "denominator": 144
+      },
+      "team_rating": {
+        "n": 0,
+        "denominator": 144
+      },
+      "passes_completed": {
+        "n": 144,
+        "denominator": 144
+      },
+      "passes_attempted": {
+        "n": 144,
+        "denominator": 144
+      },
+      "pass_accuracy": {
+        "n": 144,
+        "denominator": 144
+      },
+      "yellow_cards": {
+        "n": 140,
+        "denominator": 144
+      },
+      "red_cards": {
+        "n": 10,
+        "denominator": 144
+      }
+    },
+    "perClub": [
+      {
+        "slug": "aek-athens",
+        "matches": 2
+      },
+      {
+        "slug": "lask",
+        "matches": 2
+      },
+      {
+        "slug": "club-brugge-kv",
+        "matches": 2
+      },
+      {
+        "slug": "aston-villa-fc",
+        "matches": 2
+      },
+      {
+        "slug": "manchester-city-fc",
+        "matches": 2
+      },
+      {
+        "slug": "paris-saint-germain",
+        "matches": 2
+      },
+      {
+        "slug": "lille",
+        "matches": 2
+      },
+      {
+        "slug": "real-betis-balompie",
+        "matches": 2
+      },
+      {
+        "slug": "fc-porto",
+        "matches": 2
+      },
+      {
+        "slug": "real-madrid-cf",
+        "matches": 2
+      },
+      {
+        "slug": "fc-internazionale-milano",
+        "matches": 2
+      },
+      {
+        "slug": "vfb-stuttgart",
+        "matches": 2
+      },
+      {
+        "slug": "viking-fk",
+        "matches": 2
+      },
+      {
+        "slug": "fc-barcelona",
+        "matches": 2
+      },
+      {
+        "slug": "feyenoord-rotterdam",
+        "matches": 2
+      },
+      {
+        "slug": "borussia-dortmund",
+        "matches": 2
+      },
+      {
+        "slug": "villarreal-cf",
+        "matches": 2
+      },
+      {
+        "slug": "ssc-napoli",
+        "matches": 2
+      },
+      {
+        "slug": "arsenal-fc",
+        "matches": 2
+      },
+      {
+        "slug": "sk-slovan-bratislava",
+        "matches": 2
+      },
+      {
+        "slug": "liverpool-fc",
+        "matches": 2
+      },
+      {
+        "slug": "club-atletico-de-madrid",
+        "matches": 2
+      },
+      {
+        "slug": "psv-eindhoven",
+        "matches": 2
+      },
+      {
+        "slug": "shakhtar-donetsk",
+        "matches": 2
+      },
+      {
+        "slug": "fenerbahce",
+        "matches": 2
+      },
+      {
+        "slug": "as-roma",
+        "matches": 2
+      },
+      {
+        "slug": "sporting-cp",
+        "matches": 2
+      },
+      {
+        "slug": "galatasaray",
+        "matches": 2
+      },
+      {
+        "slug": "como-1907",
+        "matches": 2
+      },
+      {
+        "slug": "rb-leipzig",
+        "matches": 2
+      },
+      {
+        "slug": "manchester-united-fc",
+        "matches": 2
+      },
+      {
+        "slug": "fk-sabah",
+        "matches": 2
+      },
+      {
+        "slug": "fc-bayern-munchen",
+        "matches": 2
+      },
+      {
+        "slug": "fk-bod-glimt",
+        "matches": 2
+      },
+      {
+        "slug": "sk-slavia-prague",
+        "matches": 2
+      },
+      {
+        "slug": "lens",
+        "matches": 2
+      },
+      {
+        "slug": "fc-ararat-armenia",
+        "matches": 2
+      },
+      {
+        "slug": "ac-sparta-prague",
+        "matches": 2
+      },
+      {
+        "slug": "ac-omonia",
+        "matches": 2
+      },
+      {
+        "slug": "rc-celta-de-vigo",
+        "matches": 2
+      },
+      {
+        "slug": "sk-sturm-graz",
+        "matches": 2
+      },
+      {
+        "slug": "rennes",
+        "matches": 2
+      },
+      {
+        "slug": "lyon",
+        "matches": 2
+      },
+      {
+        "slug": "crystal-palace-fc",
+        "matches": 2
+      },
+      {
+        "slug": "olympiacos-piraeus",
+        "matches": 2
+      },
+      {
+        "slug": "jagiellonia-bialystok",
+        "matches": 2
+      },
+      {
+        "slug": "sunderland-afc",
+        "matches": 2
+      },
+      {
+        "slug": "az-alkmaar",
+        "matches": 2
+      },
+      {
+        "slug": "rsc-anderlecht",
+        "matches": 2
+      },
+      {
+        "slug": "bayer-04-leverkusen",
+        "matches": 2
+      },
+      {
+        "slug": "nk-celje",
+        "matches": 2
+      },
+      {
+        "slug": "ac-milan",
+        "matches": 2
+      },
+      {
+        "slug": "sl-benfica",
+        "matches": 2
+      },
+      {
+        "slug": "levski-sofia",
+        "matches": 2
+      },
+      {
+        "slug": "red-bull-salzburg",
+        "matches": 2
+      },
+      {
+        "slug": "ofi-crete",
+        "matches": 2
+      },
+      {
+        "slug": "tsg-1899-hoffenheim",
+        "matches": 2
+      },
+      {
+        "slug": "besiktas-jk",
+        "matches": 2
+      },
+      {
+        "slug": "olympique-de-marseille",
+        "matches": 2
+      },
+      {
+        "slug": "real-sociedad-de-futbol",
+        "matches": 2
+      },
+      {
+        "slug": "afc-bournemouth",
+        "matches": 2
+      },
+      {
+        "slug": "hapoel-beer-sheva",
+        "matches": 2
+      },
+      {
+        "slug": "gnk-dinamo-zagreb",
+        "matches": 2
+      },
+      {
+        "slug": "lech-poznan",
+        "matches": 2
+      },
+      {
+        "slug": "fc-viktoria-plzen",
+        "matches": 2
+      },
+      {
+        "slug": "union-saint-gilloise",
+        "matches": 2
+      },
+      {
+        "slug": "celtic-fc",
+        "matches": 2
+      },
+      {
+        "slug": "ferencvarosi-tc",
+        "matches": 2
+      },
+      {
+        "slug": "juventus-fc",
+        "matches": 2
+      },
+      {
+        "slug": "nec-nijmegen",
+        "matches": 2
+      },
+      {
+        "slug": "sc-uniao-torreense",
+        "matches": 2
+      },
+      {
+        "slug": "lillestr-m-sk",
+        "matches": 2
+      }
+    ]
+  },
+  "competitions": [
+    {
+      "key": "champions-league:2026-2027",
+      "matches": 36,
+      "clubs": 36,
+      "fields": {
+        "shots": {
+          "n": 72,
+          "denominator": 72
+        },
+        "shots_on_target": {
+          "n": 72,
+          "denominator": 72
+        },
+        "corners": {
+          "n": 72,
+          "denominator": 72
+        },
+        "possession": {
+          "n": 72,
+          "denominator": 72
+        },
+        "xg": {
+          "n": 72,
+          "denominator": 72
+        },
+        "big_chances": {
+          "n": 72,
+          "denominator": 72
+        },
+        "woodwork": {
+          "n": 0,
+          "denominator": 72
+        },
+        "team_rating": {
+          "n": 0,
+          "denominator": 72
+        },
+        "passes_completed": {
+          "n": 72,
+          "denominator": 72
+        },
+        "passes_attempted": {
+          "n": 72,
+          "denominator": 72
+        },
+        "pass_accuracy": {
+          "n": 72,
+          "denominator": 72
+        },
+        "yellow_cards": {
+          "n": 72,
+          "denominator": 72
+        },
+        "red_cards": {
+          "n": 8,
+          "denominator": 72
+        }
+      },
+      "perClub": [
+        {
+          "slug": "aek-athens",
+          "matches": 2
+        },
+        {
+          "slug": "lask",
+          "matches": 2
+        },
+        {
+          "slug": "club-brugge-kv",
+          "matches": 2
+        },
+        {
+          "slug": "aston-villa-fc",
+          "matches": 2
+        },
+        {
+          "slug": "manchester-city-fc",
+          "matches": 2
+        },
+        {
+          "slug": "paris-saint-germain",
+          "matches": 2
+        },
+        {
+          "slug": "lille",
+          "matches": 2
+        },
+        {
+          "slug": "real-betis-balompie",
+          "matches": 2
+        },
+        {
+          "slug": "fc-porto",
+          "matches": 2
+        },
+        {
+          "slug": "real-madrid-cf",
+          "matches": 2
+        },
+        {
+          "slug": "fc-internazionale-milano",
+          "matches": 2
+        },
+        {
+          "slug": "vfb-stuttgart",
+          "matches": 2
+        },
+        {
+          "slug": "viking-fk",
+          "matches": 2
+        },
+        {
+          "slug": "fc-barcelona",
+          "matches": 2
+        },
+        {
+          "slug": "feyenoord-rotterdam",
+          "matches": 2
+        },
+        {
+          "slug": "borussia-dortmund",
+          "matches": 2
+        },
+        {
+          "slug": "villarreal-cf",
+          "matches": 2
+        },
+        {
+          "slug": "ssc-napoli",
+          "matches": 2
+        },
+        {
+          "slug": "arsenal-fc",
+          "matches": 2
+        },
+        {
+          "slug": "sk-slovan-bratislava",
+          "matches": 2
+        },
+        {
+          "slug": "liverpool-fc",
+          "matches": 2
+        },
+        {
+          "slug": "club-atletico-de-madrid",
+          "matches": 2
+        },
+        {
+          "slug": "psv-eindhoven",
+          "matches": 2
+        },
+        {
+          "slug": "shakhtar-donetsk",
+          "matches": 2
+        },
+        {
+          "slug": "fenerbahce",
+          "matches": 2
+        },
+        {
+          "slug": "as-roma",
+          "matches": 2
+        },
+        {
+          "slug": "sporting-cp",
+          "matches": 2
+        },
+        {
+          "slug": "galatasaray",
+          "matches": 2
+        },
+        {
+          "slug": "como-1907",
+          "matches": 2
+        },
+        {
+          "slug": "rb-leipzig",
+          "matches": 2
+        },
+        {
+          "slug": "manchester-united-fc",
+          "matches": 2
+        },
+        {
+          "slug": "fk-sabah",
+          "matches": 2
+        },
+        {
+          "slug": "fc-bayern-munchen",
+          "matches": 2
+        },
+        {
+          "slug": "fk-bod-glimt",
+          "matches": 2
+        },
+        {
+          "slug": "sk-slavia-prague",
+          "matches": 2
+        },
+        {
+          "slug": "lens",
+          "matches": 2
+        }
+      ]
+    },
+    {
+      "key": "europa-league:2026-2027",
+      "matches": 36,
+      "clubs": 36,
+      "fields": {
+        "shots": {
+          "n": 72,
+          "denominator": 72
+        },
+        "shots_on_target": {
+          "n": 72,
+          "denominator": 72
+        },
+        "corners": {
+          "n": 72,
+          "denominator": 72
+        },
+        "possession": {
+          "n": 72,
+          "denominator": 72
+        },
+        "xg": {
+          "n": 72,
+          "denominator": 72
+        },
+        "big_chances": {
+          "n": 72,
+          "denominator": 72
+        },
+        "woodwork": {
+          "n": 0,
+          "denominator": 72
+        },
+        "team_rating": {
+          "n": 0,
+          "denominator": 72
+        },
+        "passes_completed": {
+          "n": 72,
+          "denominator": 72
+        },
+        "passes_attempted": {
+          "n": 72,
+          "denominator": 72
+        },
+        "pass_accuracy": {
+          "n": 72,
+          "denominator": 72
+        },
+        "yellow_cards": {
+          "n": 68,
+          "denominator": 72
+        },
+        "red_cards": {
+          "n": 2,
+          "denominator": 72
+        }
+      },
+      "perClub": [
+        {
+          "slug": "fc-ararat-armenia",
+          "matches": 2
+        },
+        {
+          "slug": "ac-sparta-prague",
+          "matches": 2
+        },
+        {
+          "slug": "ac-omonia",
+          "matches": 2
+        },
+        {
+          "slug": "rc-celta-de-vigo",
+          "matches": 2
+        },
+        {
+          "slug": "sk-sturm-graz",
+          "matches": 2
+        },
+        {
+          "slug": "rennes",
+          "matches": 2
+        },
+        {
+          "slug": "lyon",
+          "matches": 2
+        },
+        {
+          "slug": "crystal-palace-fc",
+          "matches": 2
+        },
+        {
+          "slug": "olympiacos-piraeus",
+          "matches": 2
+        },
+        {
+          "slug": "jagiellonia-bialystok",
+          "matches": 2
+        },
+        {
+          "slug": "sunderland-afc",
+          "matches": 2
+        },
+        {
+          "slug": "az-alkmaar",
+          "matches": 2
+        },
+        {
+          "slug": "rsc-anderlecht",
+          "matches": 2
+        },
+        {
+          "slug": "bayer-04-leverkusen",
+          "matches": 2
+        },
+        {
+          "slug": "nk-celje",
+          "matches": 2
+        },
+        {
+          "slug": "ac-milan",
+          "matches": 2
+        },
+        {
+          "slug": "sl-benfica",
+          "matches": 2
+        },
+        {
+          "slug": "levski-sofia",
+          "matches": 2
+        },
+        {
+          "slug": "red-bull-salzburg",
+          "matches": 2
+        },
+        {
+          "slug": "ofi-crete",
+          "matches": 2
+        },
+        {
+          "slug": "tsg-1899-hoffenheim",
+          "matches": 2
+        },
+        {
+          "slug": "besiktas-jk",
+          "matches": 2
+        },
+        {
+          "slug": "olympique-de-marseille",
+          "matches": 2
+        },
+        {
+          "slug": "real-sociedad-de-futbol",
+          "matches": 2
+        },
+        {
+          "slug": "afc-bournemouth",
+          "matches": 2
+        },
+        {
+          "slug": "hapoel-beer-sheva",
+          "matches": 2
+        },
+        {
+          "slug": "gnk-dinamo-zagreb",
+          "matches": 2
+        },
+        {
+          "slug": "lech-poznan",
+          "matches": 2
+        },
+        {
+          "slug": "fc-viktoria-plzen",
+          "matches": 2
+        },
+        {
+          "slug": "union-saint-gilloise",
+          "matches": 2
+        },
+        {
+          "slug": "celtic-fc",
+          "matches": 2
+        },
+        {
+          "slug": "ferencvarosi-tc",
+          "matches": 2
+        },
+        {
+          "slug": "juventus-fc",
+          "matches": 2
+        },
+        {
+          "slug": "nec-nijmegen",
+          "matches": 2
+        },
+        {
+          "slug": "sc-uniao-torreense",
+          "matches": 2
+        },
+        {
+          "slug": "lillestr-m-sk",
+          "matches": 2
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "status": "unavailable",
+    "evaluated": 0,
+    "reason": "Deux matchs par club seulement ; dates de vérification/publication et created_at/updated_at des statistiques absentes du fichier. Impossible de reconstituer leur disponibilité historique. Aucun timestamp inventé, aucun score de validation réel calculé."
+  },
+  "liveDatabase": {
+    "status": "not-audited",
+    "reason": "Lecture directe bloquée par le proxy de cet environnement (CONNECT 403). Couverture de production non certifiée ; calcul effectué côté site sur son dataset public."
+  }
+}

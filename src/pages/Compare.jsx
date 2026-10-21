@@ -1,3 +1,4 @@
+import StatisticalResearch from "../components/StatisticalResearch";
 import { recentInsight, compareInsights } from "../domain/teamInsight";
 import { PredictionHistory } from "./Predictions";
 import RecentMetrics from "../components/RecentMetrics";
@@ -552,6 +553,11 @@ export default function Compare() {
                 cutoff={cutoff}
                 mode={mode}
                 match={actualMatch}
+              />
+              <StatisticalResearch
+                report={statisticalReport.research}
+                home={left.result.data}
+                away={right.result.data}
               />
               <SourceCaption result={dataset.result} />
               <CalcitoIdentityPanel

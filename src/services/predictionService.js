@@ -1,3 +1,4 @@
+import { createResearchReport } from "./statisticalResearchService.js";
 import {
   estimateGoals,
   evaluateGoals,
@@ -109,6 +110,15 @@ export function createStatisticalReport({
   return {
     forecast,
     validation,
+    research: createResearchReport({
+      dataset,
+      home,
+      away,
+      year,
+      venue,
+      cutoff,
+      match,
+    }),
     groups,
     events,
     topProbabilities,
