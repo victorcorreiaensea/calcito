@@ -1,0 +1,368 @@
+.comparator-page .page-heading {
+  margin-bottom: 26px;
+}
+.comparator-page .page-heading p {
+  max-width: 660px;
+}
+.comparator-page .comparator-mode {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #111c2b;
+  margin-bottom: 20px;
+}
+.comparator-mode button {
+  border: 0;
+  padding: 12px 20px;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.comparator-mode button[aria-pressed="true"] {
+  background: var(--accent);
+  color: white;
+}
+.comparator-fixture-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+.comparator-fixture-picker > label,
+.comparator-venue label {
+  font-size: 12px;
+  color: var(--muted);
+}
+.comparator-fixture-picker select,
+.comparator-venue select {
+  max-width: 100%;
+  padding: 13px;
+  background: var(--secondary);
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+}
+.comparator-fixture-picker p,
+.comparator-empty {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.comparator-empty {
+  padding-block: 30px;
+}
+.comparator-venue {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-block: 18px;
+}
+.comparator-page .picker-grid {
+  margin-block: 14px;
+}
+.comparator-duel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.7fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  margin-block: 36px;
+  padding-block: 24px;
+}
+.comparator-duel > a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  min-width: 0;
+}
+.comparator-duel > a > strong {
+  font:
+    600 clamp(24px, 3vw, 36px) "Barlow Condensed",
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.comparator-duel .club-logo,
+.comparator-duel .team-badge {
+  width: 72px;
+  height: 72px;
+}
+.comparator-duel small,
+.comparator-duel time {
+  color: var(--muted);
+  font-size: 11px;
+}
+.comparator-duel-context {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.comparator-duel-context > span {
+  color: var(--accent);
+  font:
+    600 30px "Barlow Condensed",
+    sans-serif;
+}
+.comparator-duel-context strong {
+  font-size: 12px;
+}
+.comparator-duel-context a {
+  font-size: 11px;
+  color: #9bc7ff;
+}
+.comparator-forecast {
+  border-top: 1px solid var(--border);
+  padding-top: 26px;
+}
+.comparator-forecast-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.comparator-forecast h2 {
+  margin: 0;
+  font-size: 28px;
+}
+.comparator-forecast h3 {
+  font-size: 14px;
+  margin-block: 22px 16px;
+}
+.comparator-forecast > p,
+.comparator-note,
+.comparator-validation p,
+.comparator-external p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.comparator-probabilities {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  margin-block: 28px;
+}
+.comparator-probabilities > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.comparator-probabilities > div > span {
+  font-size: 13px;
+}
+.comparator-probabilities strong {
+  font:
+    600 clamp(32px, 5vw, 58px) "Barlow Condensed",
+    sans-serif;
+  color: #93c5ff;
+}
+.comparator-probabilities small,
+.comparator-highlights small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.comparator-probability-track {
+  height: 5px;
+  border-radius: 4px;
+  background: #18283d;
+  overflow: hidden;
+}
+.comparator-probability-track > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+}
+.comparator-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  padding-block: 18px;
+  border-block: 1px solid var(--border);
+}
+.comparator-highlights > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.comparator-highlights > div > span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.comparator-highlights strong {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+.comparator-highlights b {
+  color: #93c5ff;
+  white-space: nowrap;
+}
+.comparator-disclosure {
+  border: 0;
+  background: transparent;
+  padding: 16px 0;
+  font-size: 12px;
+}
+.comparator-market-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 32px;
+  padding-bottom: 24px;
+}
+.comparator-market-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #25344d66;
+  padding-block: 12px;
+  font-size: 12px;
+}
+.comparator-market-row > strong {
+  margin-left: auto;
+  color: #93c5ff;
+}
+.comparator-market-row small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.comparator-external {
+  border-top: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+.comparator-validation,
+.comparator-details {
+  border-top: 1px solid var(--border);
+  padding-block: 18px;
+  margin: 0;
+}
+.comparator-validation summary,
+.comparator-details > summary {
+  cursor: pointer;
+  color: #bbd8ff;
+  font-size: 12px;
+  padding-block: 6px;
+}
+.comparator-validation li {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.comparator-page .comparator-details .analysis-panel {
+  background: transparent;
+  border: 0;
+  padding-inline: 0;
+}
+.comparator-page > .source-caption {
+  margin-block: 14px 24px;
+}
+@media (max-width: 600px) {
+  .comparator-duel {
+    grid-template-columns: minmax(0, 1fr) minmax(75px, 0.7fr) minmax(0, 1fr);
+    gap: 10px;
+    margin-block: 20px;
+    padding-block: 16px;
+  }
+  .comparator-duel .club-logo,
+  .comparator-duel .team-badge {
+    width: 52px;
+    height: 52px;
+  }
+  .comparator-duel > a > strong {
+    font-size: 23px;
+  }
+  .comparator-duel-context {
+    gap: 8px;
+  }
+  .comparator-duel-context strong,
+  .comparator-duel time,
+  .comparator-duel small {
+    font-size: 10px;
+  }
+  .comparator-probabilities {
+    gap: 14px;
+  }
+  .comparator-probabilities > div > span {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+  .comparator-probabilities small {
+    font-size: 10px;
+  }
+  .comparator-highlights {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .comparator-market-list {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .comparator-forecast h2 {
+    font-size: 24px;
+  }
+  .comparator-fixture-picker select {
+    font-size: 12px;
+  }
+}
+
+.comparator-page .comparator-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.comparator-page .comparator-controls .comparator-mode {
+  margin: 0;
+}
+.comparator-page .filter-bar {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+.comparator-page .team-picker {
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.comparator-page .team-picker .picker-select {
+  font-size: 12px;
+  margin: 0;
+}
+.comparator-team-search > summary {
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  padding-block: 10px;
+}
+.comparator-page .team-picker .comparator-team-search label {
+  font-size: 10px;
+}
+@media (max-width: 600px) {
+  .comparator-page .picker-grid {
+    grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .comparator-page .swap-button {
+    width: 32px;
+    height: 32px;
+  }
+  .comparator-page .filter-field {
+    min-width: 0;
+  }
+  .comparator-page .comparator-controls {
+    gap: 14px;
+  }
+}
